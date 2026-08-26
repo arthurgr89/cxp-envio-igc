@@ -379,7 +379,10 @@
       <h2>Espaço aéreo (NOTAM)</h2>
       <p class="hint">Arquivo .txt do NOTAM, no formato OpenAir (mesmo que você já usa no verificador). Vale pra etapa inteira.</p>
       <input type="file" id="airspaceInput" accept=".txt" style="margin-bottom:10px;">
-      <button class="primary" id="saveAirspaceBtn" disabled>Salvar espaço aéreo</button>
+      <div style="display:flex; gap:8px;">
+        <button class="primary" id="saveAirspaceBtn" disabled style="flex:1;">Salvar espaço aéreo</button>
+        <button class="secondary" id="removeAirspaceBtn" style="flex:1; margin-top:14px;">Remover espaço aéreo</button>
+      </div>
       <div class="toast" id="airspaceToast"></div>
       <div id="airspaceStatus" class="hint" style="margin-top:8px;"></div>
     </div>
@@ -725,6 +728,30 @@
     }
     btn.disabled = false;
     btn.textContent = 'Salvar espaço aéreo';
+  });
+
+  document.getElementById('removeAirspaceBtn').addEventListener('click', async ()=>{
+    const toast = document.getElementById('airspaceToast');
+    const btn = document.getElementById('removeAirspaceBtn');
+    const sure = await appConfirm('Remover o espaço aéreo cadastrado? Nenhuma prova vai ser checada contra restrição de espaço aéreo até você subir um novo arquivo.');
+    if(!sure) return;
+    btn.disabled = true;
+    btn.textContent = 'Removendo...';
+    try{
+      const { error } = await sb.from('event_settings').upsert({ id:1, airspace_text: null });
+      if(error) throw error;
+      selectedAirspaceContent = null;
+      document.getElementById('airspaceInput').value = '';
+      document.getElementById('saveAirspaceBtn').disabled = true;
+      await loadEventSettings();
+      toast.textContent = 'Espaço aéreo removido.';
+      toast.className = 'toast ok show';
+    }catch(e){
+      toast.textContent = 'Erro ao remover: ' + (e.message || 'erro desconhecido');
+      toast.className = 'toast err show';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Remover espaço aéreo';
   });
 
   // ---------- Organizer: task (XCTSK) upload per day ----------
