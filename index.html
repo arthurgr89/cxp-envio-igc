@@ -202,7 +202,7 @@
   <header>
     <img id="cxpLogo" style="display:none; max-height:225px; max-width:90%; object-fit:contain; margin:0 auto 20px; border-radius:6px;" alt="Logo CXP">
     <h1>CXP Envio de IGC</h1>
-    <p class="sub">Renomeia IGCs automaticamente e envia para o apurador.</p>
+    <p class="sub">Renomeia IGCs automaticamente e envia para o apurador. Verificar espaço aéreo .</p>
     <div class="conn-status" id="connStatus"><span class="conn-dot"></span><span id="connText">Conectando ao banco...</span></div>
     <img id="eventLogo" style="display:none; max-height:248px; max-width:95%; object-fit:contain; margin:20px auto 0; border-radius:6px;" alt="Logo do evento">
     <p class="sub" id="championshipNameLine" style="display:none; text-align:center; font-weight:600; color:var(--text); margin:10px auto 0; max-width:80ch;"></p>
@@ -225,7 +225,7 @@
 
     <div class="card">
       <h2>1. Selecione seu nome</h2>
-      <p class="hint">A lista é a mesma cadastrada pelo organizador da prova.</p>
+      <p class="hint">Apenas piloto cadastrado no evento da CBVL.</p>
       <div class="combo">
         <input type="text" id="pilotSearch" placeholder="Digite seu nome...">
         <div class="combo-list" id="pilotList"></div>
@@ -247,7 +247,7 @@
 
     <div class="card">
       <h2>2. Envie seu arquivo IGC</h2>
-      <p class="hint">O arquivo sai do seu GPS/vário exatamente como gravado — não precisa renomear nada.</p>
+      
       <div class="dropzone" id="dropzone">
         <div class="icon">&#9992;</div>
         <div class="main">Toque para escolher o arquivo, ou arraste aqui</div>
@@ -274,14 +274,14 @@
     </div>
 
     <div class="card" id="listView">
-      <h2>Quem já enviou hoje</h2>
+      <h2>Lista de IGC`s</h2>
       <p class="hint">Baseado no dia selecionado acima. <span class="refresh-link" id="refreshSubmissionBtn">Atualizar</span></p>
       <div id="submissionStatusList"></div>
     </div>
 
     <div class="card" id="mapView" style="display:none;">
       <h2 id="mapViewTitle">Sua prova no mapa</h2>
-      <p class="hint">Traçado, pilões da prova e espaço aéreo do dia selecionado.</p>
+      <p class="hint">Tracklog, pilões da prova e espaço aéreo do dia selecionado.</p>
       <div id="flightStatusBox" style="margin-bottom:12px;"></div>
       <div id="pilotMap" style="height:420px; border-radius:8px; background:var(--bg-deep);"></div>
     </div>
@@ -291,7 +291,7 @@
   <div class="panel" id="panel-pin">
     <div class="card">
       <h2>Cadastrar seu PIN</h2>
-      <p class="hint">Escolha um PIN de 4 números só seu. Só precisa fazer isso uma vez — depois é só usar esse PIN toda vez que enviar um voo. Ninguém mais consegue ver ou trocar seu PIN depois de cadastrado, nem o organizador.</p>
+      <p class="hint">Escolha um PIN de 4 números só seu. Só precisa fazer isso uma vez — depois é só usar esse PIN toda vez que enviar um voo.</p>
       <div class="combo">
         <input type="text" id="pinSearch" placeholder="Digite seu nome...">
         <div class="combo-list" id="pinList"></div>
@@ -301,7 +301,7 @@
       </div>
 
       <div class="pin-box" id="pinAlreadyMsg">
-        <div class="msg">Esse piloto já tem um PIN cadastrado. Se esqueceu o número, peça ao organizador pra resetar no Supabase.</div>
+        <div class="msg">Esse piloto já tem um PIN cadastrado. Se esqueceu o número, peça ao apurador pra resetar.</div>
       </div>
 
       <div class="pin-box" id="pinCreateForm">
@@ -321,7 +321,7 @@
 
     <div class="card" id="orgLoginBox">
       <h2>Login do organizador</h2>
-      <p class="hint">Só você tem acesso a essa aba.</p>
+      <p class="hint">Apenas para o apurador.</p>
       <form id="orgLoginForm" autocomplete="on">
         <label>E-mail</label>
         <input type="text" id="orgEmail" name="username" autocomplete="username" placeholder="seu@email.com" style="margin-bottom:10px;">
@@ -523,7 +523,7 @@
       pilots = (data || []).map(r => ({ name: r.name, id: r.id, glider: r.glider || '' }));
       document.getElementById('noPilotsMsg').style.display = pilots.length ? 'none' : 'block';
       document.getElementById('statPilots').textContent = pilots.length;
-      setConnStatus(true, 'Conectado ao banco');
+      setConnStatus(true, 'Conectado ao banco de dados');
       loadSubmissionStatus();
     }catch(e){
       setConnStatus(false, 'Falha ao conectar ao banco — verifique a conexão');
