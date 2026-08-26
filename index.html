@@ -169,6 +169,23 @@
 
   .disclosure{ font-size:11.5px; color:var(--text-muted); margin-top:4px; line-height:1.5; }
   .refresh-link{ color:var(--thermal); cursor:pointer; text-decoration:underline; font-size:12.5px; }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-box{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:10px;
+    padding:22px; max-width:420px; width:100%;
+  }
+  .modal-box p{ font-size:13.5px; line-height:1.5; margin:0 0 18px; white-space:pre-wrap; }
+  .modal-actions{ display:flex; gap:10px; justify-content:flex-end; }
+  .modal-actions button{
+    font-family:var(--font-body); font-size:13px; padding:9px 16px; border-radius:7px; cursor:pointer; border:1px solid var(--line);
+  }
+  .modal-actions .btn-cancel{ background:none; color:var(--text-muted); }
+  .modal-actions .btn-confirm{ background:var(--thermal); color:#fff; border-color:var(--thermal); font-weight:600; }
+  .modal-actions .btn-ok{ background:var(--thermal); color:#fff; border-color:var(--thermal); font-weight:600; }
   .import-summary{ margin-top:12px; padding:10px 12px; background:var(--bg-deep); border:1px solid var(--line); border-radius:7px; font-size:13px; display:none; }
   .import-summary.show{ display:block; }
 
@@ -471,7 +488,7 @@
   const SUPABASE_URL = 'https://rqzsqlanwbdovtbxoprq.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxenNxbGFud2Jkb3Z0YnhvcHJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2OTcxNzMsImV4cCI6MjEwMzI3MzE3M30.tHaBcNnSbCwTQCnN6UWTfmvRvK-Ry7cbr1mIwrCCDbY';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false }
+    auth: { persistSession: true, autoRefreshToken: true }
   });
 
   let pilots = [];
@@ -1013,14 +1030,18 @@
       const taskBounds = drawTaskOnMap(result.turnpoints, result.optimizedRoute);
       const trackBounds = drawTrackOnMap(result.track);
 
-      if(trackBounds){
-        pilotLeafletMap.fitBounds(trackBounds, { padding:[30,30] });
-      } else {
-        const fallbackBounds = L.latLngBounds();
-        let any = false;
-        [airBounds, taskBounds].forEach(b=>{ if(b){ fallbackBounds.extend(b); any = true; } });
-        if(any) pilotLeafletMap.fitBounds(fallbackBounds, { padding:[20,20] });
-      }
+      setTimeout(()=>{
+        if(!pilotLeafletMap) return;
+        pilotLeafletMap.invalidateSize();
+        if(trackBounds){
+          pilotLeafletMap.fitBounds(trackBounds, { padding:[30,30] });
+        } else {
+          const fallbackBounds = L.latLngBounds();
+          let any = false;
+          [airBounds, taskBounds].forEach(b=>{ if(b){ fallbackBounds.extend(b); any = true; } });
+          if(any) pilotLeafletMap.fitBounds(fallbackBounds, { padding:[20,20] });
+        }
+      }, 150);
 
       const badge = (ok, label) => `<span style="display:inline-block; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; margin-right:6px; margin-bottom:6px; background:${ok?'rgba(0,178,255,0.15)':'rgba(179,179,179,0.12)'}; color:${ok?'var(--lift)':'var(--text-muted)'}; border:1px solid ${ok?'var(--lift)':'var(--line)'};">${ok?'✓ ':''}${label}</span>`;
       let html = '';
@@ -1041,7 +1062,6 @@
       document.getElementById('mapViewTitle').textContent = pilotNameForTitle ? `Prova de ${pilotNameForTitle}` : 'Sua prova no mapa';
       statusBox.innerHTML = '<div class="empty" style="padding:10px 0;">Não consegui verificar esse voo agora: ' + escapeHtml(e.message) + '</div>';
     }
-    setTimeout(()=>{ if(pilotLeafletMap) pilotLeafletMap.invalidateSize(); }, 100);
   }
 
   async function viewPilotFlight(pilotId, pilotName, date){
@@ -1078,6 +1098,44 @@
   document.getElementById('toggleListBtn').addEventListener('click', ()=> switchPilotoView('list'));
   document.getElementById('toggleMapBtn').addEventListener('click', ()=> switchPilotoView('map'));
   switchPilotoView('list');
+
+  function appConfirm(message){
+    return new Promise((resolve)=>{
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal-box">
+          <p>${escapeHtml(message)}</p>
+          <div class="modal-actions">
+            <button class="btn-cancel">Cancelar</button>
+            <button class="btn-confirm">Confirmar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      const cleanup = (result)=>{ document.body.removeChild(overlay); resolve(result); };
+      overlay.querySelector('.btn-cancel').addEventListener('click', ()=> cleanup(false));
+      overlay.querySelector('.btn-confirm').addEventListener('click', ()=> cleanup(true));
+      overlay.addEventListener('click', (e)=>{ if(e.target === overlay) cleanup(false); });
+    });
+  }
+
+  function appAlert(message){
+    return new Promise((resolve)=>{
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal-box">
+          <p>${escapeHtml(message)}</p>
+          <div class="modal-actions">
+            <button class="btn-ok">OK</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      const cleanup = ()=>{ document.body.removeChild(overlay); resolve(); };
+      overlay.querySelector('.btn-ok').addEventListener('click', cleanup);
+      overlay.addEventListener('click', (e)=>{ if(e.target === overlay) cleanup(); });
+    });
+  }
 
   function escapeHtml(s){
     return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1778,14 +1836,14 @@
       dlBtn.addEventListener('click', ()=> downloadFlight(f));
       computeAirspaceStatus(f, tr.querySelector('.air-status-cell'));
       delBtn.addEventListener('click', async ()=>{
-        const sure = confirm(`Apagar o voo de ${f.pilot_name} (${f.flight_date})? O piloto vai poder reenviar depois.`);
+        const sure = await appConfirm(`Apagar o voo de ${f.pilot_name} (${f.flight_date})? O piloto vai poder reenviar depois.`);
         if(!sure) return;
         try{
           const { error } = await sb.from('flights').delete().eq('id', f.id);
           if(error) throw error;
           await loadFlights();
         }catch(e){
-          alert('Não consegui apagar: ' + (e.message || 'erro desconhecido'));
+          await appAlert('Não consegui apagar: ' + (e.message || 'erro desconhecido'));
         }
       });
       body.appendChild(tr);
@@ -1828,7 +1886,7 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }catch(e){
-      alert('Não consegui gerar o ZIP: ' + (e.message || 'erro desconhecido'));
+      await appAlert('Não consegui gerar o ZIP: ' + (e.message || 'erro desconhecido'));
     }
     btn.textContent = originalText;
     btn.disabled = false;
@@ -1841,7 +1899,7 @@
     const filterVal = document.getElementById('flightsDayFilter').value;
     const dayLabel = filterVal ? eventDays.find(d => d.event_date === filterVal)?.label : null;
     const scopeText = dayLabel ? `do dia "${dayLabel}"` : 'de TODOS os dias';
-    const sure = confirm(`Tem certeza que quer apagar os ${filtered.length} voo(s) ${scopeText}? Isso não pode ser desfeito. Baixe o ZIP antes, se ainda não baixou.`);
+    const sure = await appConfirm(`Tem certeza que quer apagar os ${filtered.length} voo(s) ${scopeText}? Isso não pode ser desfeito. Baixe o ZIP antes, se ainda não baixou.`);
     if(!sure) return;
     btn.disabled = true;
     btn.textContent = 'Apagando...';
@@ -1852,7 +1910,7 @@
       if(error) throw error;
       await loadFlights();
     }catch(e){
-      alert('Não consegui apagar os voos: ' + (e.message || 'erro desconhecido'));
+      await appAlert('Não consegui apagar os voos: ' + (e.message || 'erro desconhecido'));
     }
     btn.disabled = false;
     updateFlightActionLabels();
