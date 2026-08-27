@@ -237,7 +237,7 @@
       <p class="empty" id="noPilotsMsg" style="display:none; padding:12px 0 0;">Nenhuma lista de pilotos cadastrada ainda. Peça ao organizador para subir a lista na aba "Organizador".</p>
 
       <div class="pin-box warn" id="pinMissingMsg">
-        <div class="msg">Você ainda não cadastrou um PIN. Vá na aba <strong>"Cadastro de PIN"</strong> antes de enviar seu voo — é rápido, só uma vez por campeonato.</div>
+        <div class="msg">Você ainda não cadastrou um PIN. Vá na aba <strong>"Cadastro de PIN"</strong> antes de enviar seu voo — o mesmo será utilizado em todos os campeonatos.</div>
       </div>
       <div class="pin-box" id="pinEntryBox">
         <label>Seu PIN (4 dígitos)</label>
@@ -516,6 +516,7 @@
       t.classList.add('active');
       document.getElementById('panel-'+t.dataset.tab).classList.add('active');
       if(t.dataset.tab==='organizador'){ refreshOrgAuthUI(); }
+      if(t.dataset.tab==='piloto'){ refreshPinStatusForSelectedPilot(); }
     });
   });
 
@@ -1197,6 +1198,23 @@
   }
 
   // ---------- Piloto tab: pilot selection + pin gate ----------
+  async function refreshPinStatusForSelectedPilot(){
+    if(!selectedPilot) return;
+    const pinBox = document.getElementById('pinEntryBox');
+    const pinMsg = document.getElementById('pinMissingMsg');
+    pinBox.classList.remove('show');
+    pinMsg.classList.remove('show');
+    try{
+      const { data, error } = await sb.rpc('pilot_has_pin', { p_pilot_id: selectedPilot.id });
+      if(error) throw error;
+      if(data){ pinBox.classList.add('show'); } else { pinMsg.classList.add('show'); }
+    }catch(e){
+      pinMsg.querySelector('.msg').textContent = 'Não consegui verificar seu PIN agora. Tente novamente.';
+      pinMsg.classList.add('show');
+    }
+    updatePreview();
+  }
+
   makePilotCombo(document.getElementById('pilotSearch'), document.getElementById('pilotList'), async (p)=>{
     selectedPilot = p;
     const box = document.getElementById('selectedPilotBox');
@@ -1214,16 +1232,7 @@
     document.getElementById('selectedPilotName').textContent = p.name;
     document.getElementById('selectedPilotId').textContent = 'ID '+p.id;
     document.getElementById('selectedPilotGlider').textContent = p.glider || 'Equipamento não cadastrado';
-    pinBox.classList.remove('show');
-    pinMsg.classList.remove('show');
-    try{
-      const { data, error } = await sb.rpc('pilot_has_pin', { p_pilot_id: p.id });
-      if(error) throw error;
-      if(data){ pinBox.classList.add('show'); } else { pinMsg.classList.add('show'); }
-    }catch(e){
-      pinMsg.querySelector('.msg').textContent = 'Não consegui verificar seu PIN agora. Tente novamente.';
-      pinMsg.classList.add('show');
-    }
+    await refreshPinStatusForSelectedPilot();
     updatePreview();
   });
 
