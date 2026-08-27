@@ -1410,49 +1410,39 @@
       return;
     }
     btn.disabled = true;
-    btn.textContent = 'Verificando PIN...';
+    btn.textContent = 'Enviando...';
     try{
-      const { data: valid, error: vErr } = await sb.rpc('verify_pilot_pin', { p_pilot_id: selectedPilot.id, p_pin: pin });
-      if(vErr) throw vErr;
-      if(!valid){
+      const filename = `${parsedFlight.date}-${normalizeName(selectedPilot.name)}.${selectedPilot.id}.igc`;
+      const { data: result, error: subErr } = await sb.rpc('submit_flight', {
+        p_pilot_id: selectedPilot.id,
+        p_date: parsedFlight.date,
+        p_pin: pin,
+        p_pilot_name: selectedPilot.name,
+        p_filename: filename,
+        p_original_name: parsedFlight.originalName,
+        p_content: parsedFlight.content
+      });
+      if(subErr) throw subErr;
+      if(result === 'invalid_pin'){
         toast.textContent = 'PIN incorreto. Confira o número e tente de novo.';
         toast.className = 'toast err show';
         btn.disabled = false;
         btn.textContent = 'Enviar voo';
         return;
       }
-      btn.textContent = 'Verificando envio anterior...';
-      const { data: alreadySent, error: checkErr } = await sb.rpc('pilot_has_submitted', { p_pilot_id: selectedPilot.id, p_date: parsedFlight.date });
-      if(checkErr) throw checkErr;
-      if(alreadySent){
-        toast.textContent = 'Você já enviou o voo desse dia. Se precisar corrigir, fale com o organizador — ele consegue apagar o envio anterior pra você reenviar.';
+      if(result === 'locked'){
+        toast.textContent = 'Muitas tentativas de PIN erradas. Aguarde 15 minutos e tente de novo, ou fale com o organizador.';
         toast.className = 'toast err show';
         btn.disabled = false;
         btn.textContent = 'Enviar voo';
         return;
       }
-      btn.textContent = 'Enviando...';
-      const filename = `${parsedFlight.date}-${normalizeName(selectedPilot.name)}.${selectedPilot.id}.igc`;
-      const flightPayload = {
-        pilot_id: selectedPilot.id,
-        pilot_name: selectedPilot.name,
-        flight_date: parsedFlight.date,
-        filename,
-        original_name: parsedFlight.originalName,
-        content: parsedFlight.content,
-        submitted_at: new Date().toISOString()
-      };
-      const { error: insErr } = await sb.from('flights').insert(flightPayload);
-      if(insErr){
-        if(insErr.code === '23505'){
-          toast.textContent = 'Você já enviou o voo desse dia. Se precisar corrigir, fale com o organizador.';
-          toast.className = 'toast err show';
-          btn.disabled = false;
-          btn.textContent = 'Enviar voo';
-          return;
-        } else {
-          throw insErr;
-        }
+      if(result === 'already_submitted'){
+        toast.textContent = 'Você já enviou o voo desse dia. Se precisar corrigir, fale com o organizador — ele consegue apagar o envio anterior pra você reenviar.';
+        toast.className = 'toast err show';
+        btn.disabled = false;
+        btn.textContent = 'Enviar voo';
+        return;
       }
       toast.textContent = `Voo recebido como ${filename}`;
       toast.className = 'toast ok show';
