@@ -1081,7 +1081,12 @@
       const violations = result.violations || [];
       if(violations.length){
         html += `<div class="pin-box warn show" style="margin-top:10px;"><div class="msg"><strong>⚠️ Invasão de espaço aéreo detectada:</strong><br>` +
-          violations.map(v => `${escapeHtml(v.area)} às ${v.hora} (UTC-3), altitude ${v.alt}m`).join('<br>') + `</div></div>`;
+          violations.map(v => {
+            const detalhe = v.kind === 'vertical'
+              ? `${v.verticalExcess}m acima do permitido`
+              : `${v.horizontalExcess}m de invasão lateral`;
+            return `${escapeHtml(v.area)} às ${v.hora} (UTC-3), ${detalhe}.`;
+          }).join('<br>') + `</div></div>`;
       } else if((result.airspaces || []).length){
         html += `<div class="hint" style="margin-top:10px; color:var(--lift);">✓ Nenhuma invasão de espaço aéreo detectada.</div>`;
       }
