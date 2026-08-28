@@ -88,6 +88,7 @@
   }
   input[type=text]:focus, input[type=password]:focus, select:focus{ outline:none; border-color:var(--thermal); }
   input.pin-input{ font-family:var(--font-mono); font-size:20px; letter-spacing:8px; text-align:center; }
+  #newPin2::placeholder{ font-size:13px; letter-spacing:normal; }
 
   .combo{ position:relative; }
   .combo-list{
@@ -1084,7 +1085,7 @@
           violations.map(v => {
             const detalhe = v.kind === 'vertical'
               ? `${v.verticalExcess}m acima do permitido`
-              : `${v.horizontalExcess}m de invasão lateral`;
+              : `${v.horizontalExcess}m de invasão horizontal`;
             return `${escapeHtml(v.area)} às ${v.hora} (UTC-3), ${detalhe}.`;
           }).join('<br>') + `</div></div>`;
       } else if((result.airspaces || []).length){
