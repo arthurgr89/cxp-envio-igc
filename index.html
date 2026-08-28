@@ -1746,10 +1746,15 @@
     btn.disabled = true;
     btn.textContent = 'Resetando...';
     try{
-      const { error } = await sb.from('pilot_pins').delete().eq('pilot_id', resetPinTarget.id);
+      const { data, error } = await sb.from('pilot_pins').delete().eq('pilot_id', resetPinTarget.id).select();
       if(error) throw error;
-      toast.textContent = `PIN de ${resetPinTarget.name} resetado. Ele já pode cadastrar um novo.`;
-      toast.className = 'toast ok show';
+      if(!data || data.length === 0){
+        toast.textContent = 'Nada foi apagado — esse piloto pode já não ter PIN cadastrado, ou sua sessão de login expirou. Tenta sair e entrar de novo na aba Organizador e repetir.';
+        toast.className = 'toast err show';
+      } else {
+        toast.textContent = `PIN de ${resetPinTarget.name} resetado. Ele já pode cadastrar um novo.`;
+        toast.className = 'toast ok show';
+      }
     }catch(e){
       toast.textContent = 'Erro ao resetar: ' + (e.message || 'erro desconhecido');
       toast.className = 'toast err show';
