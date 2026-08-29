@@ -440,8 +440,8 @@
     </div>
 
     <div class="card">
-      <h2>Marcar DNF / ABS</h2>
-      <p class="hint">Pra pilotos que não decolaram (DNF) ou não foram à etapa (ABS) — assim eles não ficam como "Pendente" na lista de envio do dia.</p>
+      <h2>Marcar DNF / ABS / Enviado</h2>
+      <p class="hint">DNF (não decolou) e ABS (não foi à etapa) evitam que o piloto fique "Pendente". "Enviado" é pra quando você recebe o IGC direto por cabo (sem internet) e joga na pasta do FSCOMP na mão — assim a lista mostra certo mesmo sem passar pelo app.</p>
       <div class="combo">
         <input type="text" id="dnfPilotSearch" placeholder="Digite o nome do piloto...">
         <div class="combo-list" id="dnfPilotList"></div>
@@ -455,6 +455,7 @@
         <button class="secondary" id="markDnfBtn" style="flex:1;" disabled>Marcar DNF</button>
         <button class="secondary" id="markAbsBtn" style="flex:1;" disabled>Marcar ABS</button>
       </div>
+      <button class="secondary" id="markEnviadoBtn" style="margin-top:8px;" disabled>Marcar Enviado (recebido por cabo)</button>
       <button class="secondary" id="clearDnfBtn" style="margin-top:8px;" disabled>Remover marcação</button>
       <div class="toast" id="dnfToast"></div>
       <div id="dnfListWrap" style="margin-top:14px;"></div>
@@ -832,7 +833,11 @@
         const pid = String(p.id);
         let label, color, clickable = false;
         if(submittedSet.has(pid)){ label = '✓ Enviado'; color = 'var(--lift)'; clickable = true; }
-        else if(statusMap[pid]){ label = `✓ ${statusMap[pid]}`; color = 'var(--lift)'; }
+        else if(statusMap[pid]){
+          const raw = statusMap[pid];
+          const display = raw === 'ENVIADO' ? 'Enviado' : raw;
+          label = `✓ ${display}`; color = 'var(--lift)';
+        }
         else { label = 'Pendente'; color = 'var(--sink)'; }
         const row = document.createElement('div');
         row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--line); font-size:13.5px;' + (clickable ? ' cursor:pointer;' : '');
@@ -1650,16 +1655,17 @@
     const box = document.getElementById('dnfSelectedBox');
     const markDnf = document.getElementById('markDnfBtn');
     const markAbs = document.getElementById('markAbsBtn');
+    const markEnviado = document.getElementById('markEnviadoBtn');
     const clearBtn = document.getElementById('clearDnfBtn');
     if(!p){
       box.classList.remove('show');
-      markDnf.disabled = true; markAbs.disabled = true; clearBtn.disabled = true;
+      markDnf.disabled = true; markAbs.disabled = true; markEnviado.disabled = true; clearBtn.disabled = true;
       return;
     }
     box.classList.add('show');
     document.getElementById('dnfSelName').textContent = p.name;
     document.getElementById('dnfSelId').textContent = 'ID '+p.id;
-    markDnf.disabled = false; markAbs.disabled = false; clearBtn.disabled = false;
+    markDnf.disabled = false; markAbs.disabled = false; markEnviado.disabled = false; clearBtn.disabled = false;
   });
 
   document.getElementById('dnfDaySelect').addEventListener('change', loadDnfList);
@@ -1687,6 +1693,7 @@
 
   document.getElementById('markDnfBtn').addEventListener('click', ()=> setDnfStatus('DNF'));
   document.getElementById('markAbsBtn').addEventListener('click', ()=> setDnfStatus('ABS'));
+  document.getElementById('markEnviadoBtn').addEventListener('click', ()=> setDnfStatus('ENVIADO'));
 
   document.getElementById('clearDnfBtn').addEventListener('click', async ()=>{
     if(!selectedDnfPilot) return;
