@@ -1,0 +1,2954 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Resultados por Categoria</title>
+    <style>
+          .hover
+          { /* for IE using onmouseover and onmouseout */
+          background: #00CED1;
+          }
+          tr.fs_res_res_row:hover
+          {
+          background: #00CED1;
+          }
+          div.fs_res
+          {
+          font-family: Verdana, Arial, Helvetica, sans-serif;
+          font-size: x-small;
+          }
+          table.fs_res
+          {
+          border:solid 1px gray;
+          border-collapse:collapse;
+          font-size: x-small;
+          }
+          td.fs_res
+          {
+          border:solid 1px gray;
+          vertical-align:top;
+          padding:5px;
+          }
+          th.fs_res
+          {
+          border:solid 1px gray;
+          vertical-align:center;
+          }
+          table, tr, th, td {page-break-inside: avoid;}
+          .female {
+            color: #FF1493;
+          }
+          .flag_icon {
+            vertical-align: middle;
+            width: 20px;
+            height: 14px;
+            object-fit: cover;
+            border: solid 1px #ccc;
+          }
+          /* ===== Card de foto do piloto ===== */
+          .pilot-name {
+            cursor: pointer;
+          }
+          .pilot-card {
+            position: fixed;
+            z-index: 1000;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 18px;
+            width: 250px;
+            display: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            font-family: Verdana, Arial, sans-serif;
+            font-size: x-small;
+            pointer-events: auto;
+            max-height: calc(100vh - 20px);
+            overflow-y: auto;
+          }
+          .pilot-card.visible { display: block; }
+          .pc-overlay { display: none; position: fixed; inset: 0; z-index: 999; }
+          .pc-overlay.visible { display: block; }
+          .pc-photo {
+            width: 92px; height: 92px; border-radius: 50%;
+            object-fit: cover; display: block; margin: 0 auto 9px;
+            border: 2px solid #00CED1;
+          }
+          .pc-initials {
+            width: 92px; height: 92px; border-radius: 50%;
+            background: #e0f7f7; display: flex; align-items: center;
+            justify-content: center; font-size: 24px; font-weight: bold;
+            color: #007a7a; margin: 0 auto 9px; border: 2px solid #00CED1;
+          }
+          .pc-name { font-weight: bold; text-align: center; margin-bottom: 6px; font-size: 14px; }
+          .pc-lbl { color: #aaa; font-size: 11px; text-transform: uppercase; text-align: center; margin: 5px 0 2px; }
+          .pc-val { text-align: center; color: #444; }
+          .pc-status { display: inline-block; margin: 6px auto 0; padding: 2px 9px;
+            border-radius: 9px; font-weight: bold; font-size: 11px; }
+          .pcs-GOAL { background:#e5f5ec; color:#1a7a3a; }
+          .pcs-ESS  { background:#e6f0ff; color:#0055aa; }
+          .pcs-DF   { background:#fdf6e3; color:#b8860b; }
+          .pcs-DNF  { background:#f0f0f0; color:#888; }
+          .pcs-ABS  { background:#fdecea; color:#c0392b; }
+          .pc-bio-btn {
+            display: block; width: 100%; margin-top: 10px;
+            background: #00CED1; color: #003333; border: none;
+            border-radius: 6px; padding: 7px 0; font-size: 12px;
+            font-weight: bold; cursor: pointer; font-family: Verdana, Arial, sans-serif;
+          }
+          .pc-bio-btn:hover { background: #00b8ba; }
+          .pc-bio-ig-link {
+            display: block; text-align: center; margin-top: 10px;
+            color: #c13584; font-weight: bold; font-size: 11px;
+            text-decoration: none;
+          }
+          .pc-bio-ig-link:hover { text-decoration: underline; }
+          .pc-bio-panel {
+            display: none; margin-top: 10px;
+            border-top: 1px solid #eee; padding-top: 8px;
+          }
+          .pc-bio-panel.visible { display: block; }
+          .pc-bio-lbl { color: #aaa; font-size: 11px; text-transform: uppercase; text-align: left; margin: 7px 0 2px; }
+          .pc-bio-val { color: #333; font-size: 12px; text-align: left; line-height: 1.5; white-space: pre-line; }
+          .pc-bio-val-sm { font-size: 10px; }
+          .pc-bio-loading { color: #aaa; font-size: 12px; text-align: center; margin-top: 8px; }
+          body { padding-bottom: 500px; }
+        
+
+        .pilot-wrap { display: inline-block; }
+        .tabs-bar { display: flex; flex-wrap: wrap; gap: 4px; background: #f2f2f2; border: 2px solid gray; margin-top: 18px; padding: 10px 10px 0 10px; position: sticky; top: 0; z-index: 100; }
+        .tab-btn { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: small; font-weight: bold; color: #333; background: #e0e0e0; border: 1px solid gray; border-bottom: none; padding: 8px 18px; cursor: pointer; border-radius: 6px 6px 0 0; }
+        .tab-btn:hover { background: #b9f0ef; }
+        .tab-btn.active { background: #00CED1; color: #000; }
+        tr.cat-hidden { display: none; }
+        #statsPanel { padding: 15px 5px; max-width: 480px; }
+        #statsPanel h3 { font-size: small; margin: 0 0 10px 0; }
+        #statsPanel h4 { font-size: x-small; margin: 18px 0 6px 0; }
+        #statsPanel table.fs_res { width: 100%; margin-bottom: 4px; }
+        #stats-total { font-size: small; font-weight: bold; margin: 0; }
+
+    </style>
+  </head>
+  <body>
+
+    <div>
+      <div class="fs_res"><nobr><img width="120" src="https://drive.google.com/thumbnail?id=1CSwSsW60T1BLRBD-FMWfGtH99ufbCoAz" hspace="10"><img width="180" src="https://drive.google.com/thumbnail?id=1TgMSH-drEAaIh7nS-fde3p4M1QuqgWiH"><img width="280" src="https://drive.google.com/thumbnail?id=178aghixbyTan1Bm7fTFsqH1sb3IQ6pUY" hspace="10"><img width="170" src="https://picodogaviao.esp.br/wp-content/uploads/2022/08/logo-azul.png" hspace="10"><img width="110" src="https://www.cbvl.esp.br/assets/images/cbvl.svg" hspace="10"><img width="180" src="https://drive.google.com/thumbnail?id=13GH_TeIb80N0MLRPlYKLNp8bgMLrlVqN"></nobr><h1>2ª Etapa do Campeonato Paranaense 2026 - Andradas</h1>
+        <p style="font-size:xx-small">2026-08-15 to 2026-08-16, FAI Category 2 event</p>
+        <h2 id="task-h2">Task 1: OPEN</h2>
+        <h3>2026-08-14 
+              Race to Goal 45.7 km</h3>
+        <p>Provisional</p>
+        
+    <div class="pilot-wrap">
+    <div class="tabs-bar">
+          <button class="tab-btn active" onclick="showTab('open')" id="btn-open">OPEN</button>
+          <button class="tab-btn" onclick="showTab('serial')" id="btn-serial">SERIAL</button>
+          <button class="tab-btn" onclick="showTab('sport')" id="btn-sport">SPORT</button>
+          <button class="tab-btn" onclick="showTab('lite')" id="btn-lite">SPORT LITE</button>
+          <button class="tab-btn" onclick="showTab('fem')" id="btn-fem">FEMININO</button>
+          <button class="tab-btn" onclick="showTab('stats')" id="btn-stats">ESTATÍSTICAS</button>
+    </div>
+    <table class="fs_res" id="pilotTable">
+      <thead style="display: table-header-group;">
+            <tr>
+              <th class="fs_res">#</th>
+              <th class="fs_res">Id</th>
+              <th class="fs_res">Name</th>
+              <th class="fs_res"></th>
+              <th class="fs_res">Nat</th>
+              <th class="fs_res">Glider</th>
+              <th class="fs_res">Sponsor</th>
+              <th class="fs_res">Status</th>
+              <th class="fs_res">SS</th>
+              <th class="fs_res">ES</th>
+              <th class="fs_res">
+          Time<br>[h:m:s]
+        </th>
+              <th class="fs_res">
+          Speed<br>[km/h]
+        </th>
+              <th class="fs_res">
+            Distance<br>[km]
+          </th>
+              <th class="fs_res">
+        Dist.<br>Points
+      </th>
+              <th class="fs_res">
+          Lead.<br>Points
+        </th>
+              <th class="fs_res">
+        Time<br>Points
+      </th>
+              <th class="fs_res">Total</th>
+            </tr>
+          </thead>
+      <tbody id="pilotTbody">
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="1">
+            <td class="fs_res rank-cell" align="right">1</td>
+            <td class="fs_res">32799</td>
+            <td class="fs_res"><span class="pilot-name" data-id="32799" data-name="MAYCON DE SOUZA DOS SANTOS" data-glider="[E] OZONE - ENZO 3 / SUBMARINE" data-sponsor="TOURCOIN" data-ss="14:00:00" data-total="637" data-status="GOAL">MAYCON DE SOUZA DOS SANTOS</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / SUBMARINE</td>
+            <td class="fs_res">TOURCOIN</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">15:31:03</td>
+            <td class="fs_res">01:31:03</td>
+            <td class="fs_res" align="right">27.7</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">52.4</td>
+            <td class="fs_res" align="right">149.0</td>
+            <td class="fs_res" align="right">637.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="2" data-rank-serial="1">
+            <td class="fs_res rank-cell" align="right">2</td>
+            <td class="fs_res">5101</td>
+            <td class="fs_res"><span class="pilot-name" data-id="5101" data-name="RONNIE KOERICH" data-glider="[D] OZONE - ZENO 2 / SUBMARINE" data-sponsor="VORTEX PARAGLIDING" data-ss="14:00:00" data-total="557.1" data-status="GOAL">RONNIE KOERICH</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZENO 2 / SUBMARINE</td>
+            <td class="fs_res">VORTEX PARAGLIDING</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">15:50:39</td>
+            <td class="fs_res">01:50:39</td>
+            <td class="fs_res" align="right">22.8</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">21.8</td>
+            <td class="fs_res" align="right">99.7</td>
+            <td class="fs_res" align="right">557.1</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="3">
+            <td class="fs_res rank-cell" align="right">3</td>
+            <td class="fs_res">65653</td>
+            <td class="fs_res"><span class="pilot-name" data-id="65653" data-name="ARTHUR GRANDINI RODELLA" data-glider="[E] OZONE - ENZO 3 / SUBMARINE" data-sponsor="CXP - CIRCUITO XC PARAPENTE" data-ss="14:00:00" data-total="555.9" data-status="GOAL">ARTHUR GRANDINI RODELLA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / SUBMARINE</td>
+            <td class="fs_res">CXP - CIRCUITO XC PARAPENTE</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">15:52:27</td>
+            <td class="fs_res">01:52:27</td>
+            <td class="fs_res" align="right">22.4</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">24.3</td>
+            <td class="fs_res" align="right">96.0</td>
+            <td class="fs_res" align="right">555.9</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="4">
+            <td class="fs_res rank-cell" align="right">4</td>
+            <td class="fs_res">19283</td>
+            <td class="fs_res"><span class="pilot-name" data-id="19283" data-name="MARCIO TAVARES" data-glider="[E] NIVIUK - X-ONE / SUBMARINE" data-sponsor="MJV CONFECÇÕES" data-ss="14:00:00" data-total="555.6" data-status="GOAL">MARCIO TAVARES</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] NIVIUK - X-ONE / SUBMARINE</td>
+            <td class="fs_res">MJV CONFECÇÕES</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">15:52:31</td>
+            <td class="fs_res">01:52:31</td>
+            <td class="fs_res" align="right">22.4</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">24.2</td>
+            <td class="fs_res" align="right">95.8</td>
+            <td class="fs_res" align="right">555.6</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="5">
+            <td class="fs_res rank-cell" align="right">5</td>
+            <td class="fs_res">23359</td>
+            <td class="fs_res"><span class="pilot-name" data-id="23359" data-name="EDUARDO VARGAS PEIRAO" data-glider="[E] OZONE - ENZO 3 / SUBMARINE" data-sponsor="CK, LAMON, JUISTREET, AP1R" data-ss="14:00:00" data-total="553.5" data-status="GOAL">EDUARDO VARGAS PEIRAO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / SUBMARINE</td>
+            <td class="fs_res">CK, LAMON, JUISTREET, AP1R</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">15:53:20</td>
+            <td class="fs_res">01:53:20</td>
+            <td class="fs_res" align="right">22.3</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">23.8</td>
+            <td class="fs_res" align="right">94.1</td>
+            <td class="fs_res" align="right">553.5</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="5" data-rank-serial="2" data-rank-sport="1" data-rank-lite="1">
+            <td class="fs_res rank-cell" align="right">5</td>
+            <td class="fs_res">95820</td>
+            <td class="fs_res"><span class="pilot-name" data-id="95820" data-name="VINICIUS DE PAULO" data-glider="[B] SKYWALK - MESCAL / SOL" data-sponsor="ARTPAPER" data-ss="14:00:00" data-total="553.5" data-status="GOAL">VINICIUS DE PAULO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] SKYWALK - MESCAL / SOL</td>
+            <td class="fs_res">ARTPAPER</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">15:53:20</td>
+            <td class="fs_res">01:53:20</td>
+            <td class="fs_res" align="right">22.3</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">23.8</td>
+            <td class="fs_res" align="right">94.1</td>
+            <td class="fs_res" align="right">553.5</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="7" data-rank-serial="3">
+            <td class="fs_res rank-cell" align="right">7</td>
+            <td class="fs_res">81213</td>
+            <td class="fs_res"><span class="pilot-name" data-id="81213" data-name="PAULO ROBERTO GAZANIGA MELO" data-glider="[D] OZONE - ZENO 2 / GENIE RACE 5" data-sponsor=">> APIR <<" data-ss="14:00:00" data-total="552.6" data-status="GOAL">PAULO ROBERTO GAZANIGA MELO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZENO 2 / GENIE RACE 5</td>
+            <td class="fs_res">&gt;&gt; APIR &lt;&lt;</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">15:53:54</td>
+            <td class="fs_res">01:53:54</td>
+            <td class="fs_res" align="right">22.2</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">24.0</td>
+            <td class="fs_res" align="right">93.0</td>
+            <td class="fs_res" align="right">552.6</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="8" data-rank-serial="4" data-rank-sport="2">
+            <td class="fs_res rank-cell" align="right">8</td>
+            <td class="fs_res">78123</td>
+            <td class="fs_res"><span class="pilot-name" data-id="78123" data-name="CLAUDIO ANDRADE ALVES" data-glider="[C] OZONE - PHOTON / GENIE RACE 5" data-sponsor="SMARTMEC, FLYMAQ, SMARTMEC" data-ss="14:00:00" data-total="539.7" data-status="GOAL">CLAUDIO ANDRADE ALVES</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] OZONE - PHOTON / GENIE RACE 5</td>
+            <td class="fs_res">SMARTMEC, FLYMAQ, SMARTMEC</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">15:56:44</td>
+            <td class="fs_res">01:56:44</td>
+            <td class="fs_res" align="right">21.6</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">16.8</td>
+            <td class="fs_res" align="right">87.3</td>
+            <td class="fs_res" align="right">539.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="9" data-rank-serial="5">
+            <td class="fs_res rank-cell" align="right">9</td>
+            <td class="fs_res">71933</td>
+            <td class="fs_res"><span class="pilot-name" data-id="71933" data-name="GUSTAVO HENRIQUE GUENO" data-glider="[D] OZONE - ZENO 2 / SUBMARINE" data-sponsor="VORTEX PARAGLIDING" data-ss="14:00:00" data-total="533.3" data-status="GOAL">GUSTAVO HENRIQUE GUENO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZENO 2 / SUBMARINE</td>
+            <td class="fs_res">VORTEX PARAGLIDING</td>
+            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">16:01:44</td>
+            <td class="fs_res">02:01:44</td>
+            <td class="fs_res" align="right">20.7</td>
+            <td class="fs_res" align="right">45.67</td>
+            <td class="fs_res" align="right">435.6</td>
+            <td class="fs_res" align="right">20.3</td>
+            <td class="fs_res" align="right">77.4</td>
+            <td class="fs_res" align="right">533.3</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="10" data-rank-serial="6" data-rank-sport="3">
+            <td class="fs_res rank-cell" align="right">10</td>
+            <td class="fs_res">87490</td>
+            <td class="fs_res"><span class="pilot-name" data-id="87490" data-name="FELIPE NICHELE BUSCHLE" data-glider="[C] NOVA - VORTEX / ZEPELIN" data-sponsor="DR FELIPE RINOPLASTIA E FACE" data-ss="14:00:00" data-total="431.3" data-status="DF">FELIPE NICHELE BUSCHLE</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] NOVA - VORTEX / ZEPELIN</td>
+            <td class="fs_res">DR FELIPE RINOPLASTIA E FACE</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">42.71</td>
+            <td class="fs_res" align="right">407.4</td>
+            <td class="fs_res" align="right">23.9</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">431.3</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="11" data-rank-serial="7" data-rank-sport="4">
+            <td class="fs_res rank-cell" align="right">11</td>
+            <td class="fs_res">74500</td>
+            <td class="fs_res"><span class="pilot-name" data-id="74500" data-name="MARCOS APOLARI NETO" data-glider="[C] FLOW - FUSION / WODDY VALEY" data-sponsor="NINA CASA DECOR" data-ss="14:00:00" data-total="429.6" data-status="DF">MARCOS APOLARI NETO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] FLOW - FUSION / WODDY VALEY</td>
+            <td class="fs_res">NINA CASA DECOR</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">43.83</td>
+            <td class="fs_res" align="right">418.1</td>
+            <td class="fs_res" align="right">11.5</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">429.6</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="12" data-rank-serial="8" data-rank-sport="5">
+            <td class="fs_res rank-cell" align="right">12</td>
+            <td class="fs_res">87749</td>
+            <td class="fs_res"><span class="pilot-name" data-id="87749" data-name="ERNESTO LUIZ REIMANN" data-glider="[C] OZONE - PHOTON / SUBMARINE" data-sponsor="CAMISETAS PARANA / VORTEX PARAGLIDING" data-ss="14:00:00" data-total="389" data-status="DF">ERNESTO LUIZ REIMANN</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] OZONE - PHOTON / SUBMARINE</td>
+            <td class="fs_res">CAMISETAS PARANA / VORTEX PARAGLIDING</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">40.79</td>
+            <td class="fs_res" align="right">389.0</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">389.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="13" data-rank-serial="9" data-rank-sport="6">
+            <td class="fs_res rank-cell" align="right">13</td>
+            <td class="fs_res">15277</td>
+            <td class="fs_res"><span class="pilot-name" data-id="15277" data-name="MARCOS DONIZETI LOPES" data-glider="[C] UP - TORRE / GENIE RACE 4" data-sponsor="WE SOLUÇÕES" data-ss="14:00:00" data-total="388.7" data-status="DF">MARCOS DONIZETI LOPES</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] UP - TORRE / GENIE RACE 4</td>
+            <td class="fs_res">WE SOLUÇÕES</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">40.75</td>
+            <td class="fs_res" align="right">388.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">388.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="14" data-rank-serial="10" data-rank-sport="7">
+            <td class="fs_res rank-cell" align="right">14</td>
+            <td class="fs_res">62628</td>
+            <td class="fs_res"><span class="pilot-name" data-id="62628" data-name="ANGELO GUEDES SARAGIOTTO" data-glider="[C] OZONE - PHOTON / GENIE RACE 5" data-sponsor="VAI FLYMAQ" data-ss="14:00:00" data-total="329.5" data-status="DF">ANGELO GUEDES SARAGIOTTO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] OZONE - PHOTON / GENIE RACE 5</td>
+            <td class="fs_res">VAI FLYMAQ</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">31.86</td>
+            <td class="fs_res" align="right">303.9</td>
+            <td class="fs_res" align="right">25.6</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">329.5</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="14">
+            <td class="fs_res rank-cell" align="right">14</td>
+            <td class="fs_res">77709</td>
+            <td class="fs_res"><span class="pilot-name" data-id="77709" data-name="ANDRE MASSAO OKANO" data-glider="[E] OZONE - ENZO 3 / ROCKET R" data-sponsor=":)" data-ss="14:00:00" data-total="329.5" data-status="DF">ANDRE MASSAO OKANO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / ROCKET R</td>
+            <td class="fs_res">:)</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">31.85</td>
+            <td class="fs_res" align="right">303.8</td>
+            <td class="fs_res" align="right">25.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">329.5</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="16" data-rank-serial="11">
+            <td class="fs_res rank-cell" align="right">16</td>
+            <td class="fs_res">78283</td>
+            <td class="fs_res"><span class="pilot-name" data-id="78283" data-name="HEITOR GRANDINI RODELLA" data-glider="[D] OZONE - ZENO 2 / SUBMARINE" data-sponsor="FLYMONSTER / BRASIL PARAGLIDING" data-ss="14:00:00" data-total="326.8" data-status="DF">HEITOR GRANDINI RODELLA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZENO 2 / SUBMARINE</td>
+            <td class="fs_res">FLYMONSTER / BRASIL PARAGLIDING</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">31.71</td>
+            <td class="fs_res" align="right">302.4</td>
+            <td class="fs_res" align="right">24.4</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">326.8</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="17">
+            <td class="fs_res rank-cell" align="right">17</td>
+            <td class="fs_res">40116</td>
+            <td class="fs_res"><span class="pilot-name" data-id="40116" data-name="CAIO HENRIQUE BUZZARELLO" data-glider="[E] OZONE - ENZO 3 / SUBMARINE" data-sponsor="" data-ss="14:00:00" data-total="314.9" data-status="DF">CAIO HENRIQUE BUZZARELLO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / SUBMARINE</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">30.17</td>
+            <td class="fs_res" align="right">287.8</td>
+            <td class="fs_res" align="right">27.1</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">314.9</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="18" data-rank-serial="12">
+            <td class="fs_res rank-cell" align="right">18</td>
+            <td class="fs_res">70205</td>
+            <td class="fs_res"><span class="pilot-name" data-id="70205" data-name="LUIZ CARLOS CAPITULINO DE ANDRADE" data-glider="[D] OZONE - ZENO 2 / OZONE" data-sponsor="PICO DO GAVIÃO" data-ss="14:00:00" data-total="302.6" data-status="DF">LUIZ CARLOS CAPITULINO DE ANDRADE</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZENO 2 / OZONE</td>
+            <td class="fs_res">PICO DO GAVIÃO</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">30.18</td>
+            <td class="fs_res" align="right">287.9</td>
+            <td class="fs_res" align="right">14.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">302.6</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="19" data-rank-serial="13">
+            <td class="fs_res rank-cell" align="right">19</td>
+            <td class="fs_res">78317</td>
+            <td class="fs_res"><span class="pilot-name" data-id="78317" data-name="JORGE AMILTON TOSATO MILSTED" data-glider="[D] BGD - DIVA 2 / FORZA 2" data-sponsor="" data-ss="14:00:00" data-total="301.3" data-status="DF">JORGE AMILTON TOSATO MILSTED</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] BGD - DIVA 2 / FORZA 2</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">31.59</td>
+            <td class="fs_res" align="right">301.3</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">301.3</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="20" data-rank-serial="14">
+            <td class="fs_res rank-cell" align="right">20</td>
+            <td class="fs_res">81021</td>
+            <td class="fs_res"><span class="pilot-name" data-id="81021" data-name="DANIEL SANZ BERNAL" data-glider="[D] BGD - DIVA 2 / GENIE RACE 5" data-sponsor="CASAFORTE.COM.CO | BGD" data-ss="14:00:00" data-total="294.6" data-status="DF">DANIEL SANZ BERNAL</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/co.png" alt="COL" title="COL" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] BGD - DIVA 2 / GENIE RACE 5</td>
+            <td class="fs_res">CASAFORTE.COM.CO | BGD</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">29.20</td>
+            <td class="fs_res" align="right">278.5</td>
+            <td class="fs_res" align="right">16.1</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">294.6</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="21" data-rank-serial="15" data-rank-sport="8" data-rank-lite="2">
+            <td class="fs_res rank-cell" align="right">21</td>
+            <td class="fs_res">83969</td>
+            <td class="fs_res"><span class="pilot-name" data-id="83969" data-name="ALEXANDRO DA SILVA BONO" data-glider="[B] PHI - MAESTRO 2 / NEO" data-sponsor="PHI" data-ss="14:00:00" data-total="269.9" data-status="DF">ALEXANDRO DA SILVA BONO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] PHI - MAESTRO 2 / NEO</td>
+            <td class="fs_res">PHI</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">28.29</td>
+            <td class="fs_res" align="right">269.9</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">269.9</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="22">
+            <td class="fs_res rank-cell" align="right">22</td>
+            <td class="fs_res">51737</td>
+            <td class="fs_res"><span class="pilot-name" data-id="51737" data-name="EMERSON AUGUSTO BUENO DE MIRANDA" data-glider="[E] NIVIUK - X-ONE / SUBMARINE" data-sponsor="K2 TRADING" data-ss="14:00:00" data-total="265.2" data-status="DF">EMERSON AUGUSTO BUENO DE MIRANDA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] NIVIUK - X-ONE / SUBMARINE</td>
+            <td class="fs_res">K2 TRADING</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">27.32</td>
+            <td class="fs_res" align="right">260.5</td>
+            <td class="fs_res" align="right">4.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">265.2</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport fem" data-rank-open="23" data-rank-serial="16" data-rank-sport="9" data-rank-fem="1">
+            <td class="fs_res rank-cell" align="right">23</td>
+            <td class="fs_res">90234</td>
+            <td class="fs_res"><span class="pilot-name" data-id="90234" data-name="ANA PAULA CAMPARI" data-glider="[C] OZONE - PHOTON / IMPRESS" data-sponsor="VAI FLYMAQ!!!" data-ss="14:00:00" data-total="262.9" data-status="DF">ANA PAULA CAMPARI</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] OZONE - PHOTON / IMPRESS</td>
+            <td class="fs_res">VAI FLYMAQ!!!</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">26.86</td>
+            <td class="fs_res" align="right">256.1</td>
+            <td class="fs_res" align="right">6.8</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">262.9</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="24" data-rank-serial="17">
+            <td class="fs_res rank-cell" align="right">24</td>
+            <td class="fs_res">72638</td>
+            <td class="fs_res"><span class="pilot-name" data-id="72638" data-name="GUSTAVO VELOZO AMORIM" data-glider="[D] FLOW - XC RACER 2 / CXMAX" data-sponsor="VORTEX PARAGLIDING" data-ss="14:00:00" data-total="248.8" data-status="DF">GUSTAVO VELOZO AMORIM</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] FLOW - XC RACER 2 / CXMAX</td>
+            <td class="fs_res">VORTEX PARAGLIDING</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">25.41</td>
+            <td class="fs_res" align="right">242.4</td>
+            <td class="fs_res" align="right">6.4</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">248.8</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="25" data-rank-serial="18">
+            <td class="fs_res rank-cell" align="right">25</td>
+            <td class="fs_res">23684</td>
+            <td class="fs_res"><span class="pilot-name" data-id="23684" data-name="VINICIUS KOPELKE" data-glider="[D] OZONE - ZENO 2 / XR7" data-sponsor="" data-ss="14:00:00" data-total="217.7" data-status="DF">VINICIUS KOPELKE</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZENO 2 / XR7</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">22.82</td>
+            <td class="fs_res" align="right">217.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">217.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="26">
+            <td class="fs_res rank-cell" align="right">26</td>
+            <td class="fs_res">45391</td>
+            <td class="fs_res"><span class="pilot-name" data-id="45391" data-name="PATRICK AMORIM" data-glider="[E] NIVIUK - X-ONE / DRIFTER2" data-sponsor="WWW.VORTEXPARAGLIDING.COM.BR" data-ss="14:00:00" data-total="209.5" data-status="DF">PATRICK AMORIM</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] NIVIUK - X-ONE / DRIFTER2</td>
+            <td class="fs_res">WWW.VORTEXPARAGLIDING.COM.BR</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">21.97</td>
+            <td class="fs_res" align="right">209.5</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">209.5</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="27">
+            <td class="fs_res rank-cell" align="right">27</td>
+            <td class="fs_res">2367</td>
+            <td class="fs_res"><span class="pilot-name" data-id="2367" data-name="SERGIO ROBERTO FURTADO" data-glider="[E] NIVIUK - X-ONE / GENIE RACE 5" data-sponsor="SUPREMO" data-ss="14:00:00" data-total="208.8" data-status="DF">SERGIO ROBERTO FURTADO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] NIVIUK - X-ONE / GENIE RACE 5</td>
+            <td class="fs_res">SUPREMO</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">21.89</td>
+            <td class="fs_res" align="right">208.8</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">208.8</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport fem" data-rank-open="28" data-rank-serial="19" data-rank-sport="10" data-rank-fem="2">
+            <td class="fs_res rank-cell" align="right">28</td>
+            <td class="fs_res">58131</td>
+            <td class="fs_res"><span class="pilot-name" data-id="58131" data-name="SARA EDITH PEREZ" data-glider="[C] GIN - GTO 3 / GENIE RACE 4" data-sponsor="FLYMAQ" data-ss="14:00:00" data-total="205.6" data-status="DF">SARA EDITH PEREZ</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] GIN - GTO 3 / GENIE RACE 4</td>
+            <td class="fs_res">FLYMAQ</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">21.55</td>
+            <td class="fs_res" align="right">205.6</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">205.6</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="29" data-rank-serial="20">
+            <td class="fs_res rank-cell" align="right">29</td>
+            <td class="fs_res">24622</td>
+            <td class="fs_res"><span class="pilot-name" data-id="24622" data-name="CLAUDEMIR JOSE ANTUNES DE LIMA" data-glider="[D] OZONE - ZEOLITE 2 / SUBLITE" data-sponsor="VIA FITNESS" data-ss="14:00:00" data-total="194.9" data-status="DF">CLAUDEMIR JOSE ANTUNES DE LIMA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZEOLITE 2 / SUBLITE</td>
+            <td class="fs_res">VIA FITNESS</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">20.44</td>
+            <td class="fs_res" align="right">194.9</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">194.9</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="30" data-rank-serial="21" data-rank-sport="11">
+            <td class="fs_res rank-cell" align="right">30</td>
+            <td class="fs_res">15510</td>
+            <td class="fs_res"><span class="pilot-name" data-id="15510" data-name="RODOLFO VARGAS DO NASCIMENTO" data-glider="[C] OZONE - PHOTON / GENIE RACE 5" data-sponsor="HANGAR 8 / DOMAER AVIATION / VOKAN SEGUROS" data-ss="14:00:00" data-total="169.1" data-status="DF">RODOLFO VARGAS DO NASCIMENTO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] OZONE - PHOTON / GENIE RACE 5</td>
+            <td class="fs_res">HANGAR 8 / DOMAER AVIATION / VOKAN SEGUROS</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">17.73</td>
+            <td class="fs_res" align="right">169.1</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">169.1</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="31" data-rank-serial="22" data-rank-sport="12">
+            <td class="fs_res rank-cell" align="right">31</td>
+            <td class="fs_res">72187</td>
+            <td class="fs_res"><span class="pilot-name" data-id="72187" data-name="PETERSON JOSÉ OLIVEIRA DA LUZ" data-glider="[C] AIR DESIGN - VOLT 5 / GTO" data-sponsor="" data-ss="14:00:00" data-total="155.6" data-status="DF">PETERSON JOSÉ OLIVEIRA DA LUZ</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] AIR DESIGN - VOLT 5 / GTO</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">16.31</td>
+            <td class="fs_res" align="right">155.6</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">155.6</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="32" data-rank-serial="23">
+            <td class="fs_res rank-cell" align="right">32</td>
+            <td class="fs_res">79324</td>
+            <td class="fs_res"><span class="pilot-name" data-id="79324" data-name="CARLOS EDUARDO DE CAMARGO" data-glider="[D] SKYWALK - XALPS 5 / IMPRESS" data-sponsor="CLUB DE PODAS" data-ss="14:00:00" data-total="155.1" data-status="DF">CARLOS EDUARDO DE CAMARGO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] SKYWALK - XALPS 5 / IMPRESS</td>
+            <td class="fs_res">CLUB DE PODAS</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">16.26</td>
+            <td class="fs_res" align="right">155.1</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">155.1</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="33">
+            <td class="fs_res rank-cell" align="right">33</td>
+            <td class="fs_res">14765</td>
+            <td class="fs_res"><span class="pilot-name" data-id="14765" data-name="ERICO LEONARDO FIGUEIRA DE OLIVEIRA" data-glider="[E] NIVIUK - X-ONE / ROCKET R" data-sponsor="HTTPS://WWW.ACTIONFLY.COM.BR/ E @NIVIUKBRASIL" data-ss="14:00:00" data-total="154.9" data-status="DF">ERICO LEONARDO FIGUEIRA DE OLIVEIRA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] NIVIUK - X-ONE / ROCKET R</td>
+            <td class="fs_res">HTTPS://WWW.ACTIONFLY.COM.BR/ E @NIVIUKBRASIL</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">16.24</td>
+            <td class="fs_res" align="right">154.9</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">154.9</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="34" data-rank-serial="24" data-rank-sport="13">
+            <td class="fs_res rank-cell" align="right">34</td>
+            <td class="fs_res">77299</td>
+            <td class="fs_res"><span class="pilot-name" data-id="77299" data-name="DANIEL PIRES BERNARDINO" data-glider="[C] SWING - LIBRA RS / XR7" data-sponsor="BLUE MÍDIA" data-ss="14:00:00" data-total="151.1" data-status="DF">DANIEL PIRES BERNARDINO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] SWING - LIBRA RS / XR7</td>
+            <td class="fs_res">BLUE MÍDIA</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">15.84</td>
+            <td class="fs_res" align="right">151.1</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">151.1</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport fem" data-rank-open="35" data-rank-serial="25" data-rank-sport="14" data-rank-fem="3">
+            <td class="fs_res rank-cell" align="right">35</td>
+            <td class="fs_res">91360</td>
+            <td class="fs_res"><span class="pilot-name" data-id="91360" data-name="MARIA PAULA DE SOUSA BUNO" data-glider="[C] OZONE - DELTA 5 / GENIE LITE" data-sponsor="FLYMAQ" data-ss="14:00:00" data-total="130.4" data-status="DF">MARIA PAULA DE SOUSA BUNO</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] OZONE - DELTA 5 / GENIE LITE</td>
+            <td class="fs_res">FLYMAQ</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">13.67</td>
+            <td class="fs_res" align="right">130.4</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">130.4</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="36" data-rank-serial="26">
+            <td class="fs_res rank-cell" align="right">36</td>
+            <td class="fs_res">74602</td>
+            <td class="fs_res"><span class="pilot-name" data-id="74602" data-name="BELMOR LUIZ BATISTA DA SILVA" data-glider="[D] OZONE - ZENO 2 / GENIE RACE 5" data-sponsor="VORTEX" data-ss="14:00:00" data-total="122.9" data-status="DF">BELMOR LUIZ BATISTA DA SILVA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZENO 2 / GENIE RACE 5</td>
+            <td class="fs_res">VORTEX</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">12.89</td>
+            <td class="fs_res" align="right">122.9</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">122.9</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="37" data-rank-serial="27" data-rank-sport="15">
+            <td class="fs_res rank-cell" align="right">37</td>
+            <td class="fs_res">55634</td>
+            <td class="fs_res"><span class="pilot-name" data-id="55634" data-name="ALEXANDRE ALBERTO CHAGAS GOES E SILVA" data-glider="[C] GIN - GTO 3 / IMPRESS" data-sponsor="FLYMAQ" data-ss="14:00:00" data-total="107.9" data-status="DF">ALEXANDRE ALBERTO CHAGAS GOES E SILVA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] GIN - GTO 3 / IMPRESS</td>
+            <td class="fs_res">FLYMAQ</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">11.32</td>
+            <td class="fs_res" align="right">107.9</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">107.9</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="38" data-rank-serial="28" data-rank-sport="16" data-rank-lite="3">
+            <td class="fs_res rank-cell" align="right">38</td>
+            <td class="fs_res">58853</td>
+            <td class="fs_res"><span class="pilot-name" data-id="58853" data-name="DIEGO MARLON SILVA" data-glider="[B] MACPARA - EDEN 7 / KANIBAL RACE" data-sponsor="SELETES DAS GERAIS / ASAS DO HOMEM" data-ss="14:00:00" data-total="107.3" data-status="DF">DIEGO MARLON SILVA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] MACPARA - EDEN 7 / KANIBAL RACE</td>
+            <td class="fs_res">SELETES DAS GERAIS / ASAS DO HOMEM</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">11.25</td>
+            <td class="fs_res" align="right">107.3</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">107.3</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial fem" data-rank-open="39" data-rank-serial="29" data-rank-fem="4">
+            <td class="fs_res rank-cell" align="right">39</td>
+            <td class="fs_res">45662</td>
+            <td class="fs_res"><span class="pilot-name" data-id="45662" data-name="RAQUEL CANALE" data-glider="[D] OZONE - ZEOLITE 2 / XR6" data-sponsor="ALTAMONTANHA" data-ss="14:00:00" data-total="107.1" data-status="DF">RAQUEL CANALE</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZEOLITE 2 / XR6</td>
+            <td class="fs_res">ALTAMONTANHA</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">11.23</td>
+            <td class="fs_res" align="right">107.1</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">107.1</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="40" data-rank-serial="30" data-rank-sport="17">
+            <td class="fs_res rank-cell" align="right">40</td>
+            <td class="fs_res">38178</td>
+            <td class="fs_res"><span class="pilot-name" data-id="38178" data-name="JESUS MAGNI ORTEGA" data-glider="[C] SKYWALK - CAYENNE 5 / GENIE RACE 4" data-sponsor="" data-ss="14:00:00" data-total="93.5" data-status="DF">JESUS MAGNI ORTEGA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] SKYWALK - CAYENNE 5 / GENIE RACE 4</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">9.80</td>
+            <td class="fs_res" align="right">93.5</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">93.5</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="41" data-rank-serial="31" data-rank-sport="18" data-rank-lite="4">
+            <td class="fs_res rank-cell" align="right">41</td>
+            <td class="fs_res">43328</td>
+            <td class="fs_res"><span class="pilot-name" data-id="43328" data-name="OLIVIO GABRIEL PERA NETO" data-glider="[B] FLOW - PANORAMA 2 / SOL" data-sponsor="AR BOM REFRIGERAÇAO" data-ss="14:00:00" data-total="93.4" data-status="DF">OLIVIO GABRIEL PERA NETO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] FLOW - PANORAMA 2 / SOL</td>
+            <td class="fs_res">AR BOM REFRIGERAÇAO</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">9.79</td>
+            <td class="fs_res" align="right">93.4</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">93.4</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="42" data-rank-serial="32" data-rank-sport="19">
+            <td class="fs_res rank-cell" align="right">42</td>
+            <td class="fs_res">30228</td>
+            <td class="fs_res"><span class="pilot-name" data-id="30228" data-name="RODRIGO MARCONDES SWERTS" data-glider="[C] AIR DESIGN - VOLT 4 / DELIGTH 4" data-sponsor="" data-ss="14:00:00" data-total="89.8" data-status="DF">RODRIGO MARCONDES SWERTS</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] AIR DESIGN - VOLT 4 / DELIGTH 4</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">9.42</td>
+            <td class="fs_res" align="right">89.8</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">89.8</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="42" data-rank-serial="32" data-rank-sport="19" data-rank-lite="5">
+            <td class="fs_res rank-cell" align="right">42</td>
+            <td class="fs_res">85591</td>
+            <td class="fs_res"><span class="pilot-name" data-id="85591" data-name="TONI CARLOS MENDONÇA DA CUNHA" data-glider="[B] SKYWALK - CHILI 5 / SKYLIGHTER 4" data-sponsor="VORTEX PARAGLIDING" data-ss="14:00:00" data-total="89.8" data-status="DF">TONI CARLOS MENDONÇA DA CUNHA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] SKYWALK - CHILI 5 / SKYLIGHTER 4</td>
+            <td class="fs_res">VORTEX PARAGLIDING</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">9.42</td>
+            <td class="fs_res" align="right">89.8</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">89.8</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="44" data-rank-serial="34" data-rank-sport="21" data-rank-lite="6">
+            <td class="fs_res rank-cell" align="right">44</td>
+            <td class="fs_res">90295</td>
+            <td class="fs_res"><span class="pilot-name" data-id="90295" data-name="LUCIO ANDRE PAIVA" data-glider="[B] SOL - SENSUS 1 / CALLIPOX" data-sponsor="PROPRIO" data-ss="14:00:00" data-total="72.5" data-status="DF">LUCIO ANDRE PAIVA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] SOL - SENSUS 1 / CALLIPOX</td>
+            <td class="fs_res">PROPRIO</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">7.60</td>
+            <td class="fs_res" align="right">72.5</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">72.5</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="45">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">42084</td>
+            <td class="fs_res"><span class="pilot-name" data-id="42084" data-name="IVANILDO BEKER PARAHYBA" data-glider="[E] OZONE - ENZO 3 / GENIE RACE 5" data-sponsor="QUIOSQUE TERRA DO SOL" data-ss="" data-total="47.7" data-status="DF">IVANILDO BEKER PARAHYBA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / GENIE RACE 5</td>
+            <td class="fs_res">QUIOSQUE TERRA DO SOL</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="45">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">78789</td>
+            <td class="fs_res"><span class="pilot-name" data-id="78789" data-name="TIAGO RODRIGUES PEREIRA" data-glider="[E] OZONE - ENZO 3 / SUBMARINE" data-sponsor="PRECISION" data-ss="" data-total="47.7" data-status="DF">TIAGO RODRIGUES PEREIRA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / SUBMARINE</td>
+            <td class="fs_res">PRECISION</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="45" data-rank-serial="35" data-rank-sport="22" data-rank-lite="7">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">91689</td>
+            <td class="fs_res"><span class="pilot-name" data-id="91689" data-name="MAICON GEORGE DORNELLES" data-glider="[C] SKYWALK - CHILI 3 / EVO XC3" data-sponsor="" data-ss="" data-total="47.7" data-status="DF">MAICON GEORGE DORNELLES</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] SKYWALK - CHILI 3 / EVO XC3</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open fem" data-rank-open="45" data-rank-fem="5">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">29846</td>
+            <td class="fs_res"><span class="pilot-name" data-id="29846" data-name="MARCELLA POMARICO UCHOA" data-glider="[E] OZONE - ENZO 3 / SUBMARINE" data-sponsor="OZONE / NAVITER" data-ss="14:00:00" data-total="47.7" data-status="DF">MARCELLA POMARICO UCHOA</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / SUBMARINE</td>
+            <td class="fs_res">OZONE / NAVITER</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="45" data-rank-serial="35" data-rank-sport="22">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">27455</td>
+            <td class="fs_res"><span class="pilot-name" data-id="27455" data-name="SENDERSON LAURIDO" data-glider="[C] SKYWALK - CAYENNE 5 / SUBMARINE" data-sponsor="DUST PROPELLER" data-ss="14:00:00" data-total="47.7" data-status="DF">SENDERSON LAURIDO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] SKYWALK - CAYENNE 5 / SUBMARINE</td>
+            <td class="fs_res">DUST PROPELLER</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="45" data-rank-serial="35" data-rank-sport="22" data-rank-lite="7">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">97727</td>
+            <td class="fs_res"><span class="pilot-name" data-id="97727" data-name="FELIX CAAMAÑO ORELLANA" data-glider="[B] MACPARA - EDEN 8 / SUBLITE" data-sponsor="MACPARA" data-ss="" data-total="47.7" data-status="DF">FELIX CAAMAÑO ORELLANA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/cl.png" alt="CHI" title="CHI" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] MACPARA - EDEN 8 / SUBLITE</td>
+            <td class="fs_res">MACPARA</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="45" data-rank-serial="35" data-rank-sport="22" data-rank-lite="7">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">96589</td>
+            <td class="fs_res"><span class="pilot-name" data-id="96589" data-name="AÉCIO CARLOS MINATO" data-glider="[B] PHI - BEAT / GTO 2" data-sponsor="MINATO BARBER SHOP" data-ss="" data-total="47.7" data-status="DF">AÉCIO CARLOS MINATO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] PHI - BEAT / GTO 2</td>
+            <td class="fs_res">MINATO BARBER SHOP</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="45" data-rank-serial="35" data-rank-sport="22" data-rank-lite="7">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">94371</td>
+            <td class="fs_res"><span class="pilot-name" data-id="94371" data-name="GUSTAVO UPTMOOR" data-glider="[B] SOL - ATMUS 3 / EASY 3" data-sponsor="AV - ANESTESIA VETERINÁRIA &amp; APIR" data-ss="" data-total="47.7" data-status="DF">GUSTAVO UPTMOOR</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] SOL - ATMUS 3 / EASY 3</td>
+            <td class="fs_res">AV - ANESTESIA VETERINÁRIA &amp; APIR</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport lite fem" data-rank-open="45" data-rank-serial="35" data-rank-sport="22" data-rank-lite="7" data-rank-fem="5">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">73425</td>
+            <td class="fs_res"><span class="pilot-name" data-id="73425" data-name="JULIANA SCHMIDT" data-glider="[B] SOL - ATMUS 3 / GTO" data-sponsor="NOAR" data-ss="14:00:00" data-total="47.7" data-status="DF">JULIANA SCHMIDT</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] SOL - ATMUS 3 / GTO</td>
+            <td class="fs_res">NOAR</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="45" data-rank-serial="35" data-rank-sport="22">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">58037</td>
+            <td class="fs_res"><span class="pilot-name" data-id="58037" data-name="EDUARDO FERNANDO DOS SANTOS" data-glider="[C] SOL - LT 2 / XC LIGHT" data-sponsor="EDUARDO PARAPENTE" data-ss="" data-total="47.7" data-status="DF">EDUARDO FERNANDO DOS SANTOS</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] SOL - LT 2 / XC LIGHT</td>
+            <td class="fs_res">EDUARDO PARAPENTE</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport lite fem" data-rank-open="45" data-rank-serial="35" data-rank-sport="22" data-rank-lite="7" data-rank-fem="5">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">79323</td>
+            <td class="fs_res"><span class="pilot-name" data-id="79323" data-name="GABRIELA DE OLIVEIRA GARDINI" data-glider="[B] SKYWALK - TEQUILA / GINGO AIRLITE" data-sponsor="CLUBE DE PODAS" data-ss="14:00:00" data-total="47.7" data-status="DF">GABRIELA DE OLIVEIRA GARDINI</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] SKYWALK - TEQUILA / GINGO AIRLITE</td>
+            <td class="fs_res">CLUBE DE PODAS</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:00:00</td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="45">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">58108</td>
+            <td class="fs_res"><span class="pilot-name" data-id="58108" data-name="LEONARDO LUIS DOS SANTOS" data-glider="[E] OZONE - ENZO 3 / GIN" data-sponsor="QUIOSQUE TERRA DO SOL" data-ss="" data-total="47.7" data-status="DF">LEONARDO LUIS DOS SANTOS</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / GIN</td>
+            <td class="fs_res">QUIOSQUE TERRA DO SOL</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport lite fem" data-rank-open="45" data-rank-serial="35" data-rank-sport="22" data-rank-lite="7" data-rank-fem="5">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">79417</td>
+            <td class="fs_res"><span class="pilot-name" data-id="79417" data-name="ISABEL ULLRICH POZES DA SILVA" data-glider="[B] SOL - SYCROSS 3 / CXMAX" data-sponsor="BEL <3" data-ss="" data-total="47.7" data-status="DF">ISABEL ULLRICH POZES DA SILVA</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] SOL - SYCROSS 3 / CXMAX</td>
+            <td class="fs_res">BEL &lt;3</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="45">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">56031</td>
+            <td class="fs_res"><span class="pilot-name" data-id="56031" data-name="ADRIANO COUTINHO DE SOUZA" data-glider="[E] UP - GURU / IMPRESS" data-sponsor="" data-ss="" data-total="47.7" data-status="DF">ADRIANO COUTINHO DE SOUZA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] UP - GURU / IMPRESS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="45">
+            <td class="fs_res rank-cell" align="right">45</td>
+            <td class="fs_res">3036</td>
+            <td class="fs_res"><span class="pilot-name" data-id="3036" data-name="MARCO AURELIO OSTI" data-glider="[E] NIVIUK - X-ONE / CXMAX" data-sponsor="SCFLY ADVENTURE" data-ss="" data-total="47.7" data-status="DF">MARCO AURELIO OSTI</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] NIVIUK - X-ONE / CXMAX</td>
+            <td class="fs_res">SCFLY ADVENTURE</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">5.00</td>
+            <td class="fs_res" align="right">47.7</td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">47.7</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="ABS" data-rank-serial="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">35703</td>
+            <td class="fs_res"><span class="pilot-name" data-id="35703" data-name="WILSON DA SILVA" data-glider="[D] GIN - LEOPARD / EXOCET" data-sponsor="CHAVEIRO ALTERNATIVA" data-ss="" data-total="0" data-status="ABS">WILSON DA SILVA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] GIN - LEOPARD / EXOCET</td>
+            <td class="fs_res">CHAVEIRO ALTERNATIVA</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="ABS" data-rank-serial="ABS" data-rank-sport="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">31278</td>
+            <td class="fs_res"><span class="pilot-name" data-id="31278" data-name="ALEXANDRE LUIZ GOMES PEREZ DE ROSARIO" data-glider="[C] OZONE - PHOTON / GTO 2 " data-sponsor="DEUS" data-ss="" data-total="0" data-status="ABS">ALEXANDRE LUIZ GOMES PEREZ DE ROSARIO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] OZONE - PHOTON / GTO 2 </td>
+            <td class="fs_res">DEUS</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">2356</td>
+            <td class="fs_res"><span class="pilot-name" data-id="2356" data-name="ALEXANDRE DIO GERMANI" data-glider="[E] NIVIUK - X-ONE / SUBMARINE" data-sponsor="PICO DO GAVIÃO | INNOVA AATB" data-ss="" data-total="0" data-status="ABS">ALEXANDRE DIO GERMANI</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] NIVIUK - X-ONE / SUBMARINE</td>
+            <td class="fs_res">PICO DO GAVIÃO | INNOVA AATB</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="ABS" data-rank-serial="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">76466</td>
+            <td class="fs_res"><span class="pilot-name" data-id="76466" data-name="VILLIAM DA SILVA BONIOTTI" data-glider="[D] SWING - SPHERA / GTO 2 " data-sponsor="VILLI CAR" data-ss="" data-total="0" data-status="ABS">VILLIAM DA SILVA BONIOTTI</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] SWING - SPHERA / GTO 2 </td>
+            <td class="fs_res">VILLI CAR</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="ABS" data-rank-serial="ABS" data-rank-sport="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">36566</td>
+            <td class="fs_res"><span class="pilot-name" data-id="36566" data-name="ADRIANO JOSE DOS SANTOS" data-glider="[C] SKYWALK - CAYENNE 5 / WOODY VALLEY" data-sponsor="NETWORK INFORMÁTICA" data-ss="" data-total="0" data-status="ABS">ADRIANO JOSE DOS SANTOS</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] SKYWALK - CAYENNE 5 / WOODY VALLEY</td>
+            <td class="fs_res">NETWORK INFORMÁTICA</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="ABS" data-rank-serial="ABS" data-rank-sport="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">87688</td>
+            <td class="fs_res"><span class="pilot-name" data-id="87688" data-name="ANDERSON LUIZ DA PAZ" data-glider="[C] AIR DESIGN - VOLT 5 / CXMAX" data-sponsor="VORTEX" data-ss="" data-total="0" data-status="ABS">ANDERSON LUIZ DA PAZ</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] AIR DESIGN - VOLT 5 / CXMAX</td>
+            <td class="fs_res">VORTEX</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="ABS" data-rank-serial="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">5103</td>
+            <td class="fs_res"><span class="pilot-name" data-id="5103" data-name="SANDRO BICHIBICHI" data-glider="[D] GIN - LEOPARD / EXOCEAT" data-sponsor="" data-ss="" data-total="0" data-status="ABS">SANDRO BICHIBICHI</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] GIN - LEOPARD / EXOCEAT</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport lite fem" data-rank-open="ABS" data-rank-serial="ABS" data-rank-sport="ABS" data-rank-lite="ABS" data-rank-fem="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">18277</td>
+            <td class="fs_res"><span class="pilot-name" data-id="18277" data-name="KARINE POLAND" data-glider="[E] OZONE - BUZZ / GIN" data-sponsor="" data-ss="" data-total="0" data-status="ABS">KARINE POLAND</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - BUZZ / GIN</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="ABS" data-rank-serial="ABS" data-rank-sport="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">29139</td>
+            <td class="fs_res"><span class="pilot-name" data-id="29139" data-name="EDSON BITTAR DE SOUZA" data-glider="[C] SKYWALK - MINT / OZONE" data-sponsor="ETIEX  CORRETORA" data-ss="" data-total="0" data-status="ABS">EDSON BITTAR DE SOUZA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] SKYWALK - MINT / OZONE</td>
+            <td class="fs_res">ETIEX  CORRETORA</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="ABS" data-rank-serial="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">77274</td>
+            <td class="fs_res"><span class="pilot-name" data-id="77274" data-name="DIONISIO CORDEIRO" data-glider="[D] OZONE - ZENO 2 / SUBMARINE" data-sponsor="VIDRAÇARIA DINÂMICA" data-ss="" data-total="0" data-status="ABS">DIONISIO CORDEIRO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] OZONE - ZENO 2 / SUBMARINE</td>
+            <td class="fs_res">VIDRAÇARIA DINÂMICA</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial" data-rank-open="ABS" data-rank-serial="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">31277</td>
+            <td class="fs_res"><span class="pilot-name" data-id="31277" data-name="EDNO AUGUSTO VEIGA ROSSETTO" data-glider="[D] UP - MERU / SUBMARINE" data-sponsor="TEAM PILOT UP PARAGLIDERS" data-ss="" data-total="0" data-status="ABS">EDNO AUGUSTO VEIGA ROSSETTO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[D] UP - MERU / SUBMARINE</td>
+            <td class="fs_res">TEAM PILOT UP PARAGLIDERS</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport" data-rank-open="ABS" data-rank-serial="ABS" data-rank-sport="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">17591</td>
+            <td class="fs_res"><span class="pilot-name" data-id="17591" data-name="AMILCAR VERONEZ DEMETRIO" data-glider="[C] SKYWALK - MINT / WOODY VALLEY" data-sponsor="TELESON TELECOM" data-ss="" data-total="0" data-status="ABS">AMILCAR VERONEZ DEMETRIO</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[C] SKYWALK - MINT / WOODY VALLEY</td>
+            <td class="fs_res">TELESON TELECOM</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport lite fem" data-rank-open="ABS" data-rank-serial="ABS" data-rank-sport="ABS" data-rank-lite="ABS" data-rank-fem="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">84616</td>
+            <td class="fs_res"><span class="pilot-name" data-id="84616" data-name="ALANNA CASSIANE DE LIMA" data-glider="[B] SKY - APOLLO 3 / SKYLIGHTER 4" data-sponsor="ALANNA LIMA ARQUITETURA" data-ss="" data-total="0" data-status="ABS">ALANNA CASSIANE DE LIMA</span></td>
+            <td class="fs_res">F</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] SKY - APOLLO 3 / SKYLIGHTER 4</td>
+            <td class="fs_res">ALANNA LIMA ARQUITETURA</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">63891</td>
+            <td class="fs_res"><span class="pilot-name" data-id="63891" data-name="RODRIGO DE SOUZA ARAUJO FERNANDES" data-glider="[E] NIVIUK - X-ONE / GENIE RACE 5" data-sponsor="OFICINA DE PARAPENTE VENTO NORTE / LOJA ALTA MONTANHA" data-ss="" data-total="0" data-status="ABS">RODRIGO DE SOUZA ARAUJO FERNANDES</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] NIVIUK - X-ONE / GENIE RACE 5</td>
+            <td class="fs_res">OFICINA DE PARAPENTE VENTO NORTE / LOJA ALTA MONTANHA</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open serial sport lite" data-rank-open="ABS" data-rank-serial="ABS" data-rank-sport="ABS" data-rank-lite="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">92463</td>
+            <td class="fs_res"><span class="pilot-name" data-id="92463" data-name="LECIAN CARMINATTI" data-glider="[B] ICARO - INSTINTIC / GENIE RACE 4" data-sponsor="NOPS" data-ss="" data-total="0" data-status="ABS">LECIAN CARMINATTI</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[B] ICARO - INSTINTIC / GENIE RACE 4</td>
+            <td class="fs_res">NOPS</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="ABS">
+            <td class="fs_res rank-cell" align="right">ABS</td>
+            <td class="fs_res">14805</td>
+            <td class="fs_res"><span class="pilot-name" data-id="14805" data-name="DANIEL LIMA DE OLIVEIRA" data-glider="[E] OZONE - ENZO 3 / CXMAX" data-sponsor="RENOVA AMBIENTAL" data-ss="" data-total="0" data-status="ABS">DANIEL LIMA DE OLIVEIRA</span></td>
+            <td class="fs_res">M</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">[E] OZONE - ENZO 3 / CXMAX</td>
+            <td class="fs_res">RENOVA AMBIENTAL</td>
+            <td class="fs_res" align="center" style="color: #c0392b;">ABS</td>
+            <td class="fs_res">
+            </td>
+            <td class="fs_res">
+              <del>
+              </del>
+            </td>
+            <td class="fs_res"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right"></td>
+            <td class="fs_res" align="right">0.0</td>
+          </tr>
+      </tbody>
+    </table>
+    </div>
+    <p id="footer-filter-text"></p>
+
+    <div id="statsPanel" style="display:none;">
+      <div class="fs_res">
+        <h3>Estatísticas do campeonato (OPEN)</h3>
+        <p id="stats-total"></p>
+        <h4>Gênero</h4>
+        <table class="fs_res" id="stats-gender"><thead><tr class="fs_res_res_row"><th class="fs_res">Gênero</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
+        <h4>Nacionalidade</h4>
+        <table class="fs_res" id="stats-nat"><thead><tr class="fs_res_res_row"><th class="fs_res">Nacionalidade</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
+        <h4>Parapente</h4>
+        <table class="fs_res" id="stats-glider"><thead><tr class="fs_res_res_row"><th class="fs_res">Parapente</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
+        <h4>Selete</h4>
+        <table class="fs_res" id="stats-selete"><thead><tr class="fs_res_res_row"><th class="fs_res">Selete</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
+        <h4>Fabricante</h4>
+        <table class="fs_res" id="stats-mfr"><thead><tr class="fs_res_res_row"><th class="fs_res">Fabricante</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
+        <h4>Categoria</h4>
+        <table class="fs_res" id="stats-cat"><thead><tr class="fs_res_res_row"><th class="fs_res">Categoria</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <div id="taskExtras">
+<br><h3>Task definition</h3>
+        <table class="fs_res">
+          <thead>
+            <tr>
+              <th class="fs_res">No</th>
+              <th class="fs_res">Leg Dist.</th>
+              <th class="fs_res">Id</th>
+              <th class="fs_res">Radius</th>
+              <th class="fs_res">Open</th>
+              <th class="fs_res">Close</th>
+              <th class="fs_res">Coordinates</th>
+              <th class="fs_res">Altitude</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="fs_res">1</td>
+              <td class="fs_res" align="right">0.0 km
+              </td>
+              <td class="fs_res">D01</td>
+              <td class="fs_res" align="right">1000 m
+            </td>
+              <td class="fs_res">09:00</td>
+              <td class="fs_res">17:00</td>
+              <td class="fs_res">
+                  Lat: -22.01524 Lon: -46.62689</td>
+              <td class="fs_res" align="right">1634 m
+            </td>
+            </tr>
+            <tr>
+              <td class="fs_res">2 SS</td>
+              <td class="fs_res" align="right">2.0 km
+              </td>
+              <td class="fs_res">D01</td>
+              <td class="fs_res" align="right">2000 m
+            </td>
+              <td class="fs_res">14:00</td>
+              <td class="fs_res">17:00</td>
+              <td class="fs_res">
+                  Lat: -22.01524 Lon: -46.62689</td>
+              <td class="fs_res" align="right">1634 m
+            </td>
+            </tr>
+            <tr>
+              <td class="fs_res">3</td>
+              <td class="fs_res" align="right">8.0 km
+              </td>
+              <td class="fs_res">G18</td>
+              <td class="fs_res" align="right">400 m
+            </td>
+              <td class="fs_res">14:00</td>
+              <td class="fs_res">17:00</td>
+              <td class="fs_res">
+                  Lat: -22.05952 Lon: -46.56154</td>
+              <td class="fs_res" align="right">922 m
+            </td>
+            </tr>
+            <tr>
+              <td class="fs_res">4</td>
+              <td class="fs_res" align="right">22.3 km
+              </td>
+              <td class="fs_res">B04</td>
+              <td class="fs_res" align="right">1000 m
+            </td>
+              <td class="fs_res">14:00</td>
+              <td class="fs_res">17:00</td>
+              <td class="fs_res">
+                  Lat: -22.07103 Lon: -46.71333</td>
+              <td class="fs_res" align="right">804 m
+            </td>
+            </tr>
+            <tr>
+              <td class="fs_res">5</td>
+              <td class="fs_res" align="right">32.0 km
+              </td>
+              <td class="fs_res">D01</td>
+              <td class="fs_res" align="right">400 m
+            </td>
+              <td class="fs_res">14:00</td>
+              <td class="fs_res">17:00</td>
+              <td class="fs_res">
+                  Lat: -22.01524 Lon: -46.62689</td>
+              <td class="fs_res" align="right">1634 m
+            </td>
+            </tr>
+            <tr>
+              <td class="fs_res">6</td>
+              <td class="fs_res" align="right">39.7 km
+              </td>
+              <td class="fs_res">G18</td>
+              <td class="fs_res" align="right">400 m
+            </td>
+              <td class="fs_res">14:00</td>
+              <td class="fs_res">17:00</td>
+              <td class="fs_res">
+                  Lat: -22.05952 Lon: -46.56154</td>
+              <td class="fs_res" align="right">922 m
+            </td>
+            </tr>
+            <tr>
+              <td class="fs_res">7 ES</td>
+              <td class="fs_res" align="right">44.1 km
+              </td>
+              <td class="fs_res">G16</td>
+              <td class="fs_res" align="right">2000 m
+            </td>
+              <td class="fs_res">14:00</td>
+              <td class="fs_res">17:00</td>
+              <td class="fs_res">
+                  Lat: -22.04521 Lon: -46.62503</td>
+              <td class="fs_res" align="right">944 m
+            </td>
+            </tr>
+            <tr>
+              <td class="fs_res">8</td>
+              <td class="fs_res" align="right">45.7 km
+              </td>
+              <td class="fs_res">G16</td>
+              <td class="fs_res" align="right">400 m
+            </td>
+              <td class="fs_res">14:00</td>
+              <td class="fs_res">17:00</td>
+              <td class="fs_res">
+                  Lat: -22.04521 Lon: -46.62503</td>
+              <td class="fs_res" align="right">944 m
+            </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+                Leading-time ratio: 26%
+              </p>
+        <div class="fs_res" style="page-break-before: always;">
+          <h3>Pilots not yet processed (NYP)</h3>
+          <table class="fs_res">
+            <thead>
+              <tr>
+                <th class="fs_res">Id</th>
+                <th class="fs_res">Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fs_res" align="right">2435</td>
+                <td class="fs_res">WASHINGTON LUIZ PERUCHI</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">3013</td>
+                <td class="fs_res">RAFAEL ELEODORO DE GOES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">3024</td>
+                <td class="fs_res">CARLOS BONIFACIO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">4719</td>
+                <td class="fs_res">LUIZ CEZAR DIAS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">9028</td>
+                <td class="fs_res">GILBERTO FERREIRA RAPOSO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">10029</td>
+                <td class="fs_res">SÉRGIO HENRIQUE SAMPAIO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">12423</td>
+                <td class="fs_res">DANILO LACERDA RIBEIRO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">12615</td>
+                <td class="fs_res">RAFAEL LUIZ MATTOS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">13498</td>
+                <td class="fs_res">EDUARDO DE FREITAS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">14182</td>
+                <td class="fs_res">SERGIO LUIS ALMEIDA LISBOA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">18468</td>
+                <td class="fs_res">RODRIGO E SILVA MARQUES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">22512</td>
+                <td class="fs_res">BENITO AUGUSTO FERRARA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">22971</td>
+                <td class="fs_res">DANIEL MENDONCA CARAM SANTOS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">23539</td>
+                <td class="fs_res">RENY MORAES DA SILVA FILHO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">23545</td>
+                <td class="fs_res">WALTER OLIVEIRA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">24500</td>
+                <td class="fs_res">HELENO GONTIJO DE SOUSA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">29522</td>
+                <td class="fs_res">DANIEL KNOBLAUCH</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">32414</td>
+                <td class="fs_res">OSMAR FRANCISCO DOS SANTOS JUNIOR</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">32530</td>
+                <td class="fs_res">WINSTON SPENCER NOVAES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">34038</td>
+                <td class="fs_res">SANDRO NUNES DOS REIS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">39006</td>
+                <td class="fs_res">CLAUDEMIR ROMÃO DA SILVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">39999</td>
+                <td class="fs_res">HILTON RONALD ALICE BENKE</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">40046</td>
+                <td class="fs_res">SIDNEI THOMAZ MARQUES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">40169</td>
+                <td class="fs_res">LIZANDRO DE ABREU CASTRO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">40920</td>
+                <td class="fs_res">RAFAEL WOJCIK</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">42141</td>
+                <td class="fs_res">ERICSSON BECK FIGUEIREDO SOUZA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">48199</td>
+                <td class="fs_res">RAQUEL PEREIRA CANDIDO VENCESLAU</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">51115</td>
+                <td class="fs_res">JOSE GERONIMO COIMBRA JUNIOR</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">52777</td>
+                <td class="fs_res">ANDRE DE PAULA QUEIROZ ABRANTES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">55573</td>
+                <td class="fs_res">THIMO EMMENEGGER</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">57144</td>
+                <td class="fs_res">IVANDRO ALESSANDRO CESTARI</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">57165</td>
+                <td class="fs_res">VICTOR VILLALVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">62939</td>
+                <td class="fs_res">THIAGO AGNOLETTO DA PORCIUNCULA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">65218</td>
+                <td class="fs_res">THALISSON WILLIAN SILVA SOUZA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">65524</td>
+                <td class="fs_res">LEDIO LAUDELINO PINHEIRO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">65541</td>
+                <td class="fs_res">EVANDRO CARLOS VAZZOLER</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">66591</td>
+                <td class="fs_res">VINICIUS SERRA VIEIRA BERNARDINO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">69874</td>
+                <td class="fs_res">DIEGO SAMUEL DE MORAES CARVALHO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">70394</td>
+                <td class="fs_res">DEVANIR MACHADO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">70488</td>
+                <td class="fs_res">ROBERTA CHAVES COCCIOLI</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">71834</td>
+                <td class="fs_res">RALPH ZUANELLA VILA NOVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">72134</td>
+                <td class="fs_res">SELMO LUIZ DOS SANTOS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">73741</td>
+                <td class="fs_res">CLAUDIO MELLO BERGER</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">75898</td>
+                <td class="fs_res">TIAGO AMADEU DOS SANTOS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">76883</td>
+                <td class="fs_res">RODRIGO PINTO LIMA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">78418</td>
+                <td class="fs_res">HELEN MAE KOIKE FORNAZIER</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">79071</td>
+                <td class="fs_res">JOSIANE INGRID BARBOSA KINTOPP</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">79866</td>
+                <td class="fs_res">GABRIEL JANSEN RABELLO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">83286</td>
+                <td class="fs_res">CINTIA LOPES RAYMUNDO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">84046</td>
+                <td class="fs_res">ANDRE LUIZ OTTE</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">86508</td>
+                <td class="fs_res">ROBSON DOS PASSOS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">89149</td>
+                <td class="fs_res">GIULLIANO NOVELLO MACIEL</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">92625</td>
+                <td class="fs_res">ELTON JOSE ROS DA LUZ</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">95289</td>
+                <td class="fs_res">DIETER JEHLE GRADIZ</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">96327</td>
+                <td class="fs_res">ROGER MESSALA PIMENTEL CAJAZEIRAS</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="fs_res" style="page-break-before: always;">
+          <h3>Task statistics</h3>
+          <table class="fs_res">
+            <thead>
+              <tr>
+                <th class="fs_res">param</th>
+                <th class="fs_res">value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fs_res">task_distance</td>
+                <td class="fs_res" align="right">45.67</td>
+              </tr>
+              <tr>
+                <td class="fs_res">ss_distance</td>
+                <td class="fs_res" align="right">42.071</td>
+              </tr>
+              <tr>
+                <td class="fs_res">launch_to_ess_distance</td>
+                <td class="fs_res" align="right">44.071</td>
+              </tr>
+              <tr>
+                <td class="fs_res">qnh_setting</td>
+                <td class="fs_res" align="right">1013.25</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_of_pilots_in_competition</td>
+                <td class="fs_res" align="right">130</td>
+              </tr>
+              <tr>
+                <td class="fs_res">max_time_en_route</td>
+                <td class="fs_res" align="right">00:00:00</td>
+              </tr>
+              <tr>
+                <td class="fs_res">max_time_en_route_tp</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_of_pilots_present</td>
+                <td class="fs_res" align="right">59</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_of_pilots_flying</td>
+                <td class="fs_res" align="right">59</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_of_pilots_lo</td>
+                <td class="fs_res" align="right">50</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_of_pilots_landed_before_stop</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">sum_dist_over_min</td>
+                <td class="fs_res" align="right">980.998</td>
+              </tr>
+              <tr>
+                <td class="fs_res">sum_real_dist_over_min</td>
+                <td class="fs_res" align="right">980.998</td>
+              </tr>
+              <tr>
+                <td class="fs_res">sum_flown_distances</td>
+                <td class="fs_res" align="right">1230.146</td>
+              </tr>
+              <tr>
+                <td class="fs_res">best_dist</td>
+                <td class="fs_res" align="right">45.67</td>
+              </tr>
+              <tr>
+                <td class="fs_res">best_real_dist</td>
+                <td class="fs_res" align="right">45.67</td>
+              </tr>
+              <tr>
+                <td class="fs_res">best_time</td>
+                <td class="fs_res" align="right">1.5175</td>
+              </tr>
+              <tr>
+                <td class="fs_res">last_finisher_start_time</td>
+                <td class="fs_res" align="right">2026-08-14T14:00:00-03:00</td>
+              </tr>
+              <tr>
+                <td class="fs_res">last_start_time</td>
+                <td class="fs_res" align="right">2026-08-14T14:00:00-03:00</td>
+              </tr>
+              <tr>
+                <td class="fs_res">first_start_time</td>
+                <td class="fs_res" align="right">2026-08-14T14:00:17-03:00</td>
+              </tr>
+              <tr>
+                <td class="fs_res">first_finish_time</td>
+                <td class="fs_res" align="right">2026-08-14T15:31:03-03:00</td>
+              </tr>
+              <tr>
+                <td class="fs_res">last_ss_finish_time</td>
+                <td class="fs_res" align="right">2026-08-14T16:01:44-03:00</td>
+              </tr>
+              <tr>
+                <td class="fs_res">last_landed_before_ess_finish_time</td>
+                <td class="fs_res" align="right">2026-08-14T16:43:46-03:00</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_of_pilots_reaching_es</td>
+                <td class="fs_res" align="right">9</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_of_pilots_reaching_goal</td>
+                <td class="fs_res" align="right">9</td>
+              </tr>
+              <tr>
+                <td class="fs_res">max_time_to_get_time_points</td>
+                <td class="fs_res" align="right">2.7494</td>
+              </tr>
+              <tr>
+                <td class="fs_res">goalratio</td>
+                <td class="fs_res" align="right">0.1525</td>
+              </tr>
+              <tr>
+                <td class="fs_res">arrival_weight</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">departure_weight</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">leading_weight</td>
+                <td class="fs_res" align="right">0.0822</td>
+              </tr>
+              <tr>
+                <td class="fs_res">time_weight</td>
+                <td class="fs_res" align="right">0.234</td>
+              </tr>
+              <tr>
+                <td class="fs_res">distance_weight</td>
+                <td class="fs_res" align="right">0.6838</td>
+              </tr>
+              <tr>
+                <td class="fs_res">smallest_leading_coefficient</td>
+                <td class="fs_res" align="right">0.9956</td>
+              </tr>
+              <tr>
+                <td class="fs_res">available_points_distance</td>
+                <td class="fs_res" align="right">435.6</td>
+              </tr>
+              <tr>
+                <td class="fs_res">available_points_time</td>
+                <td class="fs_res" align="right">149</td>
+              </tr>
+              <tr>
+                <td class="fs_res">available_points_departure</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">available_points_leading</td>
+                <td class="fs_res" align="right">52.4</td>
+              </tr>
+              <tr>
+                <td class="fs_res">available_points_arrival</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">time_validity</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">launch_validity</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">distance_validity</td>
+                <td class="fs_res" align="right">0.637</td>
+              </tr>
+              <tr>
+                <td class="fs_res">stop_validity</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">day_quality</td>
+                <td class="fs_res" align="right">0.637</td>
+              </tr>
+              <tr>
+                <td class="fs_res">ftv_day_validity</td>
+                <td class="fs_res" align="right">0.637</td>
+              </tr>
+              <tr>
+                <td class="fs_res">time_points_stop_correction</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">counts_for_competition</td>
+                <td class="fs_res" align="right">True</td>
+              </tr>
+              <tr>
+                <td class="fs_res">validity_below_minimum_to_count_for_competition</td>
+                <td class="fs_res" align="right">False</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3>Scoring formula settings</h3>
+          <table class="fs_res">
+            <thead>
+              <tr>
+                <th class="fs_res">param</th>
+                <th class="fs_res">value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fs_res">id</td>
+                <td class="fs_res" align="right">GAP2025</td>
+              </tr>
+              <tr>
+                <td class="fs_res">is_pg_comp</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">fai_sanctioning</td>
+                <td class="fs_res" align="right">2</td>
+              </tr>
+              <tr>
+                <td class="fs_res">ftv_factor</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">day_quality_override</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">bonus_gr</td>
+                <td class="fs_res" align="right">4</td>
+              </tr>
+              <tr>
+                <td class="fs_res">jump_the_gun_factor</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">jump_the_gun_max</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">min_dist</td>
+                <td class="fs_res" align="right">5</td>
+              </tr>
+              <tr>
+                <td class="fs_res">nom_dist</td>
+                <td class="fs_res" align="right">45</td>
+              </tr>
+              <tr>
+                <td class="fs_res">nom_goal</td>
+                <td class="fs_res" align="right">0.3</td>
+              </tr>
+              <tr>
+                <td class="fs_res">nom_launch</td>
+                <td class="fs_res" align="right">0.96</td>
+              </tr>
+              <tr>
+                <td class="fs_res">nom_time</td>
+                <td class="fs_res" align="right">1.5</td>
+              </tr>
+              <tr>
+                <td class="fs_res">normalize_1000_before_day_quality</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">time_points_if_not_in_goal</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_arrival_position_points</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_arrival_time_points</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_departure_points</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_difficulty_for_distance_points</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_distance_points</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_leading_points</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_semi_circle_control_zone_for_goal_line</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_time_points</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">scoring_altitude</td>
+                <td class="fs_res" align="right">GPS</td>
+              </tr>
+              <tr>
+                <td class="fs_res">final_glide_decelerator</td>
+                <td class="fs_res" align="right">none</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_final_glide_decelerator_reason</td>
+                <td class="fs_res" align="right">
+                </td>
+              </tr>
+              <tr>
+                <td class="fs_res">min_time_span_for_valid_task</td>
+                <td class="fs_res" align="right">45</td>
+              </tr>
+              <tr>
+                <td class="fs_res">score_back_time</td>
+                <td class="fs_res" align="right">5</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_proportional_leading_weight_if_nobody_in_goal</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">leading_weight_factor</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">turnpoint_radius_tolerance</td>
+                <td class="fs_res" align="right">0.002</td>
+              </tr>
+              <tr>
+                <td class="fs_res">turnpoint_radius_minimum_absolute_tolerance</td>
+                <td class="fs_res" align="right">5</td>
+              </tr>
+              <tr>
+                <td class="fs_res">number_of_decimals_task_results</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">number_of_decimals_competition_results</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">redistribute_removed_time_points_as_distance_points</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_best_score_for_ftv_validity</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_constant_leading_weight</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_flat_decline_of_timepoints</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_leading_time_ratio</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">optimize_ss_alone</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">minimum_validity_to_count_stopped_task</td>
+                <td class="fs_res" align="right">0.05</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="fs_res" style="width:100%;font-size: xx-small;"></div>
+      <div class="fs_res" style="width:100%;font-size: x-small;">
+        <p>
+              Apurador: Arthur Grandini Rodella (Tutu)
+            </p>
+      </div>
+    </div>
+    <script>
+          (function() {
+            // Encontra a tabela de pilotos — a que contém "Lead." no cabecalho
+            var pilotTable = null;
+            var tables = document.querySelectorAll('table.fs_res');
+            for (var i = 0; i < tables.length; i++) {
+              if (tables[i].textContent.indexOf('Lead.') !== -1) { pilotTable = tables[i]; break; }
+            }
+            if (!pilotTable) return;
+
+            // Indice da coluna — procura th cujo texto contém o termo mas NÃO contém excludeText
+            function colIndex(text, excludeText) {
+              var ths = pilotTable.querySelectorAll('thead th');
+              for (var i = 0; i < ths.length; i++) {
+                var t = ths[i].textContent.replace(/\s+/g,' ').trim();
+                if (t.indexOf(text) !== -1 && (!excludeText || t.indexOf(excludeText) === -1)) return i;
+              }
+              return -1;
+            }
+
+            // Negrito e destaque na celula com valor maximo
+            function boldMax(colIdx) {
+              if (colIdx < 0) return;
+              var rows = pilotTable.querySelectorAll('tr');
+              var maxVal = -1, maxCells = [];
+              rows.forEach(function(row) {
+                var cell = row.querySelectorAll('td')[colIdx];
+                if (!cell) return;
+                var val = parseFloat(cell.textContent.replace(',','.').trim());
+                if (!isNaN(val) && val > 0) {
+                  if (val > maxVal) { maxVal = val; maxCells = [cell]; }
+                  else if (val === maxVal) { maxCells.push(cell); }
+                }
+              });
+              maxCells.forEach(function(c) {
+                c.style.fontWeight = 'bold';
+              });
+            }
+
+            // 'Lead.' unico, sem ambiguidade
+            boldMax(colIndex('Lead.', null));
+            // 'Time' excluindo '[' para evitar coluna 'Time [h:m:s]'
+            boldMax(colIndex('Time', '['));
+          })();
+        </script>
+    </div>
+
+    <div class="pc-overlay" id="pcOverlay"></div>
+    <div class="pilot-card" id="pilotCard">
+      <div id="pcPhotoWrap"></div>
+      <div class="pc-name" id="pcName"></div>
+      <div class="pc-lbl">Id</div>
+      <div class="pc-val" id="pcId"></div>
+      <div class="pc-lbl">Parapente</div>
+      <div class="pc-val" id="pcGlider"></div>
+      <div class="pc-lbl">Sponsor</div>
+      <div class="pc-val" id="pcSponsor"></div>
+      <div class="pc-lbl">Total</div>
+      <div class="pc-val" id="pcTotal"></div>
+      <div style="text-align:center"><span class="pc-status" id="pcStatus"></span></div><button class="pc-bio-btn" id="pcBioBtn" style="display:none" onclick="toggleBio()">📋 Biografia</button><div class="pc-bio-panel" id="pcBioPanel">
+        <div class="pc-bio-loading" id="pcBioLoading">Carregando...</div>
+        <div id="pcBioContent" style="display:none">
+          <div class="pc-bio-lbl">Cidade - UF</div>
+          <div class="pc-bio-val" id="bioCidade"></div>
+          <div class="pc-bio-lbl">Escola / Clube</div>
+          <div class="pc-bio-val" id="bioEscola"></div>
+          <div class="pc-bio-lbl">Início no voo livre</div>
+          <div class="pc-bio-val" id="bioInicio"></div>
+          <div class="pc-bio-lbl">Record XC linha reta</div>
+          <div class="pc-bio-val" id="bioReta"></div>
+          <div class="pc-bio-lbl">Record XC triângulo</div>
+          <div class="pc-bio-val" id="bioTri"></div>
+          <div class="pc-bio-lbl">Conquistas</div>
+          <div class="pc-bio-val pc-bio-val-sm" id="bioConquistas"></div>
+          <div class="pc-bio-lbl">Sobre mim</div>
+          <div class="pc-bio-val pc-bio-val-sm" id="bioSobre"></div><a id="bioIgLink" class="pc-bio-ig-link" href="#" target="_blank" style="display:none">📸 Instagram</a></div>
+      </div>
+    </div><script>
+          (function() {
+            var BASE    = 'https://arthurgr89.github.io/fotos-pilotos/';
+            var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ210s9KVMrtsvBAfIo5NkzNcCQfZai4MjIegOSAqDTFU6YIAccIBaWrvRu6CgNopiDFRVQSnIrEU5x/pub?output=csv';
+            var GVIZ    = 'https://docs.google.com/spreadsheets/d/1Mmug8a15KUvxtB7RsU5wBvKBaBuakb9I70iyEsGtpwU/gviz/tq?tqx=out:json;responseHandler:bioDataCallback';
+            var card    = document.getElementById('pilotCard');
+            var overlay = document.getElementById('pcOverlay');
+            var currentId  = null;
+            var bioMap     = null;
+            var bioWaiters = [];
+
+            function parseCsv(line) {
+              var res = [], cur = '', inQ = false;
+              for (var i = 0; i < line.length; i++) {
+                var c = line[i];
+                if (c === '"') { inQ = !inQ; }
+                else if (c === ',' && !inQ) { res.push(cur); cur = ''; }
+                else { cur += c; }
+              }
+              res.push(cur); return res;
+            }
+
+            function setBioMap(map) {
+              if (bioMap !== null) return;
+              bioMap = map;
+              var cbs = bioWaiters.slice(); bioWaiters = [];
+              cbs.forEach(function(cb) { cb(); });
+            }
+
+            // Metodo 1: fetch() CSV (funciona em https e na maioria dos casos)
+            function tryFetchCsv() {
+              if (!window.fetch) return;
+              fetch(CSV_URL).then(function(r) { return r.text(); }).then(function(text) {
+                var map = {};
+                text.split(/\r?\n/).slice(1).forEach(function(line) {
+                  if (!line.trim()) return;
+                  var cols = parseCsv(line);
+                  var id = cols[2] ? cols[2].trim() : '';
+                  if (id && !map[id]) map[id] = { escola:cols[3]||'', inicio:cols[4]||'', reta:cols[5]||'', triangulo:cols[6]||'', conquistas:cols[7]||'', sobre:cols[8]||'', cidade:cols[10]||'', instagram:cols[12]||'' };
+                });
+                setBioMap(map);
+              }).catch(function(){});
+            }
+
+            // Metodo 2: JSONP gviz (funciona em file://)
+            window.bioDataCallback = function(data) {
+              var map = {};
+              try {
+                (data.table.rows || []).forEach(function(r) {
+                  var id = r.c[2] && r.c[2].v != null ? String(r.c[2].v).split('.')[0] : null;
+                  if (!id) return;
+                  if (!map[id]) map[id] = { escola:r.c[3]?(r.c[3].v||''):'', inicio:r.c[4]?(r.c[4].v||''):'', reta:r.c[5]?(r.c[5].v||''):'', triangulo:r.c[6]?(r.c[6].v||''):'', conquistas:r.c[7]?(r.c[7].v||''):'', sobre:r.c[8]?(r.c[8].v||''):'', cidade:r.c[10]?(r.c[10].v||''):'', instagram:r.c[12]?(r.c[12].v||''):'' };
+                });
+              } catch(e) {}
+              setBioMap(map);
+            };
+
+            function injectGviz() {
+              var s = document.createElement('script'); s.src = GVIZ;
+              s.onerror = function() { setTimeout(function() { if (bioMap === null) setBioMap({}); }, 100); };
+              document.head.appendChild(s);
+            }
+
+            function getBio(id, cb) {
+              if (bioMap !== null) { cb(bioMap[String(id)] || null); return; }
+              bioWaiters.push(function() { cb(bioMap[String(id)] || null); });
+            }
+
+            // Dispara ambos em paralelo - o primeiro que responder vence
+            tryFetchCsv();
+            injectGviz();
+
+            function populate(el) {
+              var d = el.dataset; currentId = d.id;
+              document.getElementById('pcBioPanel').classList.remove('visible');
+              document.getElementById('pcBioBtn').style.display = 'none';
+              document.getElementById('pcBioContent').style.display = 'none';
+              document.getElementById('pcBioLoading').style.display = 'block';
+              document.getElementById('pcBioLoading').textContent = 'Carregando...';
+              var initials = d.name.split(' ').slice(0,2).map(function(w){return w[0];}).join('');
+              var img = document.createElement('img');
+              img.className = 'pc-photo'; img.alt = d.name; img.src = BASE + d.id + '.jpg';
+              img.onerror = function() {
+                var div = document.createElement('div'); div.className = 'pc-initials'; div.textContent = initials;
+                this.parentNode.replaceChild(div, this);
+              };
+              var wrap = document.getElementById('pcPhotoWrap'); wrap.innerHTML = ''; wrap.appendChild(img);
+              document.getElementById('pcName').textContent    = d.name;
+              document.getElementById('pcId').textContent      = d.id;
+              document.getElementById('pcGlider').textContent  = d.glider;
+              document.getElementById('pcSponsor').textContent = d.sponsor;
+              document.getElementById('pcTotal').textContent   = d.total ? d.total + ' pts' : '—';
+              var st = document.getElementById('pcStatus');
+              st.textContent = d.status; st.className = 'pc-status pcs-' + d.status;
+              // Mostra o botao Biografia somente se o piloto tiver cadastro
+              getBio(d.id, function(bio) {
+                if (d.id !== currentId) return;
+                if (bio) document.getElementById('pcBioBtn').style.display = 'block';
+              });
+            }
+
+            window.toggleBio = function() {
+              var panel = document.getElementById('pcBioPanel');
+              var content = document.getElementById('pcBioContent');
+              var loading = document.getElementById('pcBioLoading');
+              if (panel.classList.contains('visible')) { panel.classList.remove('visible'); return; }
+              panel.classList.add('visible');
+              getBio(currentId, function(bio) {
+                if (!bio) { loading.textContent = 'Biografia não cadastrada.'; return; }
+                document.getElementById('bioEscola').textContent     = bio.escola      || '—';
+                document.getElementById('bioInicio').textContent     = bio.inicio      || '—';
+                document.getElementById('bioReta').textContent       = bio.reta        || '—';
+                document.getElementById('bioTri').textContent        = bio.triangulo   || '—';
+                document.getElementById('bioConquistas').textContent = bio.conquistas  || '—';
+                document.getElementById('bioCidade').textContent      = bio.cidade       || '—';
+                document.getElementById('bioSobre').textContent       = bio.sobre       || '—';
+                var igLink = document.getElementById('bioIgLink');
+                if (bio.instagram) {
+                  var ig = bio.instagram.replace(/^@/, '').trim();
+                  igLink.href = 'https://www.instagram.com/' + ig + '/';
+                  igLink.style.display = 'block';
+                } else {
+                  igLink.style.display = 'none';
+                }
+                loading.style.display = 'none'; content.style.display = 'block';
+                pos(lastX, lastY);
+              });
+            };
+
+            var lastX = 0, lastY = 0;
+            function pos(x, y) {
+              lastX = x; lastY = y;
+              var vw = window.innerWidth, vh = window.innerHeight;
+              var cw = card.offsetWidth || 260, ch = card.offsetHeight || 400;
+              var cx = x + 14, cy = y - 20;
+              if (cx + cw > vw) cx = Math.max(8, x - cw - 14);
+              if (cx + cw > vw) cx = Math.max(8, vw - cw - 8);
+              if (cy + ch > vh) cy = Math.max(8, vh - ch - 8);
+              if (cy < 8) cy = 8;
+              card.style.left = cx + 'px'; card.style.top = cy + 'px';
+            }
+
+            var hideTimer = null;
+            function scheduleHide() { hideTimer = setTimeout(function() { card.classList.remove('visible'); overlay.classList.remove('visible'); }, 200); }
+            function cancelHide()   { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } }
+            function hide()         { cancelHide(); card.classList.remove('visible'); overlay.classList.remove('visible'); }
+            function isMobile()     { return window.matchMedia('(hover: none)').matches; }
+
+            // O card permanece aberto quando o mouse esta sobre ele
+            card.addEventListener('mouseenter', cancelHide);
+            card.addEventListener('mouseleave', function() { if (!isMobile()) scheduleHide(); });
+
+            document.querySelectorAll('.pilot-name').forEach(function(el) {
+              el.addEventListener('mouseenter', function(e) {
+                if (isMobile()) return;
+                cancelHide(); populate(el); card.classList.add('visible'); pos(e.clientX, e.clientY);
+              });
+              el.addEventListener('mousemove', function(e) {
+                if (isMobile() || !card.classList.contains('visible')) return; pos(e.clientX, e.clientY);
+              });
+              el.addEventListener('mouseleave', function() { if (!isMobile()) scheduleHide(); });
+              el.addEventListener('click', function(e) {
+                if (!isMobile()) return; e.stopPropagation();
+                if (card.classList.contains('visible')) { hide(); return; }
+                populate(el); card.classList.add('visible'); overlay.classList.add('visible'); pos(e.clientX, e.clientY);
+              });
+            });
+            overlay.addEventListener('click', hide);
+          })();
+        </script>
+
+    <script>
+      var FOOTER_TEXT = {"open": "", "serial": "", "sport": "", "lite": "", "fem": ""};
+      var CAT_H2 = {"open": "Task 1: OPEN", "serial": "Task 1: SERIAL", "sport": "Task 1: SPORT", "lite": "Task 1: SPORT LITE", "fem": "Task 1: FEMININO"};
+
+      function showTab(catId) {
+        var pilotTableEl   = document.getElementById('pilotTable');
+        var footerElToggle = document.getElementById('footer-filter-text');
+        var statsPanelEl   = document.getElementById('statsPanel');
+        var extrasEl       = document.getElementById('taskExtras');
+
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+
+        pilotTableEl.style.display   = 'none';
+        footerElToggle.style.display = 'none';
+        statsPanelEl.style.display   = 'none';
+        if (extrasEl)     extrasEl.style.display     = 'none';
+
+        if (catId === 'stats') {
+          document.getElementById('btn-stats').classList.add('active');
+          statsPanelEl.style.display = 'block';
+          renderStats(); window.scrollTo(0, 0); return;
+        }
+
+        document.getElementById('btn-' + catId).classList.add('active');
+        pilotTableEl.style.display   = '';
+        footerElToggle.style.display = '';
+        if (extrasEl) extrasEl.style.display = '';
+        var rows = document.querySelectorAll('#pilotTbody tr');
+        rows.forEach(function(row) {
+          var rankAttr = 'data-rank-' + catId;
+          if (row.hasAttribute(rankAttr)) {
+            row.classList.remove('cat-hidden');
+            var rc = row.querySelector('.rank-cell'); if (rc) rc.textContent = row.getAttribute(rankAttr);
+          } else { row.classList.add('cat-hidden'); }
+        });
+        var h2 = document.getElementById('task-h2'); if (h2) h2.textContent = CAT_H2[catId];
+        var footerEl = document.getElementById('footer-filter-text'); footerEl.textContent = FOOTER_TEXT[catId];
+        window.scrollTo(0, 0);
+      }
+
+      function renderStats() {
+        var rows = document.querySelectorAll('#pilotTbody tr');
+        var total = rows.length, genderCount = {}, natCount = {}, gliderCount = {}, mfrCount = {}, catCount = {}, seleteCount = {};
+        var catOrder = ['CCC','D','C','B','A'], bracketToCat = {'E':'CCC','D':'D','C':'C','B':'B','A':'A'}, genderLabel = {'M':'Masculino','F':'Feminino'};
+        rows.forEach(function(row) {
+          var tds = row.querySelectorAll('td.fs_res');
+          var gender = tds[3] ? tds[3].textContent.trim() : '';
+          var natCell = tds[4] || null;
+          var natImg = natCell ? natCell.querySelector('img') : null;
+          var nat = natImg
+            ? (natImg.getAttribute('title') || natImg.getAttribute('alt') || '').trim()
+            : (natCell ? natCell.textContent.trim() : '');
+          var glider = tds[5] ? tds[5].textContent.trim() : '';
+          var gl = genderLabel[gender] || gender || '(não informado)'; genderCount[gl] = (genderCount[gl]||0)+1;
+          var nl = nat || '(não informado)'; natCount[nl] = (natCount[nl]||0)+1;
+          var gll = (glider.indexOf(' / ') !== -1 ? glider.split(' / ')[0] : glider) || '(não informado)'; gliderCount[gll] = (gliderCount[gll]||0)+1;
+          var slt = glider.indexOf(' / ') !== -1 ? glider.split(' / ')[1].trim() : '(não informado)'; if (!slt) slt = '(não informado)'; seleteCount[slt] = (seleteCount[slt]||0)+1;
+          var m = glider.match(/^\[([A-Za-z]+)\]/); var ck = m ? (bracketToCat[m[1].toUpperCase()]||m[1].toUpperCase()) : '(não informado)'; catCount[ck] = (catCount[ck]||0)+1;
+          var ab = glider.replace(/^\[[A-Za-z]+\]\s*/,'').replace(/^[^A-Za-z0-9]+/,''); var ml = ab ? ab.split(/\s*-\s*/)[0].trim() : '(não informado)'; if(!ml) ml='(não informado)'; mfrCount[ml]=(mfrCount[ml]||0)+1;
+        });
+        function pct(n){ return total?(n/total*100).toFixed(1).replace('.',',')+('%'):'0%'; }
+        var IOC_TO_A2 = {AFG:"af",ALB:"al",ALG:"dz",AND:"ad",ANG:"ao",ANT:"ag",ARG:"ar",ARM:"am",ARU:"aw",ASA:"as",AUS:"au",AUT:"at",AZE:"az",BAH:"bs",BAN:"bd",BAR:"bb",BDI:"bi",BEL:"be",BEN:"bj",BER:"bm",BHU:"bt",BIH:"ba",BIZ:"bz",BLR:"by",BOL:"bo",BOT:"bw",BRA:"br",BRN:"bh",BRU:"bn",BUL:"bg",BUR:"bf",CAF:"cf",CAM:"kh",CAN:"ca",CAY:"ky",CGO:"cg",CHA:"td",CHI:"cl",CHN:"cn",CIV:"ci",CMR:"cm",COD:"cd",COK:"ck",COL:"co",COM:"km",CPV:"cv",CRC:"cr",CRO:"hr",CUB:"cu",CYP:"cy",CZE:"cz",DEN:"dk",DJI:"dj",DMA:"dm",DOM:"do",ECU:"ec",EGY:"eg",ERI:"er",ESA:"sv",ESP:"es",EST:"ee",ETH:"et",FIJ:"fj",FIN:"fi",FRA:"fr",FSM:"fm",GAB:"ga",GAM:"gm",GBR:"gb",GBS:"gw",GEO:"ge",GEQ:"gq",GER:"de",GHA:"gh",GRE:"gr",GRN:"gd",GUA:"gt",GUI:"gn",GUM:"gu",GUY:"gy",HAI:"ht",HKG:"hk",HON:"hn",HUN:"hu",INA:"id",IND:"in",IRI:"ir",IRL:"ie",IRQ:"iq",ISL:"is",ISR:"il",ISV:"vi",ITA:"it",IVB:"vg",JAM:"jm",JOR:"jo",JPN:"jp",KAZ:"kz",KEN:"ke",KGZ:"kg",KIR:"ki",KOR:"kr",KOS:"xk",KSA:"sa",KUW:"kw",LAO:"la",LAT:"lv",LBA:"ly",LBN:"lb",LBR:"lr",LCA:"lc",LES:"ls",LIE:"li",LTU:"lt",LUX:"lu",MAD:"mg",MAR:"ma",MAS:"my",MAW:"mw",MDA:"md",MDV:"mv",MEX:"mx",MGL:"mn",MHL:"mh",MKD:"mk",MLI:"ml",MLT:"mt",MNE:"me",MON:"mc",MOZ:"mz",MRI:"mu",MTN:"mr",MYA:"mm",NAM:"na",NCA:"ni",NED:"nl",NEP:"np",NGR:"ng",NIG:"ne",NIU:"nu",NOR:"no",NRU:"nr",NZL:"nz",OMA:"om",PAK:"pk",PAN:"pa",PAR:"py",PER:"pe",PHI:"ph",PLE:"ps",PLW:"pw",PNG:"pg",POL:"pl",POR:"pt",PRK:"kp",PUR:"pr",QAT:"qa",ROU:"ro",RSA:"za",RUS:"ru",RWA:"rw",SAM:"ws",SEN:"sn",SEY:"sc",SGP:"sg",SKN:"kn",SLE:"sl",SLO:"si",SMR:"sm",SOL:"sb",SOM:"so",SRB:"rs",SRI:"lk",SSD:"ss",STP:"st",SUD:"sd",SUI:"ch",SUR:"sr",SVK:"sk",SWE:"se",SWZ:"sz",SYR:"sy",TAN:"tz",TGA:"to",THA:"th",TJK:"tj",TKM:"tm",TLS:"tl",TOG:"tg",TPE:"tw",TTO:"tt",TUN:"tn",TUR:"tr",TUV:"tv",UAE:"ae",UGA:"ug",UKR:"ua",URU:"uy",USA:"us",UZB:"uz",VAN:"vu",VAT:"va",VEN:"ve",VIE:"vn",VIN:"vc",YEM:"ye",ZAM:"zm",ZIM:"zw"};
+        function natLabelHtml(code) {
+          if (code === '(não informado)') return code;
+          var a2 = IOC_TO_A2[code];
+          var flag = a2 ? '<img src="https://flagcdn.com/h20/' + a2 + '.png" alt="' + code + '" title="' + code + '" class="flag_icon"> ' : '';
+          return flag + code;
+        }
+        function fillTable(id, obj, sortFn, labelFn) {
+          var tbody = document.querySelector('#'+id+' tbody');
+          var entries = Object.keys(obj).map(function(k){return[k,obj[k]];});
+          entries.sort(sortFn||function(a,b){return b[1]-a[1];});
+          tbody.innerHTML = entries.map(function(e){ var label = labelFn ? labelFn(e[0]) : e[0]; return '<tr class="fs_res_res_row" onmouseover="this.classList.add(\'hover\')" onmouseout="this.classList.remove(\'hover\')"><td class="fs_res">'+label+'</td><td class="fs_res" align="right">'+e[1]+'</td><td class="fs_res" align="right">'+pct(e[1])+'</td></tr>'; }).join('');
+        }
+        document.getElementById('stats-total').textContent = 'Total de pilotos: ' + total;
+        fillTable('stats-gender', genderCount);
+        fillTable('stats-nat', natCount, null, natLabelHtml);
+        fillTable('stats-glider', gliderCount);
+        fillTable('stats-selete', seleteCount);
+        fillTable('stats-mfr', mfrCount);
+        fillTable('stats-cat', catCount, function(a,b){ var ai=catOrder.indexOf(a[0]); if(ai===-1)ai=999; var bi=catOrder.indexOf(b[0]); if(bi===-1)bi=999; return ai-bi; });
+      }
+
+      showTab('open');
+    </script>
+  </body>
+</html>
