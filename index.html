@@ -128,12 +128,13 @@
   .preview .filename{ font-family:var(--font-mono); color:var(--lift); font-size:13.5px; word-break:break-all; margin-top:8px; padding-top:8px; border-top:1px solid var(--line); }
   .preview .warn{ color:var(--sink); font-size:12.5px; margin-top:6px; }
 
-  button.primary{
+  button.primary, a.primary{
     margin-top:14px; width:100%; background:var(--thermal); color:#111; border:none;
     font-family:var(--font-display); font-weight:600; font-size:14px; padding:12px;
     border-radius:7px; cursor:pointer; transition:background .15s ease;
+    display:block; text-align:center; text-decoration:none; box-sizing:border-box;
   }
-  button.primary:hover{ background:#ff8c57; }
+  button.primary:hover, a.primary:hover{ background:#ff8c57; }
   button.primary:disabled{ background:var(--line); color:var(--text-muted); cursor:not-allowed; }
   button.secondary{
     margin-top:10px; width:100%; background:none; color:var(--text-muted); border:1px solid var(--line);
@@ -207,6 +208,7 @@
     <div class="conn-status" id="connStatus"><span class="conn-dot"></span><span id="connText">Conectando ao banco...</span></div>
     <img id="eventLogo" style="display:none; max-height:248px; max-width:95%; object-fit:contain; margin:20px auto 0; border-radius:6px;" alt="Logo do evento">
     <p class="sub" id="championshipNameLine" style="display:none; text-align:center; font-weight:600; color:var(--text); margin:10px auto 0; max-width:80ch;"></p>
+    <a class="primary" href="https://app.circuitoxcparapente.com.br/resultados/preview.html" target="_blank" rel="noopener" style="max-width:360px; margin-left:auto; margin-right:auto;">Ver resultado da prova</a>
   </header>
 
   <div class="tabs">
@@ -1271,7 +1273,7 @@
       const { data, error } = await sb.rpc('pilot_has_pin', { p_pilot_id: p.id });
       if(error) throw error;
       if(data){
-        already.querySelector('.msg').textContent = 'Esse piloto já tem um PIN cadastrado. Se esqueceu o número, peça ao organizador pra resetar no Supabase.';
+        already.querySelector('.msg').textContent = 'Esse piloto já tem um PIN cadastrado. Se esqueceu o número, peça ao organizador pra resetar.';
         already.classList.add('show');
       } else {
         form.classList.add('show');
