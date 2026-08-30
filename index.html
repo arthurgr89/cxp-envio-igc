@@ -842,7 +842,7 @@
         const row = document.createElement('div');
         row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--line); font-size:13.5px;' + (clickable ? ' cursor:pointer;' : '');
         row.innerHTML = `<span${clickable ? ' style="color:var(--thermal); text-decoration:underline;"' : ''}>${escapeHtml(p.name)}</span>
-          <span style="color:${color}; font-family:var(--font-mono); font-size:12px; font-weight:600;">${label}</span>`;
+          <span style="color:${color}; font-family:var(--font-mono); font-size:12px; font-weight:600; white-space:nowrap; flex-shrink:0; margin-left:10px;">${label}</span>`;
         if(clickable){
           row.addEventListener('click', ()=> viewPilotFlight(p.id, p.name, date));
         }
