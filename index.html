@@ -1402,8 +1402,9 @@
       const selectedDate = select && eventDays.length ? select.value : null;
       const selectedDay = eventDays.find(d => d.event_date === selectedDate);
       if(selectedDay && parsedFlight.date !== selectedDay.event_date){
-        warn.textContent = `Atenção: a data do voo (${formatDateBR(parsedFlight.date)}) não bate com o dia selecionado (${selectedDay.label} — ${formatDateBR(selectedDay.event_date)}). Confira se é o arquivo certo antes de enviar.`;
+        warn.textContent = `A data do voo (${formatDateBR(parsedFlight.date)}) não bate com o dia selecionado (${selectedDay.label} — ${formatDateBR(selectedDay.event_date)}). Selecione o dia certo acima, ou confira se é o arquivo certo, antes de enviar.`;
         warn.style.display = 'block';
+        ready = false;
       }
     }
     if(!selectedPilot){ ready = false; }
