@@ -213,12 +213,40 @@
 
   <div class="tabs">
     <button class="tab active" data-tab="piloto">Piloto</button>
-    <button class="tab" data-tab="pin">Cadastro de PIN</button>
     <button class="tab" data-tab="organizador">Organizador</button>
   </div>
 
   <!-- PILOTO -->
   <div class="panel active" id="panel-piloto">
+
+    <button class="primary" id="togglePinCardBtn" style="margin-bottom:14px;">Cadastrar Novo PIN</button>
+    <div id="pinCadastroWrap" style="display:none;">
+      <div class="card">
+        <h2>Cadastrar seu PIN</h2>
+        <p class="hint">Escolha um PIN de 4 números só seu. Só precisa fazer isso uma vez — depois é só usar esse PIN toda vez que enviar um voo.</p>
+        <div class="combo">
+          <input type="text" id="pinSearch" placeholder="Digite seu nome...">
+          <div class="combo-list" id="pinList"></div>
+        </div>
+        <div class="selected-pilot" id="pinSelectedBox">
+          <div class="top"><span id="pinSelName"></span><span class="pid" id="pinSelId"></span></div>
+        </div>
+
+        <div class="pin-box" id="pinAlreadyMsg">
+          <div class="msg">Esse piloto já tem um PIN cadastrado. Se esqueceu o número, peça ao organizador pra resetar.</div>
+        </div>
+
+        <div class="pin-box" id="pinCreateForm">
+          <label>Escolha um PIN de 4 números</label>
+          <div class="pin-fields">
+            <input type="password" class="pin-input" id="newPin1" inputmode="numeric" maxlength="4" placeholder="••••">
+            <input type="password" class="pin-input" id="newPin2" inputmode="numeric" maxlength="4" placeholder="confirme">
+          </div>
+          <button class="primary" id="createPinBtn">Cadastrar PIN</button>
+        </div>
+        <div class="toast" id="pinToast"></div>
+      </div>
+    </div>
 
     <div class="card" id="dayContextCard" style="display:none;">
       <h2>Dia da prova</h2>
@@ -240,7 +268,7 @@
       <p class="empty" id="noPilotsMsg" style="display:none; padding:12px 0 0;">Nenhuma lista de pilotos cadastrada ainda. Peça ao organizador para subir a lista na aba "Organizador".</p>
 
       <div class="pin-box warn" id="pinMissingMsg">
-        <div class="msg">Você ainda não cadastrou um PIN. Vá na aba <strong>"Cadastro de PIN"</strong> antes de enviar seu voo — o mesmo será utilizado em todos os campeonatos.</div>
+        <div class="msg">Você ainda não cadastrou um PIN. Toque em <strong>"Cadastrar / verificar meu PIN"</strong> no topo desta aba antes de enviar seu voo — o mesmo será utilizado em todos os campeonatos.</div>
       </div>
       <div class="pin-box" id="pinEntryBox">
         <label>Seu PIN (4 dígitos)</label>
@@ -291,34 +319,6 @@
   </div>
 
   <!-- CADASTRO DE PIN -->
-  <div class="panel" id="panel-pin">
-    <div class="card">
-      <h2>Cadastrar seu PIN</h2>
-      <p class="hint">Escolha um PIN de 4 números só seu. Só precisa fazer isso uma vez — depois é só usar esse PIN toda vez que enviar um voo.</p>
-      <div class="combo">
-        <input type="text" id="pinSearch" placeholder="Digite seu nome...">
-        <div class="combo-list" id="pinList"></div>
-      </div>
-      <div class="selected-pilot" id="pinSelectedBox">
-        <div class="top"><span id="pinSelName"></span><span class="pid" id="pinSelId"></span></div>
-      </div>
-
-      <div class="pin-box" id="pinAlreadyMsg">
-        <div class="msg">Esse piloto já tem um PIN cadastrado. Se esqueceu o número, peça ao apurador pra resetar.</div>
-      </div>
-
-      <div class="pin-box" id="pinCreateForm">
-        <label>Escolha um PIN de 4 números</label>
-        <div class="pin-fields">
-          <input type="password" class="pin-input" id="newPin1" inputmode="numeric" maxlength="4" placeholder="••••">
-          <input type="password" class="pin-input" id="newPin2" inputmode="numeric" maxlength="4" placeholder="confirme">
-        </div>
-        <button class="primary" id="createPinBtn">Cadastrar PIN</button>
-      </div>
-      <div class="toast" id="pinToast"></div>
-    </div>
-  </div>
-
   <!-- ORGANIZADOR -->
   <div class="panel" id="panel-organizador">
 
@@ -429,7 +429,7 @@
 
     <div class="card">
       <h2>Resetar PIN de um piloto</h2>
-      <p class="hint">Se um piloto esqueceu o PIN, selecione o nome dele e resete — na próxima tentativa de envio, ele vai poder cadastrar um PIN novo na aba "Cadastro de PIN".</p>
+      <p class="hint">Se um piloto esqueceu o PIN, selecione o nome dele e resete — na próxima tentativa de envio, ele vai poder cadastrar um PIN novo tocando em "Cadastrar / verificar meu PIN" na aba Piloto.</p>
       <div class="combo">
         <input type="text" id="resetPinSearch" placeholder="Digite o nome do piloto...">
         <div class="combo-list" id="resetPinList"></div>
@@ -522,6 +522,23 @@
       if(t.dataset.tab==='organizador'){ refreshOrgAuthUI(); }
       if(t.dataset.tab==='piloto'){ refreshPinStatusForSelectedPilot(); }
     });
+  });
+
+  document.querySelectorAll('.pin-input').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      el.style.color = el.value.length === 4 ? '#2ECC71' : '';
+    });
+  });
+
+  document.getElementById('togglePinCardBtn').addEventListener('click', ()=>{
+    const wrap = document.getElementById('pinCadastroWrap');
+    const abrindo = wrap.style.display === 'none';
+    wrap.style.display = abrindo ? 'block' : 'none';
+    document.getElementById('togglePinCardBtn').textContent = abrindo ? 'Fechar cadastro de PIN' : 'Cadastrar Novo PIN';
+    if(abrindo && selectedPilot){
+      document.getElementById('pinSearch').value = selectedPilot.name;
+      selecionarPilotoParaPin(selectedPilot);
+    }
   });
 
   async function loadPilots(){
@@ -1253,7 +1270,7 @@
   document.getElementById('dayContextSelect').addEventListener('change', updatePreview);
 
   // ---------- Pin tab: pilot selection + registration ----------
-  makePilotCombo(document.getElementById('pinSearch'), document.getElementById('pinList'), async (p)=>{
+  async function selecionarPilotoParaPin(p){
     selectedPinPilot = p;
     const box = document.getElementById('pinSelectedBox');
     const already = document.getElementById('pinAlreadyMsg');
@@ -1282,7 +1299,8 @@
       already.querySelector('.msg').textContent = 'Não consegui verificar. Tente novamente.';
       already.classList.add('show');
     }
-  });
+  }
+  makePilotCombo(document.getElementById('pinSearch'), document.getElementById('pinList'), selecionarPilotoParaPin);
 
   document.getElementById('createPinBtn').addEventListener('click', async ()=>{
     const toast = document.getElementById('pinToast');
@@ -1322,6 +1340,9 @@
         const already = document.getElementById('pinAlreadyMsg');
         already.querySelector('.msg').textContent = 'PIN cadastrado com sucesso para esse piloto.';
         already.classList.add('show');
+        if(selectedPilot && selectedPinPilot && selectedPilot.id === selectedPinPilot.id){
+          refreshPinStatusForSelectedPilot();
+        }
       }
     }catch(e){
       toast.textContent = 'Erro ao cadastrar PIN: ' + (e.message || 'erro desconhecido');
