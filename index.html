@@ -1039,6 +1039,7 @@
   function drawTaskOnMap(turnpoints, optimizedRoute){
     pilotMapLayers.task.clearLayers();
     if(!turnpoints || !turnpoints.length) return null;
+    const TOLERANCIA_PILAO = 0.02; // mesma tolerância de 2% que o FSCOMP usa no raio
     let bounds = L.latLngBounds();
     turnpoints.forEach(p=>{
       let color = '#176f15';
@@ -1047,7 +1048,11 @@
       else if(p.type === 'GOAL') color = 'var(--lift)';
       const circle = L.circle([p.lat, p.lon], { radius:p.radius, color, weight:3, fillOpacity:0.15 })
         .addTo(pilotMapLayers.task)
-        .bindPopup(`<b>${escapeHtml(p.name)}</b><br>Raio: ${p.radius}m`);
+        .bindPopup(`<b>${escapeHtml(p.name)}</b><br>Raio: ${p.radius}m (tolerância ±2%)`);
+      L.circle([p.lat, p.lon], { radius:p.radius * (1 + TOLERANCIA_PILAO), color, weight:1.5, fill:false, opacity:0.7, dashArray:'6,6' })
+        .addTo(pilotMapLayers.task);
+      L.circle([p.lat, p.lon], { radius:p.radius * (1 - TOLERANCIA_PILAO), color, weight:1.5, fill:false, opacity:0.7, dashArray:'6,6' })
+        .addTo(pilotMapLayers.task);
       bounds.extend(circle.getBounds());
     });
     if(optimizedRoute && optimizedRoute.length > 1){
