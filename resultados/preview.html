@@ -1,35 +1,32 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html><html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Resultados por Categoria</title>
+    <META http-equiv="Content-Type" content="text/html; charset=utf-8">
     <style>
           .hover
           { /* for IE using onmouseover and onmouseout */
           background: #00CED1;
           }
-          tr.fs_res_res_row:hover
-          {
-          background: #00CED1;
-          }
-          div.fs_res
-          {
+          tr:hover td { background: #00CED1; }
+          tr.female td { color: #FF1493; }
+          tr.female:hover td { color: #FF1493; }
+
+          body {
           font-family: Verdana, Arial, Helvetica, sans-serif;
           font-size: x-small;
           }
-          table.fs_res
+          table
           {
           border:solid 1px gray;
           border-collapse:collapse;
           font-size: x-small;
           }
-          td.fs_res
+          td
           {
           border:solid 1px gray;
           vertical-align:top;
           padding:5px;
           }
-          th.fs_res
+          th
           {
           border:solid 1px gray;
           vertical-align:center;
@@ -45,6 +42,20 @@
             object-fit: cover;
             border: solid 1px #ccc;
           }
+          .tab-btn {
+            background: #eee;
+            border: solid 1px gray;
+            padding: 6px 16px;
+            font-size: x-small;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 4px;
+          }
+          .tab-btn.active {
+            background: #00CED1;
+          }
+          #statsPanel table { margin-bottom: 14px; }
+          #statsPanel h4 { font-size: x-small; margin: 14px 0 6px 0; }
           /* ===== Card de foto do piloto ===== */
           .pilot-name {
             cursor: pointer;
@@ -62,8 +73,6 @@
             font-family: Verdana, Arial, sans-serif;
             font-size: x-small;
             pointer-events: auto;
-            max-height: calc(100vh - 20px);
-            overflow-y: auto;
           }
           .pilot-card.visible { display: block; }
           .pc-overlay { display: none; position: fixed; inset: 0; z-index: 999; }
@@ -82,15 +91,8 @@
           .pc-name { font-weight: bold; text-align: center; margin-bottom: 6px; font-size: 14px; }
           .pc-lbl { color: #aaa; font-size: 11px; text-transform: uppercase; text-align: center; margin: 5px 0 2px; }
           .pc-val { text-align: center; color: #444; }
-          .pc-status { display: inline-block; margin: 6px auto 0; padding: 2px 9px;
-            border-radius: 9px; font-weight: bold; font-size: 11px; }
-          .pcs-GOAL { background:#e5f5ec; color:#1a7a3a; }
-          .pcs-ESS  { background:#e6f0ff; color:#0055aa; }
-          .pcs-DF   { background:#fdf6e3; color:#b8860b; }
-          .pcs-DNF  { background:#f0f0f0; color:#888; }
-          .pcs-ABS  { background:#fdecea; color:#c0392b; }
           .pc-bio-btn {
-            display: block; width: 100%; margin-top: 10px;
+            display: none; width: 100%; margin-top: 10px;
             background: #00CED1; color: #003333; border: none;
             border-radius: 6px; padding: 7px 0; font-size: 12px;
             font-weight: bold; cursor: pointer; font-family: Verdana, Arial, sans-serif;
@@ -112,843 +114,453 @@
           .pc-bio-val-sm { font-size: 10px; }
           .pc-bio-loading { color: #aaa; font-size: 12px; text-align: center; margin-top: 8px; }
           body { padding-bottom: 500px; }
-        
-
-        .pilot-wrap { display: inline-block; }
-        .tabs-bar { display: flex; flex-wrap: wrap; gap: 4px; background: #f2f2f2; border: 2px solid gray; margin-top: 18px; padding: 10px 10px 0 10px; position: sticky; top: 0; z-index: 100; }
-        .tab-btn { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: small; font-weight: bold; color: #333; background: #e0e0e0; border: 1px solid gray; border-bottom: none; padding: 8px 18px; cursor: pointer; border-radius: 6px 6px 0 0; }
-        .tab-btn:hover { background: #b9f0ef; }
-        .tab-btn.active { background: #00CED1; color: #000; }
-        tr.cat-hidden { display: none; }
-        #statsPanel { padding: 15px 5px; max-width: 480px; }
-        #statsPanel h3 { font-size: small; margin: 0 0 10px 0; }
-        #statsPanel h4 { font-size: x-small; margin: 18px 0 6px 0; }
-        #statsPanel table.fs_res { width: 100%; margin-bottom: 4px; }
-        #stats-total { font-size: small; font-weight: bold; margin: 0; }
-        .voltar-btn { display: inline-block; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: small; font-weight: bold; color: #333; background: #e0e0e0; border: 1px solid gray; border-radius: 6px; padding: 8px 18px; cursor: pointer; text-decoration: none; margin: 14px 0; }
-        .voltar-btn:hover { background: #b9f0ef; }
-
-    </style>
+        </style>
   </head>
-  <body>
-
-    <div>
-      <div class="fs_res"><nobr><img width="180" src="https://drive.google.com/thumbnail?id=1TgMSH-drEAaIh7nS-fde3p4M1QuqgWiH"></nobr><h1>19° Torneio Norte Nordeste de Voo Livre 2026 - Vicência (PE)</h1>
-        <p style="font-size:xx-small">2026-09-12 to 2026-09-12, no FAI sanctioning</p>
-        <h2 id="task-h2">Task 1: OPEN</h2>
-        <h3>2026-09-12 
-              Elapsed time 19.0 km</h3>
-        <p>Provisional</p>
-        
-    <h2 style="color:red;">Última atualização: 09/09/2026 - 23:00 h</h2>
-
-    <div class="pilot-wrap">
-    <div class="tabs-bar">
-          <button class="tab-btn active" onclick="showTab('open')" id="btn-open">OPEN</button>
-          <button class="tab-btn" onclick="showTab('stats')" id="btn-stats">ESTATÍSTICAS</button>
+  <body><nobr><img width="180" src="https://drive.google.com/thumbnail?id=1TgMSH-drEAaIh7nS-fde3p4M1QuqgWiH"></nobr><h1>19° Torneio Norte Nordeste de Voo Livre 2026 - Vicência (PE)</h1>
+    <p style="font-size:xx-small">2026-09-12 to 2026-09-12</p>
+    <h3>
+          Total de Inscritos: 34<br><br>
+          CCC: 0<br>
+          SERIAL: 0<br>
+          SPORT: 34<br>
+          SPORT LITE: 0<br>
+          FEMININO: 0<br><br>Lista dos Pilotos (Atualizada 09/09/2026)</h3><br><button type="button" class="tab-btn active" id="btn-list" onclick="showTab('list')">Lista de Pilotos</button><button type="button" class="tab-btn" id="btn-stats" onclick="showTab('stats')">Estatísticas</button><br><br><div id="listPanel">
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th></th>
+            <th>Nat</th>
+            <th>Glider</th>
+            <th>Sponsor</th>
+          </tr>
+        </thead>
+        <tr class="">
+          <td>122</td>
+          <td><span class="pilot-name" data-id="122" data-name="ADRIANO ROSA" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">ADRIANO ROSA</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>104</td>
+          <td><span class="pilot-name" data-id="104" data-name="ALEX" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">ALEX</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>106</td>
+          <td><span class="pilot-name" data-id="106" data-name="ARDILLES PONCIANO-TORITAMA" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">ARDILLES PONCIANO-TORITAMA</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>131</td>
+          <td><span class="pilot-name" data-id="131" data-name="CLAUDIO CLOUD" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">CLAUDIO CLOUD</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>107</td>
+          <td><span class="pilot-name" data-id="107" data-name="DAYLAN" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">DAYLAN</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>120</td>
+          <td><span class="pilot-name" data-id="120" data-name="DEILSON" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">DEILSON</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>119</td>
+          <td><span class="pilot-name" data-id="119" data-name="DIMITRI" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">DIMITRI</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>129</td>
+          <td><span class="pilot-name" data-id="129" data-name="EDMILSON RECIFE" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">EDMILSON RECIFE</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>130</td>
+          <td><span class="pilot-name" data-id="130" data-name="EDSON RAMOS" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">EDSON RAMOS</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>113</td>
+          <td><span class="pilot-name" data-id="113" data-name="ERIVAN" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">ERIVAN</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>111</td>
+          <td><span class="pilot-name" data-id="111" data-name="EZEQUIEL TORITAMA " data-glider="[C] SPORT PARAGLIDER" data-sponsor="">EZEQUIEL TORITAMA </span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>121</td>
+          <td><span class="pilot-name" data-id="121" data-name="FÁBIO MORAIS" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">FÁBIO MORAIS</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>128</td>
+          <td><span class="pilot-name" data-id="128" data-name="FAFÁ RETIFICA " data-glider="[C] SPORT PARAGLIDER" data-sponsor="">FAFÁ RETIFICA </span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>109</td>
+          <td><span class="pilot-name" data-id="109" data-name="LINDOMAR SOUZA" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">LINDOMAR SOUZA</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>108</td>
+          <td><span class="pilot-name" data-id="108" data-name="LUCAS SOARES " data-glider="[C] SPORT PARAGLIDER" data-sponsor="">LUCAS SOARES </span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>105</td>
+          <td><span class="pilot-name" data-id="105" data-name="LUIZ SANTANA - PESQUEIRA -PE" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">LUIZ SANTANA - PESQUEIRA -PE</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>124</td>
+          <td><span class="pilot-name" data-id="124" data-name="MÁRIO MONTEIRO" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">MÁRIO MONTEIRO</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>133</td>
+          <td><span class="pilot-name" data-id="133" data-name="MATHEUS RAMOS" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">MATHEUS RAMOS</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>101</td>
+          <td><span class="pilot-name" data-id="101" data-name="NINHO LYRA" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">NINHO LYRA</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>103</td>
+          <td><span class="pilot-name" data-id="103" data-name="PEDRO NETO" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">PEDRO NETO</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>100</td>
+          <td><span class="pilot-name" data-id="100" data-name="RAFAEL CAVALCANTE" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">RAFAEL CAVALCANTE</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>132</td>
+          <td><span class="pilot-name" data-id="132" data-name="RAFAEL PALMA" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">RAFAEL PALMA</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>117</td>
+          <td><span class="pilot-name" data-id="117" data-name="RAPHAEL ABELHA" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">RAPHAEL ABELHA</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>115</td>
+          <td><span class="pilot-name" data-id="115" data-name="ROBINSON PET SHOP " data-glider="[C] SPORT PARAGLIDER" data-sponsor="">ROBINSON PET SHOP </span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>114</td>
+          <td><span class="pilot-name" data-id="114" data-name="ROBSON FRANKILIN" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">ROBSON FRANKILIN</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>102</td>
+          <td><span class="pilot-name" data-id="102" data-name="RODRIGO" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">RODRIGO</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>110</td>
+          <td><span class="pilot-name" data-id="110" data-name="RONALDO CALADO" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">RONALDO CALADO</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>118</td>
+          <td><span class="pilot-name" data-id="118" data-name="THIAGO MARINHO" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">THIAGO MARINHO</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>127</td>
+          <td><span class="pilot-name" data-id="127" data-name="TIAGO TIBA" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">TIAGO TIBA</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>112</td>
+          <td><span class="pilot-name" data-id="112" data-name="UWELFLY" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">UWELFLY</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>125</td>
+          <td><span class="pilot-name" data-id="125" data-name="VITOR SANTOS" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">VITOR SANTOS</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>126</td>
+          <td><span class="pilot-name" data-id="126" data-name="WESLEY" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">WESLEY</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>116</td>
+          <td><span class="pilot-name" data-id="116" data-name="WESLEY MONERINHO" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">WESLEY MONERINHO</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+        <tr class="">
+          <td>123</td>
+          <td><span class="pilot-name" data-id="123" data-name="YULE" data-glider="[C] SPORT PARAGLIDER" data-sponsor="">YULE</span></td>
+          <td>M</td>
+          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+          <td style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
+          <td>
+          </td>
+        </tr>
+      </table>
     </div>
-    <table class="fs_res" id="pilotTable">
-      <thead style="display: table-header-group;">
-            <tr>
-              <th class="fs_res">#</th>
-              <th class="fs_res">Id</th>
-              <th class="fs_res">Name</th>
-              <th class="fs_res"></th>
-              <th class="fs_res">Nat</th>
-              <th class="fs_res">Glider</th>
-              <th class="fs_res">Sponsor</th>
-              <th class="fs_res">Status</th>
-              <th class="fs_res">SS</th>
-              <th class="fs_res">ES</th>
-              <th class="fs_res">
-          Time<br>[h:m:s]
-        </th>
-              <th class="fs_res">
-          Speed<br>[km/h]
-        </th>
-              <th class="fs_res">
-            Distance<br>[km]
-          </th>
-              <th class="fs_res">
-        Dist.<br>Points
-      </th>
-              <th class="fs_res">
-        Time<br>Points
-      </th>
-              <th class="fs_res">Total</th>
-            </tr>
-          </thead>
-      <tbody id="pilotTbody">
-<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="1">
-            <td class="fs_res rank-cell" align="right">1</td>
-            <td class="fs_res">108</td>
-            <td class="fs_res"><span class="pilot-name" data-id="108" data-name="LUCAS SOARES " data-glider="[C] SPORT PARAGLIDER" data-sponsor="" data-ss="14:00:01" data-total="1000" data-status="GOAL">LUCAS SOARES </span></td>
-            <td class="fs_res">M</td>
-            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-            <td class="fs_res" style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
-            <td class="fs_res">
-            </td>
-            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
-            <td class="fs_res">14:00:01</td>
-            <td class="fs_res">14:32:02</td>
-            <td class="fs_res">00:32:01</td>
-            <td class="fs_res" align="right">34.0</td>
-            <td class="fs_res" align="right">19.04</td>
-            <td class="fs_res" align="right">377.4</td>
-            <td class="fs_res" align="right">622.6</td>
-            <td class="fs_res" align="right">1000.0</td>
-          </tr>
-<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="2">
-            <td class="fs_res rank-cell" align="right">2</td>
-            <td class="fs_res">111</td>
-            <td class="fs_res"><span class="pilot-name" data-id="111" data-name="EZEQUIEL TORITAMA " data-glider="[C] SPORT PARAGLIDER" data-sponsor="" data-ss="14:00:05" data-total="934" data-status="GOAL">EZEQUIEL TORITAMA </span></td>
-            <td class="fs_res">M</td>
-            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-            <td class="fs_res" style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
-            <td class="fs_res">
-            </td>
-            <td class="fs_res" align="center" style="color: #1a7a3a; font-weight: bold;">GOAL</td>
-            <td class="fs_res">14:00:05</td>
-            <td class="fs_res">14:35:04</td>
-            <td class="fs_res">00:34:59</td>
-            <td class="fs_res" align="right">31.1</td>
-            <td class="fs_res" align="right">19.04</td>
-            <td class="fs_res" align="right">377.4</td>
-            <td class="fs_res" align="right">556.6</td>
-            <td class="fs_res" align="right">934.0</td>
-          </tr>
-<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="3">
-            <td class="fs_res rank-cell" align="right">3</td>
-            <td class="fs_res">100</td>
-            <td class="fs_res"><span class="pilot-name" data-id="100" data-name="RAFAEL CAVALCANTE" data-glider="[C] SPORT PARAGLIDER" data-sponsor="" data-ss="" data-total="59.5" data-status="DF">RAFAEL CAVALCANTE</span></td>
-            <td class="fs_res">M</td>
-            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-            <td class="fs_res" style="white-space: nowrap;">[C] SPORT PARAGLIDER</td>
-            <td class="fs_res">
-            </td>
-            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
-            <td class="fs_res">
-            </td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right">3.00</td>
-            <td class="fs_res" align="right">59.5</td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right">59.5</td>
-          </tr>
-      </tbody>
-    </table>
-    </div>
-    <p id="footer-filter-text"></p>
-    <a class="voltar-btn" href="https://www.circuitoxcparapente.com.br/live" rel="noopener">Voltar para CXP</a>
-
     <div id="statsPanel" style="display:none;">
-      <div class="fs_res">
-        <h3>Estatísticas do campeonato (OPEN)</h3>
-        <p id="stats-total"></p>
-        <h4>Gênero</h4>
-        <table class="fs_res" id="stats-gender"><thead><tr class="fs_res_res_row"><th class="fs_res">Gênero</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
-        <h4>Nacionalidade</h4>
-        <table class="fs_res" id="stats-nat"><thead><tr class="fs_res_res_row"><th class="fs_res">Nacionalidade</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
-        <h4>Parapente</h4>
-        <table class="fs_res" id="stats-glider"><thead><tr class="fs_res_res_row"><th class="fs_res">Parapente</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
-        <h4>Selete</h4>
-        <table class="fs_res" id="stats-selete"><thead><tr class="fs_res_res_row"><th class="fs_res">Selete</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
-        <h4>Fabricante</h4>
-        <table class="fs_res" id="stats-mfr"><thead><tr class="fs_res_res_row"><th class="fs_res">Fabricante</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
-        <h4>Categoria</h4>
-        <table class="fs_res" id="stats-cat"><thead><tr class="fs_res_res_row"><th class="fs_res">Categoria</th><th class="fs_res">Qtd.</th><th class="fs_res">%</th></tr></thead><tbody></tbody></table>
-      </div>
+      <h4>Gênero</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Gênero</th>
+            <th>Qtd.</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Masculino</td>
+            <td align="right">34</td>
+            <td align="right">100.0%</td>
+          </tr>
+        </tbody>
+      </table>
+      <h4>Categoria</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Categoria</th>
+            <th>Qtd.</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SPORT</td>
+            <td align="right">34</td>
+            <td align="right">100.0%</td>
+          </tr>
+        </tbody>
+      </table>
+      <h4>Nacionalidade</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Nacionalidade</th>
+            <th>Qtd.</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon">BRA</td>
+            <td align="right">34</td>
+            <td align="right">100.0%</td>
+          </tr>
+        </tbody>
+      </table>
+      <h4>Fabricante</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Fabricante</th>
+            <th>Qtd.</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SPORT PARAGLIDER</td>
+            <td align="right">34</td>
+            <td align="right">100.0%</td>
+          </tr>
+        </tbody>
+      </table>
+      <h4>Parapente</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Parapente</th>
+            <th>Qtd.</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>[C] SPORT PARAGLIDER</td>
+            <td align="right">34</td>
+            <td align="right">100.0%</td>
+          </tr>
+        </tbody>
+      </table>
+      <h4>Selete</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Selete</th>
+            <th>Qtd.</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>(não informado)</td>
+            <td align="right">34</td>
+            <td align="right">100.0%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div><script>
+          function showTab(tab) {
+            document.getElementById('listPanel').style.display = (tab === 'list') ? 'block' : 'none';
+            document.getElementById('statsPanel').style.display = (tab === 'stats') ? 'block' : 'none';
+            document.getElementById('btn-list').className = 'tab-btn' + (tab === 'list' ? ' active' : '');
+            document.getElementById('btn-stats').className = 'tab-btn' + (tab === 'stats' ? ' active' : '');
+          }
+        </script><div style="width:100%;font-size: xx-small;"><i>
+            Relatório criado: 2026-09-09T21:43:03-03:00</i></div>
+    <div class="fs_res" style="width:100%;font-size: x-small;">
+      <p>
+            Apurador: Arthur Grandini Rodella (Tutu)
+          </p>
     </div>
-
-    <div id="taskExtras">
-<br><h3>Task definition</h3>
-        <table class="fs_res">
-          <thead>
-            <tr>
-              <th class="fs_res">No</th>
-              <th class="fs_res">Leg Dist.</th>
-              <th class="fs_res">Id</th>
-              <th class="fs_res">Radius</th>
-              <th class="fs_res">Open</th>
-              <th class="fs_res">Close</th>
-              <th class="fs_res">Coordinates</th>
-              <th class="fs_res">Altitude</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="fs_res">1</td>
-              <td class="fs_res" align="right">0.0 km
-              </td>
-              <td class="fs_res">001</td>
-              <td class="fs_res" align="right">400 m
-            </td>
-              <td class="fs_res">09:00</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -7.62242 Lon: -35.32676</td>
-              <td class="fs_res" align="right">387 m
-            </td>
-            </tr>
-            <tr>
-              <td class="fs_res">2 SS</td>
-              <td class="fs_res" align="right">0.8 km
-              </td>
-              <td class="fs_res">001</td>
-              <td class="fs_res" align="right">800 m
-            </td>
-              <td class="fs_res">10:00</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -7.62242 Lon: -35.32676</td>
-              <td class="fs_res" align="right">387 m
-            </td>
-            </tr>
-            <tr>
-              <td class="fs_res">3</td>
-              <td class="fs_res" align="right">2.2 km
-              </td>
-              <td class="fs_res">002</td>
-              <td class="fs_res" align="right">300 m
-            </td>
-              <td class="fs_res">10:00</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -7.64491 Lon: -35.32537</td>
-              <td class="fs_res" align="right">141 m
-            </td>
-            </tr>
-            <tr>
-              <td class="fs_res">4</td>
-              <td class="fs_res" align="right">10.7 km
-              </td>
-              <td class="fs_res">003</td>
-              <td class="fs_res" align="right">1000 m
-            </td>
-              <td class="fs_res">10:00</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -7.58181 Lon: -35.26392</td>
-              <td class="fs_res" align="right">305 m
-            </td>
-            </tr>
-            <tr>
-              <td class="fs_res">5</td>
-              <td class="fs_res" align="right">17.0 km
-              </td>
-              <td class="fs_res">004</td>
-              <td class="fs_res" align="right">400 m
-            </td>
-              <td class="fs_res">10:00</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -7.61189 Lon: -35.32489</td>
-              <td class="fs_res" align="right">493 m
-            </td>
-            </tr>
-            <tr>
-              <td class="fs_res">6 ES</td>
-              <td class="fs_res" align="right">18.9 km
-              </td>
-              <td class="fs_res">005</td>
-              <td class="fs_res" align="right">200 m
-            </td>
-              <td class="fs_res">10:00</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -7.63278 Lon: -35.31791</td>
-              <td class="fs_res" align="right">110 m
-            </td>
-            </tr>
-            <tr>
-              <td class="fs_res">7</td>
-              <td class="fs_res" align="right">19.0 km
-              </td>
-              <td class="fs_res">005</td>
-              <td class="fs_res" align="right">100 m
-            </td>
-              <td class="fs_res">10:00</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -7.63278 Lon: -35.31791</td>
-              <td class="fs_res" align="right">110 m
-            </td>
-            </tr>
-          </tbody>
-        </table>
-        <p>
-                Leading-time ratio: 26%
-              </p>
-        <div class="fs_res" style="page-break-before: always;">
-          <h3>Pilots not yet processed (NYP)</h3>
-          <table class="fs_res">
-            <thead>
-              <tr>
-                <th class="fs_res">Id</th>
-                <th class="fs_res">Name</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="fs_res" align="right">101</td>
-                <td class="fs_res">NINHO LYRA</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">102</td>
-                <td class="fs_res">RODRIGO</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">103</td>
-                <td class="fs_res">PEDRO NETO</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">104</td>
-                <td class="fs_res">ALEX</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">105</td>
-                <td class="fs_res">LUIZ SANTANA - PESQUEIRA -PE</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">106</td>
-                <td class="fs_res">ARDILLES PONCIANO-TORITAMA</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">107</td>
-                <td class="fs_res">DAYLAN</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">109</td>
-                <td class="fs_res">LINDOMAR SOUZA</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">110</td>
-                <td class="fs_res">RONALDO CALADO</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">112</td>
-                <td class="fs_res">UWELFLY</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">113</td>
-                <td class="fs_res">ERIVAN</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">114</td>
-                <td class="fs_res">ROBSON FRANKILIN</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">115</td>
-                <td class="fs_res">ROBINSON PET SHOP </td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">116</td>
-                <td class="fs_res">WESLEY MONERINHO</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">117</td>
-                <td class="fs_res">RAPHAEL ABELHA</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">118</td>
-                <td class="fs_res">THIAGO MARINHO</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">119</td>
-                <td class="fs_res">DIMITRI</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">120</td>
-                <td class="fs_res">DEILSON</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">121</td>
-                <td class="fs_res">FÁBIO MORAIS</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">122</td>
-                <td class="fs_res">ADRIANO ROSA</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">123</td>
-                <td class="fs_res">YULE</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">124</td>
-                <td class="fs_res">MÁRIO MONTEIRO</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">125</td>
-                <td class="fs_res">VITOR SANTOS</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">126</td>
-                <td class="fs_res">WESLEY</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">127</td>
-                <td class="fs_res">TIAGO TIBA</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">128</td>
-                <td class="fs_res">FAFÁ RETIFICA </td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">129</td>
-                <td class="fs_res">EDMILSON RECIFE</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">130</td>
-                <td class="fs_res">EDSON RAMOS</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">131</td>
-                <td class="fs_res">CLAUDIO CLOUD</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">132</td>
-                <td class="fs_res">RAFAEL PALMA</td>
-              </tr>
-              <tr>
-                <td class="fs_res" align="right">133</td>
-                <td class="fs_res">MATHEUS RAMOS</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="fs_res" style="page-break-before: always;">
-          <h3>Task statistics</h3>
-          <table class="fs_res">
-            <thead>
-              <tr>
-                <th class="fs_res">param</th>
-                <th class="fs_res">value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="fs_res">task_distance</td>
-                <td class="fs_res" align="right">19.042</td>
-              </tr>
-              <tr>
-                <td class="fs_res">ss_distance</td>
-                <td class="fs_res" align="right">18.142</td>
-              </tr>
-              <tr>
-                <td class="fs_res">launch_to_ess_distance</td>
-                <td class="fs_res" align="right">18.942</td>
-              </tr>
-              <tr>
-                <td class="fs_res">qnh_setting</td>
-                <td class="fs_res" align="right">1013.25</td>
-              </tr>
-              <tr>
-                <td class="fs_res">no_of_pilots_in_competition</td>
-                <td class="fs_res" align="right">34</td>
-              </tr>
-              <tr>
-                <td class="fs_res">max_time_en_route</td>
-                <td class="fs_res" align="right">00:00:00</td>
-              </tr>
-              <tr>
-                <td class="fs_res">max_time_en_route_tp</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">no_of_pilots_present</td>
-                <td class="fs_res" align="right">3</td>
-              </tr>
-              <tr>
-                <td class="fs_res">no_of_pilots_flying</td>
-                <td class="fs_res" align="right">3</td>
-              </tr>
-              <tr>
-                <td class="fs_res">no_of_pilots_lo</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">no_of_pilots_landed_before_stop</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">sum_dist_over_min</td>
-                <td class="fs_res" align="right">34</td>
-              </tr>
-              <tr>
-                <td class="fs_res">sum_real_dist_over_min</td>
-                <td class="fs_res" align="right">34</td>
-              </tr>
-              <tr>
-                <td class="fs_res">sum_flown_distances</td>
-                <td class="fs_res" align="right">40</td>
-              </tr>
-              <tr>
-                <td class="fs_res">best_dist</td>
-                <td class="fs_res" align="right">19.042</td>
-              </tr>
-              <tr>
-                <td class="fs_res">best_real_dist</td>
-                <td class="fs_res" align="right">19.042</td>
-              </tr>
-              <tr>
-                <td class="fs_res">best_time</td>
-                <td class="fs_res" align="right">0.5336</td>
-              </tr>
-              <tr>
-                <td class="fs_res">last_finisher_start_time</td>
-                <td class="fs_res" align="right">2026-09-12T14:00:05-03:00</td>
-              </tr>
-              <tr>
-                <td class="fs_res">last_start_time</td>
-                <td class="fs_res" align="right">2026-09-12T14:00:05-03:00</td>
-              </tr>
-              <tr>
-                <td class="fs_res">first_start_time</td>
-                <td class="fs_res" align="right">2026-09-12T14:00:01-03:00</td>
-              </tr>
-              <tr>
-                <td class="fs_res">first_finish_time</td>
-                <td class="fs_res" align="right">2026-09-12T14:32:02-03:00</td>
-              </tr>
-              <tr>
-                <td class="fs_res">last_ss_finish_time</td>
-                <td class="fs_res" align="right">2026-09-12T14:35:04-03:00</td>
-              </tr>
-              <tr>
-                <td class="fs_res">no_of_pilots_reaching_es</td>
-                <td class="fs_res" align="right">2</td>
-              </tr>
-              <tr>
-                <td class="fs_res">no_of_pilots_reaching_goal</td>
-                <td class="fs_res" align="right">2</td>
-              </tr>
-              <tr>
-                <td class="fs_res">max_time_to_get_time_points</td>
-                <td class="fs_res" align="right">1.2641</td>
-              </tr>
-              <tr>
-                <td class="fs_res">goalratio</td>
-                <td class="fs_res" align="right">0.6667</td>
-              </tr>
-              <tr>
-                <td class="fs_res">arrival_weight</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">departure_weight</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">leading_weight</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">time_weight</td>
-                <td class="fs_res" align="right">0.6226</td>
-              </tr>
-              <tr>
-                <td class="fs_res">distance_weight</td>
-                <td class="fs_res" align="right">0.3774</td>
-              </tr>
-              <tr>
-                <td class="fs_res">smallest_leading_coefficient</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">available_points_distance</td>
-                <td class="fs_res" align="right">377.4</td>
-              </tr>
-              <tr>
-                <td class="fs_res">available_points_time</td>
-                <td class="fs_res" align="right">622.6</td>
-              </tr>
-              <tr>
-                <td class="fs_res">available_points_departure</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">available_points_leading</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">available_points_arrival</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">time_validity</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">launch_validity</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">distance_validity</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">stop_validity</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">day_quality</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">ftv_day_validity</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">time_points_stop_correction</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">counts_for_competition</td>
-                <td class="fs_res" align="right">True</td>
-              </tr>
-              <tr>
-                <td class="fs_res">validity_below_minimum_to_count_for_competition</td>
-                <td class="fs_res" align="right">False</td>
-              </tr>
-            </tbody>
-          </table>
-          <h3>Scoring formula settings</h3>
-          <table class="fs_res">
-            <thead>
-              <tr>
-                <th class="fs_res">param</th>
-                <th class="fs_res">value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="fs_res">id</td>
-                <td class="fs_res" align="right">GAP2026</td>
-              </tr>
-              <tr>
-                <td class="fs_res">is_pg_comp</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">fai_sanctioning</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">ftv_factor</td>
-                <td class="fs_res" align="right">0.25</td>
-              </tr>
-              <tr>
-                <td class="fs_res">day_quality_override</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">bonus_gr</td>
-                <td class="fs_res" align="right">2</td>
-              </tr>
-              <tr>
-                <td class="fs_res">jump_the_gun_factor</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">jump_the_gun_max</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">min_dist</td>
-                <td class="fs_res" align="right">3</td>
-              </tr>
-              <tr>
-                <td class="fs_res">nom_dist</td>
-                <td class="fs_res" align="right">12</td>
-              </tr>
-              <tr>
-                <td class="fs_res">nom_goal</td>
-                <td class="fs_res" align="right">0.3</td>
-              </tr>
-              <tr>
-                <td class="fs_res">nom_launch</td>
-                <td class="fs_res" align="right">0.96</td>
-              </tr>
-              <tr>
-                <td class="fs_res">nom_time</td>
-                <td class="fs_res" align="right">0.333333333333333</td>
-              </tr>
-              <tr>
-                <td class="fs_res">normalize_1000_before_day_quality</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">time_points_if_not_in_goal</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_arrival_position_points</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_arrival_time_points</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_departure_points</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_difficulty_for_distance_points</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_distance_points</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_leading_points</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_semi_circle_control_zone_for_goal_line</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_time_points</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">scoring_altitude</td>
-                <td class="fs_res" align="right">GPS</td>
-              </tr>
-              <tr>
-                <td class="fs_res">final_glide_decelerator</td>
-                <td class="fs_res" align="right">none</td>
-              </tr>
-              <tr>
-                <td class="fs_res">no_final_glide_decelerator_reason</td>
-                <td class="fs_res" align="right">
-                </td>
-              </tr>
-              <tr>
-                <td class="fs_res">min_time_span_for_valid_task</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">score_back_time</td>
-                <td class="fs_res" align="right">5</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_proportional_leading_weight_if_nobody_in_goal</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">leading_weight_factor</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">turnpoint_radius_tolerance</td>
-                <td class="fs_res" align="right">0.002</td>
-              </tr>
-              <tr>
-                <td class="fs_res">turnpoint_radius_minimum_absolute_tolerance</td>
-                <td class="fs_res" align="right">5</td>
-              </tr>
-              <tr>
-                <td class="fs_res">number_of_decimals_task_results</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">number_of_decimals_competition_results</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">redistribute_removed_time_points_as_distance_points</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_best_score_for_ftv_validity</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_constant_leading_weight</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_flat_decline_of_timepoints</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">use_leading_time_ratio</td>
-                <td class="fs_res" align="right">1</td>
-              </tr>
-              <tr>
-                <td class="fs_res">optimize_ss_alone</td>
-                <td class="fs_res" align="right">0</td>
-              </tr>
-              <tr>
-                <td class="fs_res">minimum_validity_to_count_stopped_task</td>
-                <td class="fs_res" align="right">0.05</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="fs_res" style="width:100%;font-size: xx-small;"></div>
-      <div class="fs_res" style="width:100%;font-size: x-small;">
-        <p>
-              Apurador: Arthur Grandini Rodella (Tutu)
-            </p>
-      </div>
-    </div>
-    <script>
-          (function() {
-            // Encontra a tabela de pilotos — a que contém "Lead." no cabecalho
-            var pilotTable = null;
-            var tables = document.querySelectorAll('table.fs_res');
-            for (var i = 0; i < tables.length; i++) {
-              if (tables[i].textContent.indexOf('Lead.') !== -1) { pilotTable = tables[i]; break; }
-            }
-            if (!pilotTable) return;
-
-            // Indice da coluna — procura th cujo texto contém o termo mas NÃO contém excludeText
-            function colIndex(text, excludeText) {
-              var ths = pilotTable.querySelectorAll('thead th');
-              for (var i = 0; i < ths.length; i++) {
-                var t = ths[i].textContent.replace(/\s+/g,' ').trim();
-                if (t.indexOf(text) !== -1 && (!excludeText || t.indexOf(excludeText) === -1)) return i;
-              }
-              return -1;
-            }
-
-            // Negrito e destaque na celula com valor maximo
-            function boldMax(colIdx) {
-              if (colIdx < 0) return;
-              var rows = pilotTable.querySelectorAll('tr');
-              var maxVal = -1, maxCells = [];
-              rows.forEach(function(row) {
-                var cell = row.querySelectorAll('td')[colIdx];
-                if (!cell) return;
-                var val = parseFloat(cell.textContent.replace(',','.').trim());
-                if (!isNaN(val) && val > 0) {
-                  if (val > maxVal) { maxVal = val; maxCells = [cell]; }
-                  else if (val === maxVal) { maxCells.push(cell); }
-                }
-              });
-              maxCells.forEach(function(c) {
-                c.style.fontWeight = 'bold';
-              });
-            }
-
-            // 'Lead.' unico, sem ambiguidade
-            boldMax(colIndex('Lead.', null));
-            // 'Time' excluindo '[' para evitar coluna 'Time [h:m:s]'
-            boldMax(colIndex('Time', '['));
-          })();
-        </script>
-    </div>
-
     <div class="pc-overlay" id="pcOverlay"></div>
     <div class="pilot-card" id="pilotCard">
       <div id="pcPhotoWrap"></div>
@@ -958,10 +570,7 @@
       <div class="pc-lbl">Parapente</div>
       <div class="pc-val" id="pcGlider"></div>
       <div class="pc-lbl">Sponsor</div>
-      <div class="pc-val" id="pcSponsor"></div>
-      <div class="pc-lbl">Total</div>
-      <div class="pc-val" id="pcTotal"></div>
-      <div style="text-align:center"><span class="pc-status" id="pcStatus"></span></div><button class="pc-bio-btn" id="pcBioBtn" style="display:none" onclick="toggleBio()">📋 Biografia</button><div class="pc-bio-panel" id="pcBioPanel">
+      <div class="pc-val" id="pcSponsor"></div><button class="pc-bio-btn" id="pcBioBtn" style="display:none" onclick="toggleBio()">📋 Biografia</button><div class="pc-bio-panel" id="pcBioPanel">
         <div class="pc-bio-loading" id="pcBioLoading">Carregando...</div>
         <div id="pcBioContent" style="display:none">
           <div class="pc-bio-lbl">Cidade - UF</div>
@@ -1008,7 +617,6 @@
               cbs.forEach(function(cb) { cb(); });
             }
 
-            // Metodo 1: fetch() CSV (funciona em https e na maioria dos casos)
             function tryFetchCsv() {
               if (!window.fetch) return;
               fetch(CSV_URL).then(function(r) { return r.text(); }).then(function(text) {
@@ -1017,20 +625,19 @@
                   if (!line.trim()) return;
                   var cols = parseCsv(line);
                   var id = cols[2] ? cols[2].trim() : '';
-                  if (id && !map[id]) map[id] = { escola:cols[3]||'', inicio:cols[4]||'', reta:cols[5]||'', triangulo:cols[6]||'', conquistas:cols[7]||'', sobre:cols[8]||'', cidade:cols[10]||'', instagram:cols[12]||'' };
+                  if (id && !map[id]) map[id] = { cidade:cols[10]||'', escola:cols[3]||'', inicio:cols[4]||'', reta:cols[5]||'', triangulo:cols[6]||'', conquistas:cols[7]||'', sobre:cols[8]||'', instagram:cols[12]||'' };
                 });
                 setBioMap(map);
               }).catch(function(){});
             }
 
-            // Metodo 2: JSONP gviz (funciona em file://)
             window.bioDataCallback = function(data) {
               var map = {};
               try {
                 (data.table.rows || []).forEach(function(r) {
                   var id = r.c[2] && r.c[2].v != null ? String(r.c[2].v).split('.')[0] : null;
                   if (!id) return;
-                  if (!map[id]) map[id] = { escola:r.c[3]?(r.c[3].v||''):'', inicio:r.c[4]?(r.c[4].v||''):'', reta:r.c[5]?(r.c[5].v||''):'', triangulo:r.c[6]?(r.c[6].v||''):'', conquistas:r.c[7]?(r.c[7].v||''):'', sobre:r.c[8]?(r.c[8].v||''):'', cidade:r.c[10]?(r.c[10].v||''):'', instagram:r.c[12]?(r.c[12].v||''):'' };
+                  if (!map[id]) map[id] = { cidade:r.c[10]?(r.c[10].v||''):'', escola:r.c[3]?(r.c[3].v||''):'', inicio:r.c[4]?(r.c[4].v||''):'', reta:r.c[5]?(r.c[5].v||''):'', triangulo:r.c[6]?(r.c[6].v||''):'', conquistas:r.c[7]?(r.c[7].v||''):'', sobre:r.c[8]?(r.c[8].v||''):'', instagram:r.c[12]?(r.c[12].v||''):'' };
                 });
               } catch(e) {}
               setBioMap(map);
@@ -1047,7 +654,6 @@
               bioWaiters.push(function() { cb(bioMap[String(id)] || null); });
             }
 
-            // Dispara ambos em paralelo - o primeiro que responder vence
             tryFetchCsv();
             injectGviz();
 
@@ -1070,10 +676,6 @@
               document.getElementById('pcId').textContent      = d.id;
               document.getElementById('pcGlider').textContent  = d.glider;
               document.getElementById('pcSponsor').textContent = d.sponsor;
-              document.getElementById('pcTotal').textContent   = d.total ? d.total + ' pts' : '—';
-              var st = document.getElementById('pcStatus');
-              st.textContent = d.status; st.className = 'pc-status pcs-' + d.status;
-              // Mostra o botao Biografia somente se o piloto tiver cadastro
               getBio(d.id, function(bio) {
                 if (d.id !== currentId) return;
                 if (bio) document.getElementById('pcBioBtn').style.display = 'block';
@@ -1088,12 +690,12 @@
               panel.classList.add('visible');
               getBio(currentId, function(bio) {
                 if (!bio) { loading.textContent = 'Biografia não cadastrada.'; return; }
-                document.getElementById('bioEscola').textContent     = bio.escola      || '—';
-                document.getElementById('bioInicio').textContent     = bio.inicio      || '—';
-                document.getElementById('bioReta').textContent       = bio.reta        || '—';
-                document.getElementById('bioTri').textContent        = bio.triangulo   || '—';
-                document.getElementById('bioConquistas').textContent = bio.conquistas  || '—';
-                document.getElementById('bioCidade').textContent      = bio.cidade       || '—';
+                document.getElementById('bioCidade').textContent      = bio.cidade      || '—';
+                document.getElementById('bioEscola').textContent      = bio.escola      || '—';
+                document.getElementById('bioInicio').textContent      = bio.inicio      || '—';
+                document.getElementById('bioReta').textContent        = bio.reta        || '—';
+                document.getElementById('bioTri').textContent         = bio.triangulo   || '—';
+                document.getElementById('bioConquistas').textContent  = bio.conquistas  || '—';
                 document.getElementById('bioSobre').textContent       = bio.sobre       || '—';
                 var igLink = document.getElementById('bioIgLink');
                 if (bio.instagram) {
@@ -1127,14 +729,13 @@
             function hide()         { cancelHide(); card.classList.remove('visible'); overlay.classList.remove('visible'); }
             function isMobile()     { return window.matchMedia('(hover: none)').matches; }
 
-            // O card permanece aberto quando o mouse esta sobre ele
             card.addEventListener('mouseenter', cancelHide);
             card.addEventListener('mouseleave', function() { if (!isMobile()) scheduleHide(); });
 
             document.querySelectorAll('.pilot-name').forEach(function(el) {
               el.addEventListener('mouseenter', function(e) {
                 if (isMobile()) return;
-                cancelHide(); populate(el); card.classList.add('visible'); pos(e.clientX, e.clientY);
+                cancelHide(); populate(el); pos(e.clientX, e.clientY); card.classList.add('visible');
               });
               el.addEventListener('mousemove', function(e) {
                 if (isMobile() || !card.classList.contains('visible')) return; pos(e.clientX, e.clientY);
@@ -1143,97 +744,11 @@
               el.addEventListener('click', function(e) {
                 if (!isMobile()) return; e.stopPropagation();
                 if (card.classList.contains('visible')) { hide(); return; }
-                populate(el); card.classList.add('visible'); overlay.classList.add('visible'); pos(e.clientX, e.clientY);
+                populate(el); pos(e.clientX, e.clientY); card.classList.add('visible'); overlay.classList.add('visible');
               });
             });
+
             overlay.addEventListener('click', hide);
           })();
-        </script>
-
-    <script>
-      var FOOTER_TEXT = {"open": ""};
-      var CAT_H2 = {"open": "Task 1: OPEN"};
-
-      function showTab(catId) {
-        var pilotTableEl   = document.getElementById('pilotTable');
-        var footerElToggle = document.getElementById('footer-filter-text');
-        var statsPanelEl   = document.getElementById('statsPanel');
-        var extrasEl       = document.getElementById('taskExtras');
-
-        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-
-        pilotTableEl.style.display   = 'none';
-        footerElToggle.style.display = 'none';
-        statsPanelEl.style.display   = 'none';
-        if (extrasEl)     extrasEl.style.display     = 'none';
-
-        if (catId === 'stats') {
-          document.getElementById('btn-stats').classList.add('active');
-          statsPanelEl.style.display = 'block';
-          renderStats(); window.scrollTo(0, 0); return;
-        }
-
-        document.getElementById('btn-' + catId).classList.add('active');
-        pilotTableEl.style.display   = '';
-        footerElToggle.style.display = '';
-        if (extrasEl) extrasEl.style.display = '';
-        var rows = document.querySelectorAll('#pilotTbody tr');
-        rows.forEach(function(row) {
-          var rankAttr = 'data-rank-' + catId;
-          if (row.hasAttribute(rankAttr)) {
-            row.classList.remove('cat-hidden');
-            var rc = row.querySelector('.rank-cell'); if (rc) rc.textContent = row.getAttribute(rankAttr);
-          } else { row.classList.add('cat-hidden'); }
-        });
-        var h2 = document.getElementById('task-h2'); if (h2) h2.textContent = CAT_H2[catId];
-        var footerEl = document.getElementById('footer-filter-text'); footerEl.textContent = FOOTER_TEXT[catId];
-        window.scrollTo(0, 0);
-      }
-
-      function renderStats() {
-        var rows = document.querySelectorAll('#pilotTbody tr');
-        var total = rows.length, genderCount = {}, natCount = {}, gliderCount = {}, mfrCount = {}, catCount = {}, seleteCount = {};
-        var catOrder = ['CCC','D','C','B','A'], bracketToCat = {'E':'CCC','D':'D','C':'C','B':'B','A':'A'}, genderLabel = {'M':'Masculino','F':'Feminino'};
-        rows.forEach(function(row) {
-          var tds = row.querySelectorAll('td.fs_res');
-          var gender = tds[3] ? tds[3].textContent.trim() : '';
-          var natCell = tds[4] || null;
-          var natImg = natCell ? natCell.querySelector('img') : null;
-          var nat = natImg
-            ? (natImg.getAttribute('title') || natImg.getAttribute('alt') || '').trim()
-            : (natCell ? natCell.textContent.trim() : '');
-          var glider = tds[5] ? tds[5].textContent.trim() : '';
-          var gl = genderLabel[gender] || gender || '(não informado)'; genderCount[gl] = (genderCount[gl]||0)+1;
-          var nl = nat || '(não informado)'; natCount[nl] = (natCount[nl]||0)+1;
-          var gll = (glider.indexOf(' / ') !== -1 ? glider.split(' / ')[0] : glider) || '(não informado)'; gliderCount[gll] = (gliderCount[gll]||0)+1;
-          var slt = glider.indexOf(' / ') !== -1 ? glider.split(' / ')[1].trim() : '(não informado)'; if (!slt) slt = '(não informado)'; seleteCount[slt] = (seleteCount[slt]||0)+1;
-          var m = glider.match(/^\[([A-Za-z]+)\]/); var ck = m ? (bracketToCat[m[1].toUpperCase()]||m[1].toUpperCase()) : '(não informado)'; catCount[ck] = (catCount[ck]||0)+1;
-          var ab = glider.replace(/^\[[A-Za-z]+\]\s*/,'').replace(/^[^A-Za-z0-9]+/,''); var ml = ab ? ab.split(/\s*-\s*/)[0].trim() : '(não informado)'; if(!ml) ml='(não informado)'; mfrCount[ml]=(mfrCount[ml]||0)+1;
-        });
-        function pct(n){ return total?(n/total*100).toFixed(1).replace('.',',')+('%'):'0%'; }
-        var IOC_TO_A2 = {AFG:"af",ALB:"al",ALG:"dz",AND:"ad",ANG:"ao",ANT:"ag",ARG:"ar",ARM:"am",ARU:"aw",ASA:"as",AUS:"au",AUT:"at",AZE:"az",BAH:"bs",BAN:"bd",BAR:"bb",BDI:"bi",BEL:"be",BEN:"bj",BER:"bm",BHU:"bt",BIH:"ba",BIZ:"bz",BLR:"by",BOL:"bo",BOT:"bw",BRA:"br",BRN:"bh",BRU:"bn",BUL:"bg",BUR:"bf",CAF:"cf",CAM:"kh",CAN:"ca",CAY:"ky",CGO:"cg",CHA:"td",CHI:"cl",CHN:"cn",CIV:"ci",CMR:"cm",COD:"cd",COK:"ck",COL:"co",COM:"km",CPV:"cv",CRC:"cr",CRO:"hr",CUB:"cu",CYP:"cy",CZE:"cz",DEN:"dk",DJI:"dj",DMA:"dm",DOM:"do",ECU:"ec",EGY:"eg",ERI:"er",ESA:"sv",ESP:"es",EST:"ee",ETH:"et",FIJ:"fj",FIN:"fi",FRA:"fr",FSM:"fm",GAB:"ga",GAM:"gm",GBR:"gb",GBS:"gw",GEO:"ge",GEQ:"gq",GER:"de",GHA:"gh",GRE:"gr",GRN:"gd",GUA:"gt",GUI:"gn",GUM:"gu",GUY:"gy",HAI:"ht",HKG:"hk",HON:"hn",HUN:"hu",INA:"id",IND:"in",IRI:"ir",IRL:"ie",IRQ:"iq",ISL:"is",ISR:"il",ISV:"vi",ITA:"it",IVB:"vg",JAM:"jm",JOR:"jo",JPN:"jp",KAZ:"kz",KEN:"ke",KGZ:"kg",KIR:"ki",KOR:"kr",KOS:"xk",KSA:"sa",KUW:"kw",LAO:"la",LAT:"lv",LBA:"ly",LBN:"lb",LBR:"lr",LCA:"lc",LES:"ls",LIE:"li",LTU:"lt",LUX:"lu",MAD:"mg",MAR:"ma",MAS:"my",MAW:"mw",MDA:"md",MDV:"mv",MEX:"mx",MGL:"mn",MHL:"mh",MKD:"mk",MLI:"ml",MLT:"mt",MNE:"me",MON:"mc",MOZ:"mz",MRI:"mu",MTN:"mr",MYA:"mm",NAM:"na",NCA:"ni",NED:"nl",NEP:"np",NGR:"ng",NIG:"ne",NIU:"nu",NOR:"no",NRU:"nr",NZL:"nz",OMA:"om",PAK:"pk",PAN:"pa",PAR:"py",PER:"pe",PHI:"ph",PLE:"ps",PLW:"pw",PNG:"pg",POL:"pl",POR:"pt",PRK:"kp",PUR:"pr",QAT:"qa",ROU:"ro",RSA:"za",RUS:"ru",RWA:"rw",SAM:"ws",SEN:"sn",SEY:"sc",SGP:"sg",SKN:"kn",SLE:"sl",SLO:"si",SMR:"sm",SOL:"sb",SOM:"so",SRB:"rs",SRI:"lk",SSD:"ss",STP:"st",SUD:"sd",SUI:"ch",SUR:"sr",SVK:"sk",SWE:"se",SWZ:"sz",SYR:"sy",TAN:"tz",TGA:"to",THA:"th",TJK:"tj",TKM:"tm",TLS:"tl",TOG:"tg",TPE:"tw",TTO:"tt",TUN:"tn",TUR:"tr",TUV:"tv",UAE:"ae",UGA:"ug",UKR:"ua",URU:"uy",USA:"us",UZB:"uz",VAN:"vu",VAT:"va",VEN:"ve",VIE:"vn",VIN:"vc",YEM:"ye",ZAM:"zm",ZIM:"zw"};
-        function natLabelHtml(code) {
-          if (code === '(não informado)') return code;
-          var a2 = IOC_TO_A2[code];
-          var flag = a2 ? '<img src="https://flagcdn.com/h20/' + a2 + '.png" alt="' + code + '" title="' + code + '" class="flag_icon"> ' : '';
-          return flag + code;
-        }
-        function fillTable(id, obj, sortFn, labelFn) {
-          var tbody = document.querySelector('#'+id+' tbody');
-          var entries = Object.keys(obj).map(function(k){return[k,obj[k]];});
-          entries.sort(sortFn||function(a,b){return b[1]-a[1];});
-          tbody.innerHTML = entries.map(function(e){ var label = labelFn ? labelFn(e[0]) : e[0]; return '<tr class="fs_res_res_row" onmouseover="this.classList.add(\'hover\')" onmouseout="this.classList.remove(\'hover\')"><td class="fs_res">'+label+'</td><td class="fs_res" align="right">'+e[1]+'</td><td class="fs_res" align="right">'+pct(e[1])+'</td></tr>'; }).join('');
-        }
-        document.getElementById('stats-total').textContent = 'Total de pilotos: ' + total;
-        fillTable('stats-gender', genderCount);
-        fillTable('stats-nat', natCount, null, natLabelHtml);
-        fillTable('stats-glider', gliderCount);
-        fillTable('stats-selete', seleteCount);
-        fillTable('stats-mfr', mfrCount);
-        fillTable('stats-cat', catCount, function(a,b){ var ai=catOrder.indexOf(a[0]); if(ai===-1)ai=999; var bi=catOrder.indexOf(b[0]); if(bi===-1)bi=999; return ai-bi; });
-      }
-
-      showTab('open');
-    </script>
-  </body>
+        </script></body>
 </html>
