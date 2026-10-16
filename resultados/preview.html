@@ -1,7 +1,347 @@
-<!DOCTYPE html><html>
-  <head>
-    <META http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <style>
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+  <!--  To see the input used for this xslt, check the "Create source.xml file 
+        when creating report" menu item under the "Reports" menu in FsComp.
+        When checked a .source.xml file is created each time you create a report.
+        It shows the actual xml input to the xslt processor.
+        This is helpfull if you like to modify this file.
+  -->
+
+  <xsl:output method="html" encoding="utf-8" indent="yes" />
+
+  <!--  Set the decimal separator to be used (. or ,) when decimal data is displayed.
+        All decimal data in the source is with . and will be displayed with . unless
+        formated otherwise using format-number() function.
+  -->
+  <xsl:variable name="decimal_separator" select="'.'"/>
+  <xsl:decimal-format decimal-separator='.' grouping-separator=' ' />
+  <!-- note! make sure both above use same, ie either . or ,!! -->
+
+  <!--  All <xsl:param ... elements will show as a field in a report dialog in 
+        FS when creating reports. This means you can define param elements here 
+        with a default value and set the value from FS when creating report.
+        Some is used simply to display text at the top of the report (ie status), 
+        others is used to filter the results (ie women_only, nation, ...).
+        If you add filter params you must of course also change the "filter"
+        definition below so that the filter params is applied.
+  -->
+  <xsl:param name="Heading">Lista dos Pilotos (Atualizada 16/10/2026)</xsl:param>
+  <!-- filter params -->
+  <!-- sort_on possible values: name, id, CIVLID -->
+  <xsl:param name="sort_on">name</xsl:param>
+
+  <xsl:param name="women_only">0</xsl:param>
+  <xsl:param name="nation"></xsl:param>
+  <xsl:param name="custom_pilot_attribute_name"></xsl:param>
+  <xsl:param name="custom_pilot_attribute_value"></xsl:param>
+
+  <!-- Converte codigo de nacionalidade IOC (ex: BRA, GER, NED, SUI) para ISO 3166-1 alpha-2 (ex: br, de, nl, ch), usado pelo flagcdn.com -->
+  <xsl:template name="nat_code_a2">
+    <xsl:param name="ioc"/>
+    <xsl:choose>
+      <xsl:when test="$ioc='AFG'">af</xsl:when>
+      <xsl:when test="$ioc='ALB'">al</xsl:when>
+      <xsl:when test="$ioc='ALG'">dz</xsl:when>
+      <xsl:when test="$ioc='AND'">ad</xsl:when>
+      <xsl:when test="$ioc='ANG'">ao</xsl:when>
+      <xsl:when test="$ioc='ANT'">ag</xsl:when>
+      <xsl:when test="$ioc='ARG'">ar</xsl:when>
+      <xsl:when test="$ioc='ARM'">am</xsl:when>
+      <xsl:when test="$ioc='ARU'">aw</xsl:when>
+      <xsl:when test="$ioc='ASA'">as</xsl:when>
+      <xsl:when test="$ioc='AUS'">au</xsl:when>
+      <xsl:when test="$ioc='AUT'">at</xsl:when>
+      <xsl:when test="$ioc='AZE'">az</xsl:when>
+      <xsl:when test="$ioc='BAH'">bs</xsl:when>
+      <xsl:when test="$ioc='BAN'">bd</xsl:when>
+      <xsl:when test="$ioc='BAR'">bb</xsl:when>
+      <xsl:when test="$ioc='BDI'">bi</xsl:when>
+      <xsl:when test="$ioc='BEL'">be</xsl:when>
+      <xsl:when test="$ioc='BEN'">bj</xsl:when>
+      <xsl:when test="$ioc='BER'">bm</xsl:when>
+      <xsl:when test="$ioc='BHU'">bt</xsl:when>
+      <xsl:when test="$ioc='BIH'">ba</xsl:when>
+      <xsl:when test="$ioc='BIZ'">bz</xsl:when>
+      <xsl:when test="$ioc='BLR'">by</xsl:when>
+      <xsl:when test="$ioc='BOL'">bo</xsl:when>
+      <xsl:when test="$ioc='BOT'">bw</xsl:when>
+      <xsl:when test="$ioc='BRA'">br</xsl:when>
+      <xsl:when test="$ioc='BRN'">bh</xsl:when>
+      <xsl:when test="$ioc='BRU'">bn</xsl:when>
+      <xsl:when test="$ioc='BUL'">bg</xsl:when>
+      <xsl:when test="$ioc='BUR'">bf</xsl:when>
+      <xsl:when test="$ioc='CAF'">cf</xsl:when>
+      <xsl:when test="$ioc='CAM'">kh</xsl:when>
+      <xsl:when test="$ioc='CAN'">ca</xsl:when>
+      <xsl:when test="$ioc='CAY'">ky</xsl:when>
+      <xsl:when test="$ioc='CGO'">cg</xsl:when>
+      <xsl:when test="$ioc='CHA'">td</xsl:when>
+      <xsl:when test="$ioc='CHI'">cl</xsl:when>
+      <xsl:when test="$ioc='CHN'">cn</xsl:when>
+      <xsl:when test="$ioc='CIV'">ci</xsl:when>
+      <xsl:when test="$ioc='CMR'">cm</xsl:when>
+      <xsl:when test="$ioc='COD'">cd</xsl:when>
+      <xsl:when test="$ioc='COK'">ck</xsl:when>
+      <xsl:when test="$ioc='COL'">co</xsl:when>
+      <xsl:when test="$ioc='COM'">km</xsl:when>
+      <xsl:when test="$ioc='CPV'">cv</xsl:when>
+      <xsl:when test="$ioc='CRC'">cr</xsl:when>
+      <xsl:when test="$ioc='CRO'">hr</xsl:when>
+      <xsl:when test="$ioc='CUB'">cu</xsl:when>
+      <xsl:when test="$ioc='CYP'">cy</xsl:when>
+      <xsl:when test="$ioc='CZE'">cz</xsl:when>
+      <xsl:when test="$ioc='DEN'">dk</xsl:when>
+      <xsl:when test="$ioc='DJI'">dj</xsl:when>
+      <xsl:when test="$ioc='DMA'">dm</xsl:when>
+      <xsl:when test="$ioc='DOM'">do</xsl:when>
+      <xsl:when test="$ioc='ECU'">ec</xsl:when>
+      <xsl:when test="$ioc='EGY'">eg</xsl:when>
+      <xsl:when test="$ioc='ERI'">er</xsl:when>
+      <xsl:when test="$ioc='ESA'">sv</xsl:when>
+      <xsl:when test="$ioc='ESP'">es</xsl:when>
+      <xsl:when test="$ioc='EST'">ee</xsl:when>
+      <xsl:when test="$ioc='ETH'">et</xsl:when>
+      <xsl:when test="$ioc='FIJ'">fj</xsl:when>
+      <xsl:when test="$ioc='FIN'">fi</xsl:when>
+      <xsl:when test="$ioc='FRA'">fr</xsl:when>
+      <xsl:when test="$ioc='FSM'">fm</xsl:when>
+      <xsl:when test="$ioc='GAB'">ga</xsl:when>
+      <xsl:when test="$ioc='GAM'">gm</xsl:when>
+      <xsl:when test="$ioc='GBR'">gb</xsl:when>
+      <xsl:when test="$ioc='GBS'">gw</xsl:when>
+      <xsl:when test="$ioc='GEO'">ge</xsl:when>
+      <xsl:when test="$ioc='GEQ'">gq</xsl:when>
+      <xsl:when test="$ioc='GER'">de</xsl:when>
+      <xsl:when test="$ioc='GHA'">gh</xsl:when>
+      <xsl:when test="$ioc='GRE'">gr</xsl:when>
+      <xsl:when test="$ioc='GRN'">gd</xsl:when>
+      <xsl:when test="$ioc='GUA'">gt</xsl:when>
+      <xsl:when test="$ioc='GUI'">gn</xsl:when>
+      <xsl:when test="$ioc='GUM'">gu</xsl:when>
+      <xsl:when test="$ioc='GUY'">gy</xsl:when>
+      <xsl:when test="$ioc='HAI'">ht</xsl:when>
+      <xsl:when test="$ioc='HKG'">hk</xsl:when>
+      <xsl:when test="$ioc='HON'">hn</xsl:when>
+      <xsl:when test="$ioc='HUN'">hu</xsl:when>
+      <xsl:when test="$ioc='INA'">id</xsl:when>
+      <xsl:when test="$ioc='IND'">in</xsl:when>
+      <xsl:when test="$ioc='IRI'">ir</xsl:when>
+      <xsl:when test="$ioc='IRL'">ie</xsl:when>
+      <xsl:when test="$ioc='IRQ'">iq</xsl:when>
+      <xsl:when test="$ioc='ISL'">is</xsl:when>
+      <xsl:when test="$ioc='ISR'">il</xsl:when>
+      <xsl:when test="$ioc='ISV'">vi</xsl:when>
+      <xsl:when test="$ioc='ITA'">it</xsl:when>
+      <xsl:when test="$ioc='IVB'">vg</xsl:when>
+      <xsl:when test="$ioc='JAM'">jm</xsl:when>
+      <xsl:when test="$ioc='JOR'">jo</xsl:when>
+      <xsl:when test="$ioc='JPN'">jp</xsl:when>
+      <xsl:when test="$ioc='KAZ'">kz</xsl:when>
+      <xsl:when test="$ioc='KEN'">ke</xsl:when>
+      <xsl:when test="$ioc='KGZ'">kg</xsl:when>
+      <xsl:when test="$ioc='KIR'">ki</xsl:when>
+      <xsl:when test="$ioc='KOR'">kr</xsl:when>
+      <xsl:when test="$ioc='KOS'">xk</xsl:when>
+      <xsl:when test="$ioc='KSA'">sa</xsl:when>
+      <xsl:when test="$ioc='KUW'">kw</xsl:when>
+      <xsl:when test="$ioc='LAO'">la</xsl:when>
+      <xsl:when test="$ioc='LAT'">lv</xsl:when>
+      <xsl:when test="$ioc='LBA'">ly</xsl:when>
+      <xsl:when test="$ioc='LBN'">lb</xsl:when>
+      <xsl:when test="$ioc='LBR'">lr</xsl:when>
+      <xsl:when test="$ioc='LCA'">lc</xsl:when>
+      <xsl:when test="$ioc='LES'">ls</xsl:when>
+      <xsl:when test="$ioc='LIE'">li</xsl:when>
+      <xsl:when test="$ioc='LTU'">lt</xsl:when>
+      <xsl:when test="$ioc='LUX'">lu</xsl:when>
+      <xsl:when test="$ioc='MAD'">mg</xsl:when>
+      <xsl:when test="$ioc='MAR'">ma</xsl:when>
+      <xsl:when test="$ioc='MAS'">my</xsl:when>
+      <xsl:when test="$ioc='MAW'">mw</xsl:when>
+      <xsl:when test="$ioc='MDA'">md</xsl:when>
+      <xsl:when test="$ioc='MDV'">mv</xsl:when>
+      <xsl:when test="$ioc='MEX'">mx</xsl:when>
+      <xsl:when test="$ioc='MGL'">mn</xsl:when>
+      <xsl:when test="$ioc='MHL'">mh</xsl:when>
+      <xsl:when test="$ioc='MKD'">mk</xsl:when>
+      <xsl:when test="$ioc='MLI'">ml</xsl:when>
+      <xsl:when test="$ioc='MLT'">mt</xsl:when>
+      <xsl:when test="$ioc='MNE'">me</xsl:when>
+      <xsl:when test="$ioc='MON'">mc</xsl:when>
+      <xsl:when test="$ioc='MOZ'">mz</xsl:when>
+      <xsl:when test="$ioc='MRI'">mu</xsl:when>
+      <xsl:when test="$ioc='MTN'">mr</xsl:when>
+      <xsl:when test="$ioc='MYA'">mm</xsl:when>
+      <xsl:when test="$ioc='NAM'">na</xsl:when>
+      <xsl:when test="$ioc='NCA'">ni</xsl:when>
+      <xsl:when test="$ioc='NED'">nl</xsl:when>
+      <xsl:when test="$ioc='NEP'">np</xsl:when>
+      <xsl:when test="$ioc='NGR'">ng</xsl:when>
+      <xsl:when test="$ioc='NIG'">ne</xsl:when>
+      <xsl:when test="$ioc='NIU'">nu</xsl:when>
+      <xsl:when test="$ioc='NOR'">no</xsl:when>
+      <xsl:when test="$ioc='NRU'">nr</xsl:when>
+      <xsl:when test="$ioc='NZL'">nz</xsl:when>
+      <xsl:when test="$ioc='OMA'">om</xsl:when>
+      <xsl:when test="$ioc='PAK'">pk</xsl:when>
+      <xsl:when test="$ioc='PAN'">pa</xsl:when>
+      <xsl:when test="$ioc='PAR'">py</xsl:when>
+      <xsl:when test="$ioc='PER'">pe</xsl:when>
+      <xsl:when test="$ioc='PHI'">ph</xsl:when>
+      <xsl:when test="$ioc='PLE'">ps</xsl:when>
+      <xsl:when test="$ioc='PLW'">pw</xsl:when>
+      <xsl:when test="$ioc='PNG'">pg</xsl:when>
+      <xsl:when test="$ioc='POL'">pl</xsl:when>
+      <xsl:when test="$ioc='POR'">pt</xsl:when>
+      <xsl:when test="$ioc='PRK'">kp</xsl:when>
+      <xsl:when test="$ioc='PUR'">pr</xsl:when>
+      <xsl:when test="$ioc='QAT'">qa</xsl:when>
+      <xsl:when test="$ioc='ROU'">ro</xsl:when>
+      <xsl:when test="$ioc='RSA'">za</xsl:when>
+      <xsl:when test="$ioc='RUS'">ru</xsl:when>
+      <xsl:when test="$ioc='RWA'">rw</xsl:when>
+      <xsl:when test="$ioc='SAM'">ws</xsl:when>
+      <xsl:when test="$ioc='SEN'">sn</xsl:when>
+      <xsl:when test="$ioc='SEY'">sc</xsl:when>
+      <xsl:when test="$ioc='SGP'">sg</xsl:when>
+      <xsl:when test="$ioc='SKN'">kn</xsl:when>
+      <xsl:when test="$ioc='SLE'">sl</xsl:when>
+      <xsl:when test="$ioc='SLO'">si</xsl:when>
+      <xsl:when test="$ioc='SMR'">sm</xsl:when>
+      <xsl:when test="$ioc='SOL'">sb</xsl:when>
+      <xsl:when test="$ioc='SOM'">so</xsl:when>
+      <xsl:when test="$ioc='SRB'">rs</xsl:when>
+      <xsl:when test="$ioc='SRI'">lk</xsl:when>
+      <xsl:when test="$ioc='SSD'">ss</xsl:when>
+      <xsl:when test="$ioc='STP'">st</xsl:when>
+      <xsl:when test="$ioc='SUD'">sd</xsl:when>
+      <xsl:when test="$ioc='SUI'">ch</xsl:when>
+      <xsl:when test="$ioc='SUR'">sr</xsl:when>
+      <xsl:when test="$ioc='SVK'">sk</xsl:when>
+      <xsl:when test="$ioc='SWE'">se</xsl:when>
+      <xsl:when test="$ioc='SWZ'">sz</xsl:when>
+      <xsl:when test="$ioc='SYR'">sy</xsl:when>
+      <xsl:when test="$ioc='TAN'">tz</xsl:when>
+      <xsl:when test="$ioc='TGA'">to</xsl:when>
+      <xsl:when test="$ioc='THA'">th</xsl:when>
+      <xsl:when test="$ioc='TJK'">tj</xsl:when>
+      <xsl:when test="$ioc='TKM'">tm</xsl:when>
+      <xsl:when test="$ioc='TLS'">tl</xsl:when>
+      <xsl:when test="$ioc='TOG'">tg</xsl:when>
+      <xsl:when test="$ioc='TPE'">tw</xsl:when>
+      <xsl:when test="$ioc='TTO'">tt</xsl:when>
+      <xsl:when test="$ioc='TUN'">tn</xsl:when>
+      <xsl:when test="$ioc='TUR'">tr</xsl:when>
+      <xsl:when test="$ioc='TUV'">tv</xsl:when>
+      <xsl:when test="$ioc='UAE'">ae</xsl:when>
+      <xsl:when test="$ioc='UGA'">ug</xsl:when>
+      <xsl:when test="$ioc='UKR'">ua</xsl:when>
+      <xsl:when test="$ioc='URU'">uy</xsl:when>
+      <xsl:when test="$ioc='USA'">us</xsl:when>
+      <xsl:when test="$ioc='UZB'">uz</xsl:when>
+      <xsl:when test="$ioc='VAN'">vu</xsl:when>
+      <xsl:when test="$ioc='VAT'">va</xsl:when>
+      <xsl:when test="$ioc='VEN'">ve</xsl:when>
+      <xsl:when test="$ioc='VIE'">vn</xsl:when>
+      <xsl:when test="$ioc='VIN'">vc</xsl:when>
+      <xsl:when test="$ioc='YEM'">ye</xsl:when>
+      <xsl:when test="$ioc='ZAM'">zm</xsl:when>
+      <xsl:when test="$ioc='ZIM'">zw</xsl:when>
+      <xsl:otherwise/>
+    </xsl:choose>
+  </xsl:template>
+
+  <!--  The node-set that this variable returns is what is used 
+        to create the result list.
+        Here some of the params above is used.
+  -->
+  <xsl:variable name="filter" select="
+      /Fs/FsCompetition/FsParticipants/FsParticipant[
+        ($women_only=0 or @female=1) 
+        and ($nation='' or @nat_code_ioc=$nation)
+        and ($custom_pilot_attribute_name='' or
+          FsCustomAttributes/FsCustomAttribute/@name=$custom_pilot_attribute_name
+          and FsCustomAttributes/FsCustomAttribute/@value=$custom_pilot_attribute_value)
+      ]
+    "/>
+
+  <!-- record template, used for each pilot in the ranked list of pilots -->
+  <xsl:template name="record">
+    <tr>
+      <xsl:attribute name="class">
+        <xsl:if test="@female=1">female</xsl:if>
+      </xsl:attribute>
+      <td>
+        <xsl:value-of select="@CIVLID"/>
+      </td>
+      <td>
+        <span class="pilot-name"
+          data-id="{@CIVLID}"
+          data-name="{@name}"
+          data-glider="{@glider}"
+          data-sponsor="{@sponsor}">
+          <xsl:value-of select="@name"/>
+        </span>
+      </td>
+      <td>
+        <xsl:choose>
+          <xsl:when test="@female=1">F</xsl:when>
+          <xsl:otherwise>M</xsl:otherwise>
+        </xsl:choose>
+      </td>
+      <td align="center">
+        <xsl:variable name="nat_a2">
+          <xsl:call-template name="nat_code_a2">
+            <xsl:with-param name="ioc" select="@nat_code_ioc"/>
+          </xsl:call-template>
+        </xsl:variable>
+        <xsl:choose>
+          <xsl:when test="$nat_a2 != ''">
+            <img src="https://flagcdn.com/h20/{$nat_a2}.png" alt="{@nat_code_ioc}" title="{@nat_code_ioc}" class="flag_icon"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="@nat_code_ioc"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </td>
+      <td style="white-space: nowrap;">
+        <xsl:value-of select="@glider"/>
+      </td>
+      <td>
+        <xsl:value-of select="@sponsor"/>
+      </td>
+    </tr>
+  </xsl:template>
+
+  <!-- Traduz a letra de categoria (extraida do colchete no nome da asa, ex: "[D] OZONE - ZENO 2" -> "D")
+       para o nome usado no campeonato. Ajuste aqui se a nomenclatura de categorias mudar. -->
+  <xsl:template name="cat_label">
+    <xsl:param name="letter"/>
+    <xsl:choose>
+      <xsl:when test="$letter='E'">CCC</xsl:when>
+      <xsl:when test="$letter='D'">SERIAL</xsl:when>
+      <xsl:when test="$letter='C'">SPORT</xsl:when>
+      <xsl:when test="$letter='B'">SPORT LITE</xsl:when>
+      <xsl:when test="$letter=''">(não informado)</xsl:when>
+      <xsl:otherwise><xsl:value-of select="$letter"/></xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="/">
+    <!-- Variaveis com as estatisticas do campeonato, calculadas a partir do XML (sempre atualizadas) -->
+    <xsl:variable name="total_count" select="count($filter)"/>
+    <xsl:variable name="female_count" select="count($filter[@female=1])"/>
+    <xsl:variable name="cat_ccc" select="count($filter[substring-before(concat(substring-after(@glider,'['),']'),']')='E'])"/>
+    <xsl:variable name="cat_serial" select="count($filter[substring-before(concat(substring-after(@glider,'['),']'),']')='D'])"/>
+    <xsl:variable name="cat_sport" select="count($filter[substring-before(concat(substring-after(@glider,'['),']'),']')='C'])"/>
+    <xsl:variable name="cat_lite" select="count($filter[substring-before(concat(substring-after(@glider,'['),']'),']')='B'])"/>
+    <xsl:variable name="cat_known_sum" select="$cat_ccc + $cat_serial + $cat_sport + $cat_lite"/>
+    <xsl:variable name="cat_other" select="$total_count - $cat_known_sum"/>
+    <xsl:text disable-output-escaping="yes">&lt;!DOCTYPE html&gt;</xsl:text>
+    <html>
+      <head>
+        <style>
           .hover
           { /* for IE using onmouseover and onmouseout */
           background: #00CED1;
@@ -115,388 +455,315 @@
           .pc-bio-loading { color: #aaa; font-size: 12px; text-align: center; margin-top: 8px; }
           body { padding-bottom: 500px; }
         </style>
-  </head>
-  <body><nobr><img width="170" src="https://drive.google.com/thumbnail?id=1tAKibPPTvm-Il02Wpyqayr9DJXTErYys" hspace="10"><img width="220" src="https://drive.google.com/thumbnail?id=1TgMSH-drEAaIh7nS-fde3p4M1QuqgWiH"></nobr><h1>Open Serra da Moeda</h1>
-    <p style="font-size:xx-small">2026-10-23 to 2026-10-25</p>
-    <h3>
-          Total de Inscritos: 13<br><br>
-          CCC: 2<br>
-          SERIAL: 2<br>
-          SPORT: 3<br>
-          SPORT LITE: 6<br>
-          FEMININO: 1<br><br>Lista dos Pilotos (Atualizada 15/10/2026)</h3>
-    <p style="font-size: x-small; margin: 4px 0 10px 0;">
+      </head>
+      <body>
+
+        <nobr>
+
+          <img width="170" src="https://drive.google.com/thumbnail?id=1tAKibPPTvm-Il02Wpyqayr9DJXTErYys" hspace="10" /> <!-- CAMPEONATO DA GALAXIA -->
+          <img width="220" src="https://drive.google.com/thumbnail?id=1TgMSH-drEAaIh7nS-fde3p4M1QuqgWiH" /> <!-- CXP -->
+          
+          
+         
+          
+          
+        </nobr>
+        
+        <h1>
+          <xsl:value-of select="/Fs/FsCompetition/@name"/>
+        </h1>
+        <p style="font-size:xx-small">
+          <xsl:value-of select="/Fs/FsCompetition/@from"/> to <xsl:value-of select="/Fs/FsCompetition/@to"/>
+        </p>
+        <h3>
+          Total de Inscritos: <xsl:value-of select="$total_count"/>
+          <br/>
+          <br/>
+          CCC: <xsl:value-of select="$cat_ccc"/> <br/>
+          SERIAL: <xsl:value-of select="$cat_serial"/> <br/>
+          SPORT: <xsl:value-of select="$cat_sport"/> <br/>
+          SPORT LITE: <xsl:value-of select="$cat_lite"/> <br/>
+          <xsl:if test="$cat_other &gt; 0">
+            Outras/Não informado: <xsl:value-of select="$cat_other"/> <br/>
+          </xsl:if>
+          FEMININO: <xsl:value-of select="$female_count"/> <br/> <br/>
+
+
+          <xsl:value-of select="$Heading"/>
+        </h3>
+        <p style="font-size: x-small; margin: 4px 0 10px 0;">
           📋 Cadastre ou atualize sua biografia:
           <a href="https://forms.gle/wjweiXfvZLFPnEPF7" target="_blank" style="color: #007a7a; font-weight: bold;">
             https://forms.gle/wjweiXfvZLFPnEPF7
-          </a></p><br><button type="button" class="tab-btn active" id="btn-list" onclick="showTab('list')">Lista de Pilotos</button><button type="button" class="tab-btn" id="btn-stats" onclick="showTab('stats')">Estatísticas</button><br><br><div id="listPanel">
-      <table>
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th></th>
-            <th>Nat</th>
-            <th>Glider</th>
-            <th>Sponsor</th>
-          </tr>
-        </thead>
-        <tr class="">
-          <td>22971</td>
-          <td><span class="pilot-name" data-id="22971" data-name="DANIEL CARAM" data-glider="[D] OZONE - ZENO 2" data-sponsor="DAKK">DANIEL CARAM</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[D] OZONE - ZENO 2</td>
-          <td>DAKK</td>
-        </tr>
-        <tr class="">
-          <td>38416</td>
-          <td><span class="pilot-name" data-id="38416" data-name="ERIVELTON SANTOS JARDIM" data-glider="[C] AIR DESIGN - VOLT 4" data-sponsor="LOJA MONDICOISA">ERIVELTON SANTOS JARDIM</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[C] AIR DESIGN - VOLT 4</td>
-          <td>LOJA MONDICOISA</td>
-        </tr>
-        <tr class="">
-          <td>42693</td>
-          <td><span class="pilot-name" data-id="42693" data-name="FELIPE GONTIJO PALHARES" data-glider="[B] ADVANCE - IOTA" data-sponsor="">FELIPE GONTIJO PALHARES</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[B] ADVANCE - IOTA</td>
-          <td>
-          </td>
-        </tr>
-        <tr class="female">
-          <td>42081</td>
-          <td><span class="pilot-name" data-id="42081" data-name="GABRIELA RIBEIRO ÁSSIMOS" data-glider="[B] MACPARA - EDEN 8" data-sponsor="BASE DA NUVEM E VETS">GABRIELA RIBEIRO ÁSSIMOS</span></td>
-          <td>F</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[B] MACPARA - EDEN 8</td>
-          <td>BASE DA NUVEM E VETS</td>
-        </tr>
-        <tr class="">
-          <td>2370</td>
-          <td><span class="pilot-name" data-id="2370" data-name="GETÚLIO DE CARVALHO" data-glider="[C] BGD - CURE 3" data-sponsor="">GETÚLIO DE CARVALHO</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[C] BGD - CURE 3</td>
-          <td>
-          </td>
-        </tr>
-        <tr class="">
-          <td>16390</td>
-          <td><span class="pilot-name" data-id="16390" data-name="GUILHERME DE OLIVEIRA PEIXOTO" data-glider="[B] MACPARA - PASHA 7" data-sponsor="BASE DA NUVEM">GUILHERME DE OLIVEIRA PEIXOTO</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[B] MACPARA - PASHA 7</td>
-          <td>BASE DA NUVEM</td>
-        </tr>
-        <tr class="">
-          <td>78283</td>
-          <td><span class="pilot-name" data-id="78283" data-name="HEITOR GRANDINI RODELLA" data-glider="[D] UP - MERU" data-sponsor="CXP - CIRCUITO XC PARAPENTE">HEITOR GRANDINI RODELLA</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[D] UP - MERU</td>
-          <td>CXP - CIRCUITO XC PARAPENTE</td>
-        </tr>
-        <tr class="">
-          <td>94347</td>
-          <td><span class="pilot-name" data-id="94347" data-name="JEFFERSON HENRIQUE" data-glider="[B] MACPARA - EDEN 8" data-sponsor="BASE DA NUVEM / AUTO ELÉTRICA JEFFIN">JEFFERSON HENRIQUE</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[B] MACPARA - EDEN 8</td>
-          <td>BASE DA NUVEM / AUTO ELÉTRICA JEFFIN</td>
-        </tr>
-        <tr class="">
-          <td>51115</td>
-          <td><span class="pilot-name" data-id="51115" data-name="JOSÉ GERÔNIMO COIMBRA JÚNIOR" data-glider="[E] OZONE - ENZO 3" data-sponsor="VRC MAQ.">JOSÉ GERÔNIMO COIMBRA JÚNIOR</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[E] OZONE - ENZO 3</td>
-          <td>VRC MAQ.</td>
-        </tr>
-        <tr class="">
-          <td>37560</td>
-          <td><span class="pilot-name" data-id="37560" data-name="LUIZ FERNANDO COELHO" data-glider="[B] OZONE - RUSH 6" data-sponsor="">LUIZ FERNANDO COELHO</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[B] OZONE - RUSH 6</td>
-          <td>
-          </td>
-        </tr>
-        <tr class="">
-          <td>96838</td>
-          <td><span class="pilot-name" data-id="96838" data-name="LUIZ PAULO VANNUCCI DA FONSECA" data-glider="[B] APCO - VISTA 4" data-sponsor="">LUIZ PAULO VANNUCCI DA FONSECA</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[B] APCO - VISTA 4</td>
-          <td>
-          </td>
-        </tr>
-        <tr class="">
-          <td>100</td>
-          <td><span class="pilot-name" data-id="100" data-name="RUBEM MARTINS DE OLIVEIRA" data-glider="[C] MACPARA - VERV" data-sponsor="">RUBEM MARTINS DE OLIVEIRA</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[C] MACPARA - VERV</td>
-          <td>
-          </td>
-        </tr>
-        <tr class="">
-          <td>78789</td>
-          <td><span class="pilot-name" data-id="78789" data-name="TIAGO RODRIGUES PEREIRA" data-glider="[E] OZONE - ENZO 3" data-sponsor="PRECISION">TIAGO RODRIGUES PEREIRA</span></td>
-          <td>M</td>
-          <td align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
-          <td style="white-space: nowrap;">[E] OZONE - ENZO 3</td>
-          <td>PRECISION</td>
-        </tr>
-      </table>
-    </div>
-    <div id="statsPanel" style="display:none;">
-      <h4>Gênero</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Gênero</th>
-            <th>Qtd.</th>
-            <th>%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Masculino</td>
-            <td align="right">12</td>
-            <td align="right">92.3%</td>
-          </tr>
-          <tr>
-            <td>Feminino</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-        </tbody>
-      </table>
-      <h4>Categoria</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Categoria</th>
-            <th>Qtd.</th>
-            <th>%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>CCC</td>
-            <td align="right">2</td>
-            <td align="right">15.4%</td>
-          </tr>
-          <tr>
-            <td>SERIAL</td>
-            <td align="right">2</td>
-            <td align="right">15.4%</td>
-          </tr>
-          <tr>
-            <td>SPORT</td>
-            <td align="right">3</td>
-            <td align="right">23.1%</td>
-          </tr>
-          <tr>
-            <td>SPORT LITE</td>
-            <td align="right">6</td>
-            <td align="right">46.2%</td>
-          </tr>
-        </tbody>
-      </table>
-      <h4>Nacionalidade</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Nacionalidade</th>
-            <th>Qtd.</th>
-            <th>%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon">BRA</td>
-            <td align="right">13</td>
-            <td align="right">100.0%</td>
-          </tr>
-        </tbody>
-      </table>
-      <h4>Fabricante</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Fabricante</th>
-            <th>Qtd.</th>
-            <th>%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>MACPARA</td>
-            <td align="right">4</td>
-            <td align="right">30.8%</td>
-          </tr>
-          <tr>
-            <td>OZONE</td>
-            <td align="right">4</td>
-            <td align="right">30.8%</td>
-          </tr>
-          <tr>
-            <td>AIR DESIGN</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>ADVANCE</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>UP</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>APCO</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>BGD</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-        </tbody>
-      </table>
-      <h4>Parapente</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Parapente</th>
-            <th>Qtd.</th>
-            <th>%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>[B] MACPARA - EDEN 8</td>
-            <td align="right">2</td>
-            <td align="right">15.4%</td>
-          </tr>
-          <tr>
-            <td>[E] OZONE - ENZO 3</td>
-            <td align="right">2</td>
-            <td align="right">15.4%</td>
-          </tr>
-          <tr>
-            <td>[C] AIR DESIGN - VOLT 4</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>[B] ADVANCE - IOTA</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>[D] UP - MERU</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>[B] OZONE - RUSH 6</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>[B] APCO - VISTA 4</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>[C] MACPARA - VERV</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>[B] MACPARA - PASHA 7</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>[D] OZONE - ZENO 2</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-          <tr>
-            <td>[C] BGD - CURE 3</td>
-            <td align="right">1</td>
-            <td align="right">7.7%</td>
-          </tr>
-        </tbody>
-      </table>
-      <h4>Selete</h4>
-      <table>
-        <thead>
-          <tr>
-            <th>Selete</th>
-            <th>Qtd.</th>
-            <th>%</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>(não informado)</td>
-            <td align="right">13</td>
-            <td align="right">100.0%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div><script>
+          </a>
+        </p>
+        <br/>
+
+        <button type="button" class="tab-btn active" id="btn-list" onclick="showTab('list')">Lista de Pilotos</button>
+        <button type="button" class="tab-btn" id="btn-stats" onclick="showTab('stats')">Estatísticas</button>
+        <br/><br/>
+
+        <div id="listPanel">
+        <table>
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th></th>
+              <th>Nat</th>
+              <th>Glider</th>
+              <th>Sponsor</th>
+            </tr>
+          </thead>
+          <!-- for each participant sorted on name -->
+          <xsl:choose>
+            <xsl:when test="$sort_on = 'id'">
+              <xsl:for-each select="$filter">
+                <xsl:sort select="@id" data-type="number" order="ascending"/>
+                <!-- participant rows -->
+                <xsl:call-template name="record"/>
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:when test="$sort_on = 'Id'">
+              <xsl:for-each select="$filter">
+                <xsl:sort select="@id" data-type="number" order="ascending"/>
+                <!-- participant rows -->
+                <xsl:call-template name="record"/>
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:when test="$sort_on = 'ID'">
+              <xsl:for-each select="$filter">
+                <xsl:sort select="@id" data-type="number" order="ascending"/>
+                <!-- participant rows -->
+                <xsl:call-template name="record"/>
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:when test="$sort_on = 'CIVLID'">
+              <xsl:for-each select="$filter">
+                <xsl:sort select="@CIVLID" data-type="number" order="ascending"/>
+                <!-- participant rows -->
+                <xsl:call-template name="record"/>
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:when test="$sort_on = 'civlid'">
+              <xsl:for-each select="$filter">
+                <xsl:sort select="@CIVLID" data-type="number" order="ascending"/>
+                <!-- participant rows -->
+                <xsl:call-template name="record"/>
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:when test="$sort_on = 'Civlid'">
+              <xsl:for-each select="$filter">
+                <xsl:sort select="@CIVLID" data-type="number" order="ascending"/>
+                <!-- participant rows -->
+                <xsl:call-template name="record"/>
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:for-each select="$filter">
+                <xsl:sort select="@name" data-type="text" order="ascending"/>
+                <!-- participant rows -->
+                <xsl:call-template name="record"/>
+              </xsl:for-each>
+            </xsl:otherwise>
+          </xsl:choose>
+        </table>
+        </div>
+
+        <div id="statsPanel" style="display:none;">
+          <h4>Gênero</h4>
+          <table>
+            <thead><tr><th>Gênero</th><th>Qtd.</th><th>%</th></tr></thead>
+            <tbody>
+              <xsl:for-each select="$filter">
+                <xsl:sort select="count($filter[@female=current()/@female])" order="descending" data-type="number"/>
+                <xsl:if test="generate-id() = generate-id($filter[@female=current()/@female][1])">
+                  <xsl:variable name="cnt" select="count($filter[@female=current()/@female])"/>
+                  <tr>
+                    <td>
+                      <xsl:choose>
+                        <xsl:when test="@female=1">Feminino</xsl:when>
+                        <xsl:otherwise>Masculino</xsl:otherwise>
+                      </xsl:choose>
+                    </td>
+                    <td align="right"><xsl:value-of select="$cnt"/></td>
+                    <td align="right"><xsl:value-of select="format-number($cnt div $total_count * 100,'0.0')"/>%</td>
+                  </tr>
+                </xsl:if>
+              </xsl:for-each>
+            </tbody>
+          </table>
+
+          <h4>Categoria</h4>
+          <table>
+            <thead><tr><th>Categoria</th><th>Qtd.</th><th>%</th></tr></thead>
+            <tbody>
+              <xsl:if test="$cat_ccc &gt; 0">
+                <tr><td>CCC</td><td align="right"><xsl:value-of select="$cat_ccc"/></td><td align="right"><xsl:value-of select="format-number($cat_ccc div $total_count * 100,'0.0')"/>%</td></tr>
+              </xsl:if>
+              <xsl:if test="$cat_serial &gt; 0">
+                <tr><td>SERIAL</td><td align="right"><xsl:value-of select="$cat_serial"/></td><td align="right"><xsl:value-of select="format-number($cat_serial div $total_count * 100,'0.0')"/>%</td></tr>
+              </xsl:if>
+              <xsl:if test="$cat_sport &gt; 0">
+                <tr><td>SPORT</td><td align="right"><xsl:value-of select="$cat_sport"/></td><td align="right"><xsl:value-of select="format-number($cat_sport div $total_count * 100,'0.0')"/>%</td></tr>
+              </xsl:if>
+              <xsl:if test="$cat_lite &gt; 0">
+                <tr><td>SPORT LITE</td><td align="right"><xsl:value-of select="$cat_lite"/></td><td align="right"><xsl:value-of select="format-number($cat_lite div $total_count * 100,'0.0')"/>%</td></tr>
+              </xsl:if>
+              <xsl:if test="$cat_other &gt; 0">
+                <tr><td>(não informado)</td><td align="right"><xsl:value-of select="$cat_other"/></td><td align="right"><xsl:value-of select="format-number($cat_other div $total_count * 100,'0.0')"/>%</td></tr>
+              </xsl:if>
+            </tbody>
+          </table>
+
+          <h4>Nacionalidade</h4>
+          <table>
+            <thead><tr><th>Nacionalidade</th><th>Qtd.</th><th>%</th></tr></thead>
+            <tbody>
+              <xsl:for-each select="$filter">
+                <xsl:sort select="count($filter[@nat_code_ioc=current()/@nat_code_ioc])" order="descending" data-type="number"/>
+                <xsl:if test="generate-id() = generate-id($filter[@nat_code_ioc=current()/@nat_code_ioc][1])">
+                  <xsl:variable name="cnt" select="count($filter[@nat_code_ioc=current()/@nat_code_ioc])"/>
+                  <xsl:variable name="nat_a2">
+                    <xsl:call-template name="nat_code_a2">
+                      <xsl:with-param name="ioc" select="@nat_code_ioc"/>
+                    </xsl:call-template>
+                  </xsl:variable>
+                  <tr>
+                    <td>
+                      <xsl:if test="$nat_a2 != ''">
+                        <img src="https://flagcdn.com/h20/{$nat_a2}.png" alt="{@nat_code_ioc}" title="{@nat_code_ioc}" class="flag_icon"/>
+                        <xsl:text> </xsl:text>
+                      </xsl:if>
+                      <xsl:choose>
+                        <xsl:when test="@nat_code_ioc != ''"><xsl:value-of select="@nat_code_ioc"/></xsl:when>
+                        <xsl:otherwise>(não informado)</xsl:otherwise>
+                      </xsl:choose>
+                    </td>
+                    <td align="right"><xsl:value-of select="$cnt"/></td>
+                    <td align="right"><xsl:value-of select="format-number($cnt div $total_count * 100,'0.0')"/>%</td>
+                  </tr>
+                </xsl:if>
+              </xsl:for-each>
+            </tbody>
+          </table>
+
+          <h4>Fabricante</h4>
+          <table>
+            <thead><tr><th>Fabricante</th><th>Qtd.</th><th>%</th></tr></thead>
+            <tbody>
+              <xsl:for-each select="$filter">
+                <xsl:sort select="count($filter[substring-before(concat(normalize-space(substring-after(@glider,']')),' - '),' - ')=substring-before(concat(normalize-space(substring-after(current()/@glider,']')),' - '),' - ')])" order="descending" data-type="number"/>
+                <xsl:variable name="mfr" select="substring-before(concat(normalize-space(substring-after(@glider,']')),' - '),' - ')"/>
+                <xsl:if test="generate-id() = generate-id($filter[substring-before(concat(normalize-space(substring-after(@glider,']')),' - '),' - ')=$mfr][1])">
+                  <xsl:variable name="cnt" select="count($filter[substring-before(concat(normalize-space(substring-after(@glider,']')),' - '),' - ')=$mfr])"/>
+                  <tr>
+                    <td>
+                      <xsl:choose>
+                        <xsl:when test="$mfr != ''"><xsl:value-of select="$mfr"/></xsl:when>
+                        <xsl:otherwise>(não informado)</xsl:otherwise>
+                      </xsl:choose>
+                    </td>
+                    <td align="right"><xsl:value-of select="$cnt"/></td>
+                    <td align="right"><xsl:value-of select="format-number($cnt div $total_count * 100,'0.0')"/>%</td>
+                  </tr>
+                </xsl:if>
+              </xsl:for-each>
+            </tbody>
+          </table>
+
+          <h4>Parapente</h4>
+          <table>
+            <thead><tr><th>Parapente</th><th>Qtd.</th><th>%</th></tr></thead>
+            <tbody>
+              <xsl:for-each select="$filter">
+                <xsl:sort select="count($filter[substring-before(concat(@glider,' / '),' / ')=substring-before(concat(current()/@glider,' / '),' / ')])" order="descending" data-type="number"/>
+                <xsl:variable name="glider_no_selete" select="substring-before(concat(@glider,' / '),' / ')"/>
+                <xsl:if test="generate-id() = generate-id($filter[substring-before(concat(@glider,' / '),' / ')=$glider_no_selete][1])">
+                  <xsl:variable name="cnt" select="count($filter[substring-before(concat(@glider,' / '),' / ')=$glider_no_selete])"/>
+                  <tr>
+                    <td>
+                      <xsl:choose>
+                        <xsl:when test="$glider_no_selete != ''"><xsl:value-of select="$glider_no_selete"/></xsl:when>
+                        <xsl:otherwise>(não informado)</xsl:otherwise>
+                      </xsl:choose>
+                    </td>
+                    <td align="right"><xsl:value-of select="$cnt"/></td>
+                    <td align="right"><xsl:value-of select="format-number($cnt div $total_count * 100,'0.0')"/>%</td>
+                  </tr>
+                </xsl:if>
+              </xsl:for-each>
+            </tbody>
+          </table>
+
+          <h4>Selete</h4>
+          <table>
+            <thead><tr><th>Selete</th><th>Qtd.</th><th>%</th></tr></thead>
+            <tbody>
+              <xsl:for-each select="$filter">
+                <xsl:sort select="count($filter[normalize-space(substring-after(@glider,' / '))=normalize-space(substring-after(current()/@glider,' / '))])" order="descending" data-type="number"/>
+                <xsl:variable name="selete_key" select="normalize-space(substring-after(@glider,' / '))"/>
+                <xsl:if test="generate-id() = generate-id($filter[normalize-space(substring-after(@glider,' / '))=$selete_key][1])">
+                  <xsl:variable name="cnt" select="count($filter[normalize-space(substring-after(@glider,' / '))=$selete_key])"/>
+                  <tr>
+                    <td>
+                      <xsl:choose>
+                        <xsl:when test="$selete_key != ''"><xsl:value-of select="$selete_key"/></xsl:when>
+                        <xsl:otherwise>(não informado)</xsl:otherwise>
+                      </xsl:choose>
+                    </td>
+                    <td align="right"><xsl:value-of select="$cnt"/></td>
+                    <td align="right"><xsl:value-of select="format-number($cnt div $total_count * 100,'0.0')"/>%</td>
+                  </tr>
+                </xsl:if>
+              </xsl:for-each>
+            </tbody>
+          </table>
+        </div>
+
+        <script>
           function showTab(tab) {
             document.getElementById('listPanel').style.display = (tab === 'list') ? 'block' : 'none';
             document.getElementById('statsPanel').style.display = (tab === 'stats') ? 'block' : 'none';
             document.getElementById('btn-list').className = 'tab-btn' + (tab === 'list' ? ' active' : '');
             document.getElementById('btn-stats').className = 'tab-btn' + (tab === 'stats' ? ' active' : '');
           }
-        </script><div style="width:100%;font-size: xx-small;"><i>
-            Relatório criado: 2026-10-15T21:12:39-03:00</i></div>
-    <div class="fs_res" style="width:100%;font-size: x-small;">
-      <p>
+        </script>
+
+        <div style="width:100%;font-size: xx-small;" >
+          <i>
+            Relatório criado: <xsl:value-of select="/Fs/FsCompetition/FsParticipants/@ts"/>
+          </i>
+        </div>
+        <div class="fs_res" style="width:100%;font-size: x-small;" >
+          <p>
             Apurador: Arthur Grandini Rodella (Tutu)
           </p>
-    </div>
-    <div class="pc-overlay" id="pcOverlay"></div>
-    <div class="pilot-card" id="pilotCard">
-      <div id="pcPhotoWrap"></div>
-      <div class="pc-name" id="pcName"></div>
-      <div class="pc-lbl">Id</div>
-      <div class="pc-val" id="pcId"></div>
-      <div class="pc-lbl">Parapente</div>
-      <div class="pc-val" id="pcGlider"></div>
-      <div class="pc-lbl">Sponsor</div>
-      <div class="pc-val" id="pcSponsor"></div><button class="pc-bio-btn" id="pcBioBtn" style="display:none" onclick="toggleBio()">📋 Biografia</button><div class="pc-bio-panel" id="pcBioPanel">
-        <div class="pc-bio-loading" id="pcBioLoading">Carregando...</div>
-        <div id="pcBioContent" style="display:none">
-          <div class="pc-bio-lbl">Cidade - UF</div>
-          <div class="pc-bio-val" id="bioCidade"></div>
-          <div class="pc-bio-lbl">Escola / Clube</div>
-          <div class="pc-bio-val" id="bioEscola"></div>
-          <div class="pc-bio-lbl">Início no voo livre</div>
-          <div class="pc-bio-val" id="bioInicio"></div>
-          <div class="pc-bio-lbl">Record XC linha reta</div>
-          <div class="pc-bio-val" id="bioReta"></div>
-          <div class="pc-bio-lbl">Record XC triângulo</div>
-          <div class="pc-bio-val" id="bioTri"></div>
-          <div class="pc-bio-lbl">Conquistas</div>
-          <div class="pc-bio-val pc-bio-val-sm" id="bioConquistas"></div>
-          <div class="pc-bio-lbl">Sobre mim</div>
-          <div class="pc-bio-val pc-bio-val-sm" id="bioSobre"></div><a id="bioIgLink" class="pc-bio-ig-link" href="#" target="_blank" style="display:none">📸 Instagram</a></div>
-      </div>
-    </div><script>
+        </div>
+        <!-- ===== Card de foto do piloto ===== -->
+        <div class="pc-overlay" id="pcOverlay"></div>
+        <div class="pilot-card" id="pilotCard">
+          <div id="pcPhotoWrap"></div>
+          <div class="pc-name" id="pcName"></div>
+          <div class="pc-lbl">Id</div><div class="pc-val" id="pcId"></div>
+          <div class="pc-lbl">Parapente</div><div class="pc-val" id="pcGlider"></div>
+          <div class="pc-lbl">Sponsor</div><div class="pc-val" id="pcSponsor"></div>
+          <button class="pc-bio-btn" id="pcBioBtn" style="display:none" onclick="toggleBio()">📋 Biografia</button>
+          <div class="pc-bio-panel" id="pcBioPanel">
+            <div class="pc-bio-loading" id="pcBioLoading">Carregando...</div>
+            <div id="pcBioContent" style="display:none">
+              <div class="pc-bio-lbl">Cidade - UF</div><div class="pc-bio-val" id="bioCidade"></div>
+              <div class="pc-bio-lbl">Escola / Clube</div><div class="pc-bio-val" id="bioEscola"></div>
+              <div class="pc-bio-lbl">Início no voo livre</div><div class="pc-bio-val" id="bioInicio"></div>
+              <div class="pc-bio-lbl">Record XC linha reta</div><div class="pc-bio-val" id="bioReta"></div>
+              <div class="pc-bio-lbl">Record XC triângulo</div><div class="pc-bio-val" id="bioTri"></div>
+              <div class="pc-bio-lbl">Conquistas</div><div class="pc-bio-val pc-bio-val-sm" id="bioConquistas"></div>
+              <div class="pc-bio-lbl">Sobre mim</div><div class="pc-bio-val pc-bio-val-sm" id="bioSobre"></div>
+              <a id="bioIgLink" class="pc-bio-ig-link" href="#" target="_blank" style="display:none">📸 Instagram</a>
+            </div>
+          </div>
+        </div>
+        <script>
           (function() {
             var BASE    = 'https://arthurgr89.github.io/fotos-pilotos/';
             var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ210s9KVMrtsvBAfIo5NkzNcCQfZai4MjIegOSAqDTFU6YIAccIBaWrvRu6CgNopiDFRVQSnIrEU5x/pub?output=csv';
@@ -509,10 +776,10 @@
 
             function parseCsv(line) {
               var res = [], cur = '', inQ = false;
-              for (var i = 0; i < line.length; i++) {
+              for (var i = 0; i &lt; line.length; i++) {
                 var c = line[i];
                 if (c === '"') { inQ = !inQ; }
-                else if (c === ',' && !inQ) { res.push(cur); cur = ''; }
+                else if (c === ',' &amp;&amp; !inQ) { res.push(cur); cur = ''; }
                 else { cur += c; }
               }
               res.push(cur); return res;
@@ -533,7 +800,7 @@
                   if (!line.trim()) return;
                   var cols = parseCsv(line);
                   var id = cols[2] ? cols[2].trim() : '';
-                  if (id && !map[id]) map[id] = { cidade:cols[10]||'', escola:cols[3]||'', inicio:cols[4]||'', reta:cols[5]||'', triangulo:cols[6]||'', conquistas:cols[7]||'', sobre:cols[8]||'', instagram:cols[12]||'' };
+                  if (id &amp;&amp; !map[id]) map[id] = { cidade:cols[10]||'', escola:cols[3]||'', inicio:cols[4]||'', reta:cols[5]||'', triangulo:cols[6]||'', conquistas:cols[7]||'', sobre:cols[8]||'', instagram:cols[12]||'' };
                 });
                 setBioMap(map);
               }).catch(function(){});
@@ -543,7 +810,7 @@
               var map = {};
               try {
                 (data.table.rows || []).forEach(function(r) {
-                  var id = r.c[2] && r.c[2].v != null ? String(r.c[2].v).split('.')[0] : null;
+                  var id = r.c[2] &amp;&amp; r.c[2].v != null ? String(r.c[2].v).split('.')[0] : null;
                   if (!id) return;
                   if (!map[id]) map[id] = { cidade:r.c[10]?(r.c[10].v||''):'', escola:r.c[3]?(r.c[3].v||''):'', inicio:r.c[4]?(r.c[4].v||''):'', reta:r.c[5]?(r.c[5].v||''):'', triangulo:r.c[6]?(r.c[6].v||''):'', conquistas:r.c[7]?(r.c[7].v||''):'', sobre:r.c[8]?(r.c[8].v||''):'', instagram:r.c[12]?(r.c[12].v||''):'' };
                 });
@@ -627,7 +894,7 @@
               if (cx + cw > vw) cx = Math.max(8, x - cw - 14);
               if (cx + cw > vw) cx = Math.max(8, vw - cw - 8);
               if (cy + ch > vh) cy = Math.max(8, vh - ch - 8);
-              if (cy < 8) cy = 8;
+              if (cy &lt; 8) cy = 8;
               card.style.left = cx + 'px'; card.style.top = cy + 'px';
             }
 
@@ -658,5 +925,8 @@
 
             overlay.addEventListener('click', hide);
           })();
-        </script></body>
-</html>
+        </script>
+      </body>
+    </html>
+  </xsl:template>
+</xsl:stylesheet>
