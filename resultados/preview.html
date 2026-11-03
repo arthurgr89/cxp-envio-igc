@@ -6,22 +6,22 @@
     <style>
           .hover
           { /* for IE using onmouseover and onmouseout */
-          background: yellow;
+          background: #00CED1;
           }
           tr.fs_res_res_row:hover
           {
-          background: yellow;
+          background: #00CED1;
           }
           div.fs_res
           {
           font-family: Verdana, Arial, Helvetica, sans-serif;
-          font-size: xx-small;
+          font-size: x-small;
           }
           table.fs_res
           {
           border:solid 1px gray;
           border-collapse:collapse;
-          font-size: xx-small;
+          font-size: x-small;
           }
           td.fs_res
           {
@@ -35,6 +35,83 @@
           vertical-align:center;
           }
           table, tr, th, td {page-break-inside: avoid;}
+          .female {
+            color: #FF1493;
+          }
+          .flag_icon {
+            vertical-align: middle;
+            width: 20px;
+            height: 14px;
+            object-fit: cover;
+            border: solid 1px #ccc;
+          }
+          /* ===== Card de foto do piloto ===== */
+          .pilot-name {
+            cursor: pointer;
+          }
+          .pilot-card {
+            position: fixed;
+            z-index: 1000;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 18px;
+            width: 250px;
+            display: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            font-family: Verdana, Arial, sans-serif;
+            font-size: x-small;
+            pointer-events: auto;
+            max-height: calc(100vh - 20px);
+            overflow-y: auto;
+          }
+          .pilot-card.visible { display: block; }
+          .pc-overlay { display: none; position: fixed; inset: 0; z-index: 999; }
+          .pc-overlay.visible { display: block; }
+          .pc-photo {
+            width: 92px; height: 92px; border-radius: 50%;
+            object-fit: cover; display: block; margin: 0 auto 9px;
+            border: 2px solid #00CED1;
+          }
+          .pc-initials {
+            width: 92px; height: 92px; border-radius: 50%;
+            background: #e0f7f7; display: flex; align-items: center;
+            justify-content: center; font-size: 24px; font-weight: bold;
+            color: #007a7a; margin: 0 auto 9px; border: 2px solid #00CED1;
+          }
+          .pc-name { font-weight: bold; text-align: center; margin-bottom: 6px; font-size: 14px; }
+          .pc-lbl { color: #aaa; font-size: 11px; text-transform: uppercase; text-align: center; margin: 5px 0 2px; }
+          .pc-val { text-align: center; color: #444; }
+          .pc-status { display: inline-block; margin: 6px auto 0; padding: 2px 9px;
+            border-radius: 9px; font-weight: bold; font-size: 11px; }
+          .pcs-GOAL { background:#e5f5ec; color:#1a7a3a; }
+          .pcs-ESS  { background:#e6f0ff; color:#0055aa; }
+          .pcs-DF   { background:#fdf6e3; color:#b8860b; }
+          .pcs-DNF  { background:#f0f0f0; color:#888; }
+          .pcs-ABS  { background:#fdecea; color:#c0392b; }
+          .pc-bio-btn {
+            display: block; width: 100%; margin-top: 10px;
+            background: #00CED1; color: #003333; border: none;
+            border-radius: 6px; padding: 7px 0; font-size: 12px;
+            font-weight: bold; cursor: pointer; font-family: Verdana, Arial, sans-serif;
+          }
+          .pc-bio-btn:hover { background: #00b8ba; }
+          .pc-bio-ig-link {
+            display: block; text-align: center; margin-top: 10px;
+            color: #c13584; font-weight: bold; font-size: 11px;
+            text-decoration: none;
+          }
+          .pc-bio-ig-link:hover { text-decoration: underline; }
+          .pc-bio-panel {
+            display: none; margin-top: 10px;
+            border-top: 1px solid #eee; padding-top: 8px;
+          }
+          .pc-bio-panel.visible { display: block; }
+          .pc-bio-lbl { color: #aaa; font-size: 11px; text-transform: uppercase; text-align: left; margin: 7px 0 2px; }
+          .pc-bio-val { color: #333; font-size: 12px; text-align: left; line-height: 1.5; white-space: pre-line; }
+          .pc-bio-val-sm { font-size: 10px; }
+          .pc-bio-loading { color: #aaa; font-size: 12px; text-align: center; margin-top: 8px; }
+          body { padding-bottom: 500px; }
         
 
         .pilot-wrap { display: inline-block; }
@@ -48,25 +125,28 @@
         #statsPanel h4 { font-size: x-small; margin: 18px 0 6px 0; }
         #statsPanel table.fs_res { width: 100%; margin-bottom: 4px; }
         #stats-total { font-size: small; font-weight: bold; margin: 0; }
-  
+        .voltar-btn { display: inline-block; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: small; font-weight: bold; color: #333; background: #e0e0e0; border: 1px solid gray; border-radius: 6px; padding: 8px 18px; cursor: pointer; text-decoration: none; margin: 14px 0; }
+        .voltar-btn:hover { background: #b9f0ef; }
+
     </style>
   </head>
   <body>
 
     <div>
-      <div class="fs_res"><img src="data:image/png;base64,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"><h1>II Etapa do Campeonato Sul-Brasileiro de Parapente 2026</h1>
+      <div class="fs_res"><nobr><img width="120" src="https://drive.google.com/thumbnail?id=1CSwSsW60T1BLRBD-FMWfGtH99ufbCoAz" hspace="10"><img width="120" src="https://drive.google.com/thumbnail?id=1ZEBsrxld6eai1l44VVucKFd9QbV7giKN" hspace="15"><img width="120" src="https://drive.google.com/thumbnail?id=1--8PvocIyb7Czn5TRE9b4p8L_JJUiFyj" hspace="15"><img width="180" src="https://drive.google.com/thumbnail?id=1TgMSH-drEAaIh7nS-fde3p4M1QuqgWiH"><img width="110" src="https://www.cbvl.esp.br/assets/images/cbvl.svg" hspace="10"><img width="180" src="https://drive.google.com/thumbnail?id=13GH_TeIb80N0MLRPlYKLNp8bgMLrlVqN"></nobr><h1>II Etapa do Campeonato Sul-Brasileiro de Parapente 2026</h1>
         <p style="font-size:xx-small">2026-10-31 to 2026-11-02, FAI Category 2 event</p>
-        <h2 id="task-h2">Task 1: Overall V4</h2>
-        <h3>2026-10-31 
-              Race 53.8 km</h3>
+        <h2 id="task-h2">Task 2: OPEN</h2>
+        <h3>2026-11-01 
+              Race to Goal 35.9 km</h3>
         <p>Provisional</p>
         
+    <h2 style="color:red;">Última atualização: 03/11/2026 - 17:31 h</h2>
+
     <div class="pilot-wrap">
     <div class="tabs-bar">
           <button class="tab-btn active" onclick="showTab('open')" id="btn-open">OPEN</button>
           <button class="tab-btn" onclick="showTab('serial')" id="btn-serial">SERIAL</button>
           <button class="tab-btn" onclick="showTab('sport')" id="btn-sport">SPORT</button>
-          <button class="tab-btn" onclick="showTab('lite')" id="btn-lite">SPORT LITE</button>
           <button class="tab-btn" onclick="showTab('fem')" id="btn-fem">FEMININO</button>
           <button class="tab-btn" onclick="showTab('stats')" id="btn-stats">ESTATÍSTICAS</button>
     </div>
@@ -80,6 +160,7 @@
               <th class="fs_res">Nat</th>
               <th class="fs_res">Glider</th>
               <th class="fs_res">Sponsor</th>
+              <th class="fs_res">Status</th>
               <th class="fs_res">SS</th>
               <th class="fs_res">ES</th>
               <th class="fs_res">
@@ -104,1378 +185,33 @@
             </tr>
           </thead>
       <tbody id="pilotTbody">
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="1">
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="" data-cats="open" data-rank-open="1">
             <td class="fs_res rank-cell" align="right">1</td>
-            <td class="fs_res">10136</td>
-            <td class="fs_res">RICHARD BRYAN PETHIGAL</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Niviuk/X-One</td>
-            <td class="fs_res">PAZ MUNDIAL, ALFA PILOT,  STODEUS BIP</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">47.96</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">356.5</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">37.9</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">394.4</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="2" data-rank-serial="1">
-            <td class="fs_res rank-cell" align="right">2</td>
-            <td class="fs_res">22523</td>
-            <td class="fs_res">HELTON MACHADO KRAUS</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Zeno 2</td>
-            <td class="fs_res">. </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">46.76</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">347.6</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">35.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">382.8</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="3">
-            <td class="fs_res rank-cell" align="right">3</td>
-            <td class="fs_res">5105</td>
-            <td class="fs_res">LUCIANO HORN</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone Enzo 3</td>
-            <td class="fs_res">PRO ESPORTE RS / FAMÍLIA GEISSE / OZONE / AIR 3</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">44.80</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">333.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">39.6</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">372.7</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="4">
-            <td class="fs_res rank-cell" align="right">4</td>
             <td class="fs_res">65653</td>
-            <td class="fs_res">ARTHUR GRANDINI RODELLA</td>
+            <td class="fs_res"><span class="pilot-name" data-id="65653" data-name="ARTHUR GRANDINI RODELLA" data-glider="OZONE / Enzo 3" data-sponsor="CXP - CIRCUITO XC PARAPENTE" data-ss="14:15:00" data-total="277.7" data-status="DF">ARTHUR GRANDINI RODELLA</span></td>
             <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">OZONE / Enzo 3</td>
+            <td class="fs_res" align="center"><img src="https://flagcdn.com/h20/br.png" alt="BRA" title="BRA" class="flag_icon"></td>
+            <td class="fs_res" style="white-space: nowrap;">OZONE / Enzo 3</td>
             <td class="fs_res">CXP - CIRCUITO XC PARAPENTE</td>
-            <td class="fs_res">13:45:00</td>
+            <td class="fs_res" align="center" style="color: #b8860b; font-weight: bold;">DF</td>
+            <td class="fs_res">14:15:00</td>
             <td class="fs_res">
               <del>
               </del>
             </td>
             <td class="fs_res"></td>
             <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">44.75</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">332.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">36.6</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">369.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="5">
-            <td class="fs_res rank-cell" align="right">5</td>
-            <td class="fs_res">3047</td>
-            <td class="fs_res">JOSE LUIS SUDBRACK GUIMARAES</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Enzo </td>
-            <td class="fs_res">Guimas CO</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
+            <td class="fs_res" align="right">13.33</td>
+            <td class="fs_res" align="right">249.9</td>
+            <td class="fs_res" align="right">27.8</td>
             <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">44.25</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">329.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">37.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">366.2</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="6" data-rank-serial="2" data-rank-sport="1">
-            <td class="fs_res rank-cell" align="right">6</td>
-            <td class="fs_res">64663</td>
-            <td class="fs_res">LUCAS PEDRO BONFADINI</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Gin GTO 3</td>
-            <td class="fs_res">Pró-Esporte RS</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">43.68</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">324.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">23.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">347.8</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="7">
-            <td class="fs_res rank-cell" align="right">7</td>
-            <td class="fs_res">32414</td>
-            <td class="fs_res">OSMAR FRANCISCO DOS SANTOS JUNIOR</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone/Enzo 3</td>
-            <td class="fs_res">@voaserra</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">30.31</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">225.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">25.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">250.4</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="8" data-rank-serial="3" data-rank-sport="2">
-            <td class="fs_res rank-cell" align="right">8</td>
-            <td class="fs_res">29589</td>
-            <td class="fs_res">WIGBERT SCHWADE</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Advance TAU 23</td>
-            <td class="fs_res">DA VINCI IMOVEIS, PRO ESPORTE RS, FAMÍLIA GEISSE</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">30.61</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">227.5</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">18.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">245.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="9">
-            <td class="fs_res rank-cell" align="right">9</td>
-            <td class="fs_res">74631</td>
-            <td class="fs_res">HENRIQUE SANTOS DA ROSA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Enzo 3</td>
-            <td class="fs_res">PRO ESPORTE RS/FAMÍLIA GEISSE / TECNOPLAST</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">27.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">200.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">23.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">224.0</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="10">
-            <td class="fs_res rank-cell" align="right">10</td>
-            <td class="fs_res">5103</td>
-            <td class="fs_res">SANDRO BICHIBICHI</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone Enzo 3</td>
-            <td class="fs_res"> </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">27.02</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">200.9</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">222.9</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="11" data-rank-serial="4">
-            <td class="fs_res rank-cell" align="right">11</td>
-            <td class="fs_res">36143</td>
-            <td class="fs_res">ROBSON LUIZ PERSKE DA SILVA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone Zeno II</td>
-            <td class="fs_res">Perske</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">25.32</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">188.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">15.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">203.9</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="12" data-rank-serial="5">
-            <td class="fs_res rank-cell" align="right">12</td>
-            <td class="fs_res">60916</td>
-            <td class="fs_res">RICHARD DA SILVA DOURADO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone zeno2</td>
-            <td class="fs_res">MATERIA PRIMA SUPLEMENTOS </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">23.12</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">171.9</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">18.8</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">190.7</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="13" data-rank-serial="6">
-            <td class="fs_res rank-cell" align="right">13</td>
-            <td class="fs_res">77274</td>
-            <td class="fs_res">DIONISIO CORDEIRO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone/zeno2</td>
-            <td class="fs_res">VIDRAçARIA DINâMICA </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.69</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">168.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">18.8</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">187.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="14">
-            <td class="fs_res rank-cell" align="right">14</td>
-            <td class="fs_res">23678</td>
-            <td class="fs_res">LUCILEI DAL POZZO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Enzo / ozone </td>
-            <td class="fs_res">PRO ESPORTE RS/ FAMíLIA GEISSE</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.51</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">167.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">19.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">186.4</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="15">
-            <td class="fs_res rank-cell" align="right">15</td>
-            <td class="fs_res">18437</td>
-            <td class="fs_res">VALTER ROBERTO POSTALI</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Enzo - Ozone</td>
-            <td class="fs_res">Pró Esporte Família Geise - AGVL Sapiranga</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">19.01</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">141.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">14.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">155.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="16" data-rank-serial="7">
-            <td class="fs_res rank-cell" align="right">16</td>
-            <td class="fs_res">5101</td>
-            <td class="fs_res">RONNIE KOERICH</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Niviuk Peak 7</td>
-            <td class="fs_res">VORTEX PARAGLIDING</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">18.47</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">137.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">11.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">148.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="17" data-rank-serial="8">
-            <td class="fs_res rank-cell" align="right">17</td>
-            <td class="fs_res">3045</td>
-            <td class="fs_res">GUSTAVO BRUGGEMANN</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone zeno 2</td>
-            <td class="fs_res">Posto Bruggemann/ chalés dos alpes</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">17.42</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">129.5</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">9.4</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">138.9</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="18">
-            <td class="fs_res rank-cell" align="right">18</td>
-            <td class="fs_res">2367</td>
-            <td class="fs_res">SERGIO ROBERTO FURTADO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Niviuk x-one</td>
-            <td class="fs_res">PATROA</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">15.85</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">117.8</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">9.8</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">127.6</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="19" data-rank-serial="9" data-rank-sport="3">
-            <td class="fs_res rank-cell" align="right">19</td>
-            <td class="fs_res">72056</td>
-            <td class="fs_res">EDUARDO RODRIGUES DA SILVA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Gim- GTO</td>
-            <td class="fs_res">AGVL-PRO ESPORTE-FAMILIA GEISSE</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">12.95</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">96.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.8</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">103.1</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="20" data-rank-serial="10">
-            <td class="fs_res rank-cell" align="right">20</td>
-            <td class="fs_res">38482</td>
-            <td class="fs_res">MARCOS CEZAR MONTI RAUPP</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone - zeno2</td>
-            <td class="fs_res">Pro esporte - Família Geisse</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">12.67</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">94.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">99.4</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="21" data-rank-serial="11">
-            <td class="fs_res rank-cell" align="right">21</td>
-            <td class="fs_res">52223</td>
-            <td class="fs_res">LUCAS BECKER AXELRUD</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone Zeno 2</td>
-            <td class="fs_res">Pro Esporte - Família Geisse</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">11.86</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">88.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.4</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">93.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="22" data-rank-serial="12">
-            <td class="fs_res rank-cell" align="right">22</td>
-            <td class="fs_res">25503</td>
-            <td class="fs_res">MARCO ANDRE BRUXEL</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone</td>
-            <td class="fs_res">MARCO BRUXEL</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">11.71</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">87.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">92.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="23" data-rank-serial="13" data-rank-sport="4">
-            <td class="fs_res rank-cell" align="right">23</td>
-            <td class="fs_res">32540</td>
-            <td class="fs_res">ROLF PACHALY</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Sol</td>
-            <td class="fs_res">Eu</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">11.31</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">84.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">87.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="24" data-rank-serial="14">
-            <td class="fs_res rank-cell" align="right">24</td>
-            <td class="fs_res">88682</td>
-            <td class="fs_res">CRISTIANO DE ALMEIDA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone/Zeno 2</td>
-            <td class="fs_res">Casa Granado</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">11.19</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">83.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">4.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">87.1</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="25" data-rank-serial="15" data-rank-sport="5">
-            <td class="fs_res rank-cell" align="right">25</td>
-            <td class="fs_res">3050</td>
-            <td class="fs_res">FLAVIO LYSZKOWSKI PINHEIRO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Gin GTO 3</td>
-            <td class="fs_res">FAMíLIA GEISSE / PRó ESPORTE RS</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">9.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">66.9</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">2.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">69.0</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="26" data-rank-serial="16">
-            <td class="fs_res rank-cell" align="right">26</td>
-            <td class="fs_res">24714</td>
-            <td class="fs_res">ANGELO SANTOS</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Zeno</td>
-            <td class="fs_res">ÓTICAS PARIS SUL</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">8.41</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">62.5</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">1.4</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">63.9</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="27">
-            <td class="fs_res rank-cell" align="right">27</td>
-            <td class="fs_res">12617</td>
-            <td class="fs_res">MARCELO WICKERT</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Niviuk/xone</td>
-            <td class="fs_res">CTF INFORMáTICA / MERCADãO DOS ÓCULOS</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">8.32</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">61.9</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">1.6</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">63.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="28">
-            <td class="fs_res rank-cell" align="right">28</td>
-            <td class="fs_res">28826</td>
-            <td class="fs_res">LUIS CARLOS FAGUNDES FILHO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Enzo3</td>
-            <td class="fs_res">SERRA DIESEL</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">8.31</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">61.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">1.6</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">63.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="29" data-rank-serial="17">
-            <td class="fs_res rank-cell" align="right">29</td>
-            <td class="fs_res">2351</td>
-            <td class="fs_res">FABIO ROBERTO KUHN FARIAS</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone</td>
-            <td class="fs_res">MERAK CONSULTORIA</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">7.68</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">57.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">0.8</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">57.9</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="30">
-            <td class="fs_res rank-cell" align="right">30</td>
-            <td class="fs_res">18150</td>
-            <td class="fs_res">JARBAS BATISTA DE MELLO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone Enzo3</td>
-            <td class="fs_res">PRO ESPORTE RS / FAMILIA GEISSE / ART DRAW</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">7.36</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">54.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">0.4</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">55.1</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="31" data-rank-serial="18">
-            <td class="fs_res rank-cell" align="right">31</td>
-            <td class="fs_res">81213</td>
-            <td class="fs_res">PAULO ROBERTO GAZANIGA MELO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone/ zeno 2</td>
-            <td class="fs_res">&gt;&gt; APIR &lt;&lt;</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">7.29</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">54.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">0.4</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">54.6</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="32" data-rank-serial="19">
-            <td class="fs_res rank-cell" align="right">32</td>
-            <td class="fs_res">71933</td>
-            <td class="fs_res">GUSTAVO HENRIQUE GUENO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone / Zeno II</td>
-            <td class="fs_res">VORTEX PARAGLIDING</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">7.23</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">53.8</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">0.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">54.1</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="33">
-            <td class="fs_res rank-cell" align="right">33</td>
-            <td class="fs_res">46030</td>
-            <td class="fs_res">MAICON DANIEL DE SOUZA CORREA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Niviuk/ X-One</td>
-            <td class="fs_res">Equipe Agvl/@PROFITACADEMIANH</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">7.16</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">53.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">0.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">53.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="34" data-rank-serial="20">
-            <td class="fs_res rank-cell" align="right">34</td>
-            <td class="fs_res">3013</td>
-            <td class="fs_res">RAFAEL ELEODORO DE GOES</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone/Zeno2</td>
-            <td class="fs_res">UTFPR.EDU.BR</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">7.03</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">52.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">0.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">52.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="35" data-rank-serial="21" data-rank-sport="6">
-            <td class="fs_res rank-cell" align="right">35</td>
-            <td class="fs_res">87490</td>
-            <td class="fs_res">FELIPE NICHELE BUSCHLE</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Swing sphera 2</td>
-            <td class="fs_res">Dr felipe rinoplastia e face</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.98</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">51.9</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">51.9</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="36">
-            <td class="fs_res rank-cell" align="right">36</td>
-            <td class="fs_res">14805</td>
-            <td class="fs_res">DANIEL LIMA DE OLIVEIRA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">ENZO 3 - OZONE</td>
-            <td class="fs_res">CARICA FLY / RENOVA AMBIENTAL</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.91</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">51.4</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">51.4</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="37" data-rank-serial="22">
-            <td class="fs_res rank-cell" align="right">37</td>
-            <td class="fs_res">74602</td>
-            <td class="fs_res">BELMOR LUIZ BATISTA DA SILVA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone/zeno 2</td>
-            <td class="fs_res">Vortex </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.89</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">51.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">51.2</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="38" data-rank-serial="23" data-rank-sport="7">
-            <td class="fs_res rank-cell" align="right">38</td>
-            <td class="fs_res">31278</td>
-            <td class="fs_res">ALEXANDRE LUIZ GOMES PEREZ DE ROSARIO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone/Photon</td>
-            <td class="fs_res">Deus</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.83</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">50.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">50.7</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="39" data-rank-serial="24">
-            <td class="fs_res rank-cell" align="right">39</td>
-            <td class="fs_res">18078</td>
-            <td class="fs_res">JOCELI SCHOPF</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Flow xc race2</td>
-            <td class="fs_res">Eu mesmo</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.53</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">48.5</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">48.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="40" data-rank-serial="25" data-rank-sport="8">
-            <td class="fs_res rank-cell" align="right">40</td>
-            <td class="fs_res">72434</td>
-            <td class="fs_res">FABIO MATEUS GOMES</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Gin/GTO 3</td>
-            <td class="fs_res">TOPOGRAFF ENGENHARIA E TOPOGRAFIA LTDA</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.49</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">48.2</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">48.2</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="41" data-rank-serial="26" data-rank-sport="9">
-            <td class="fs_res rank-cell" align="right">41</td>
-            <td class="fs_res">70468</td>
-            <td class="fs_res">TIAGO CASSIANO FORTUNA MENEZES</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Gin GTO3 </td>
-            <td class="fs_res">PRÓ-ESPORTE RS / FAMÍLIA GEISSE</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.46</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">48.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">48.0</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="42">
-            <td class="fs_res rank-cell" align="right">42</td>
-            <td class="fs_res">13237</td>
-            <td class="fs_res">ALEX WAGNER BOLDT</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Air design volt 5</td>
-            <td class="fs_res">Esposa</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">6.13</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">45.5</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">45.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="43" data-rank-serial="27" data-rank-sport="10">
-            <td class="fs_res rank-cell" align="right">43</td>
-            <td class="fs_res">51977</td>
-            <td class="fs_res">CRISTIANO ROSSA MODEL</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">AirDesign Volt5 </td>
-            <td class="fs_res">PRO ESPORTE RS / FAMILIA GEISSE</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.96</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">44.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">44.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="44" data-rank-serial="28">
-            <td class="fs_res rank-cell" align="right">44</td>
-            <td class="fs_res">34846</td>
-            <td class="fs_res">ROBSON LEO PACHALY</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Zeno II</td>
-            <td class="fs_res">FLO-2D</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.82</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">43.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">43.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open" data-rank-open="44">
-            <td class="fs_res rank-cell" align="right">44</td>
-            <td class="fs_res">5102</td>
-            <td class="fs_res">VALDIR OLI DIAS DA ROSA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone Enzo 3 </td>
-            <td class="fs_res">TECNOPLAST</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.83</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">43.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">43.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="46" data-rank-serial="29" data-rank-sport="11">
-            <td class="fs_res rank-cell" align="right">46</td>
-            <td class="fs_res">76890</td>
-            <td class="fs_res">FERNANDO SCHULTZ ALDADO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone Photon</td>
-            <td class="fs_res">-</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.79</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">43.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">43.0</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="47" data-rank-serial="30" data-rank-sport="12">
-            <td class="fs_res rank-cell" align="right">47</td>
-            <td class="fs_res">15510</td>
-            <td class="fs_res">RODOLFO VARGAS DO NASCIMENTO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone photon </td>
-            <td class="fs_res">HANGAR 8 / DOMAER AVIATION / VOKAN SEGUROS </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.52</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">41.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">41.0</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="48" data-rank-serial="31" data-rank-sport="13" data-rank-lite="1">
-            <td class="fs_res rank-cell" align="right">48</td>
-            <td class="fs_res">17236</td>
-            <td class="fs_res">MIGUEL ANTONIO PELIZAN</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Skywalk/Chili4 </td>
-            <td class="fs_res">Cia do Ar</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">5.34</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">39.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">39.7</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="49" data-rank-serial="32" data-rank-sport="14">
-            <td class="fs_res rank-cell" align="right">49</td>
-            <td class="fs_res">27072</td>
-            <td class="fs_res">ANDRE ISOTON</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">[C]  -OZONE -DELTA 4</td>
-            <td class="fs_res">
-            </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">4.94</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">36.7</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">36.7</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="50" data-rank-serial="33" data-rank-sport="15" data-rank-lite="2">
-            <td class="fs_res rank-cell" align="right">50</td>
-            <td class="fs_res">42540</td>
-            <td class="fs_res">ROLF PACHALY FILHO</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Chili 5</td>
-            <td class="fs_res">Farmácia Galenica </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">4.59</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">34.1</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">34.1</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="51" data-rank-serial="34" data-rank-sport="16">
-            <td class="fs_res rank-cell" align="right">51</td>
-            <td class="fs_res">57852</td>
-            <td class="fs_res">ALEX SANDRO TROMBINI E SILVA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Gin gto3</td>
-            <td class="fs_res">PRO ESPORTE RS / FAMILIA GEISSE</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">4.24</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">31.5</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">31.5</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial" data-rank-open="52" data-rank-serial="35">
-            <td class="fs_res rank-cell" align="right">52</td>
-            <td class="fs_res">25955</td>
-            <td class="fs_res">PAULO ROBERTO BAPTISTA DA SILVA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Ozone, Zeno 2</td>
-            <td class="fs_res">meu bolso.com.br</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.50</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">26.0</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">26.0</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="53" data-rank-serial="36" data-rank-sport="17" data-rank-lite="3">
-            <td class="fs_res rank-cell" align="right">53</td>
-            <td class="fs_res">57415</td>
-            <td class="fs_res">ROMULO CARDOSO TEIXEIRA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Advance yota 2</td>
-            <td class="fs_res"> Agvl Pro sport</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.17</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">23.6</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">23.6</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="54" data-rank-serial="37" data-rank-sport="18" data-rank-lite="4">
-            <td class="fs_res rank-cell" align="right">54</td>
-            <td class="fs_res">89415</td>
-            <td class="fs_res">JONAS FERNANDO FRANCO STURZA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Mac para</td>
-            <td class="fs_res">PRÓ-ESPORTE RS / FAMÍLIA GEISSE</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.04</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.6</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.6</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="54" data-rank-serial="37" data-rank-sport="18">
-            <td class="fs_res rank-cell" align="right">54</td>
-            <td class="fs_res">52161</td>
-            <td class="fs_res">JHEANDRE CASSOL SCHOPF</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">[C] -NIVIUK - ARTIK R</td>
-            <td class="fs_res">MADCON SCHOPF - MATERIAIS DE CONSTRUÇÃO</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.04</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.6</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.6</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">87081</td>
-            <td class="fs_res">DIEGO DE SOUZA BERETTA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Advance/Iota</td>
-            <td class="fs_res">PRO ESPORTE RS - AGVL</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport" data-rank-open="56" data-rank-serial="39" data-rank-sport="20">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">44914</td>
-            <td class="fs_res">BRUNO WALDEMIR KUHN </td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Advance TAU DLS </td>
-            <td class="fs_res">Eu</td>
-            <td class="fs_res">
-            </td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">32405</td>
-            <td class="fs_res">JOSE FERNANDO DE QUINA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">iota</td>
-            <td class="fs_res">QLEILAO</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">89396</td>
-            <td class="fs_res">GUSTAVO TEIXEIRA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">CHILLI 5</td>
-            <td class="fs_res">AGVL/PRO ESPORTE/FAMILIA GEISSE </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">66227</td>
-            <td class="fs_res">ALLAN GULARTE RODRIGUES</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Sol</td>
-            <td class="fs_res">Pro Esporte </td>
-            <td class="fs_res">
-            </td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">83094</td>
-            <td class="fs_res">THÉO PIERO DE BARROS</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">SOL SPORTS - ATMUS 3</td>
-            <td class="fs_res">PRO ESPORTE RS / FAMILIA GEISSE</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite fem" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5" data-rank-fem="1">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">61189</td>
-            <td class="fs_res">TATIANA CRISTINA VENTER ODY</td>
-            <td class="fs_res">F</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Advance Iota2</td>
-            <td class="fs_res">.</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">70168</td>
-            <td class="fs_res">JOãO CARLOS SOARES PETRY</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Skywalk Chili5</td>
-            <td class="fs_res">FAMíLIA GEISSE / PRó ESPORTE RS //FOTOGRAFIADEAVENTURA </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">88671</td>
-            <td class="fs_res">JORGE SEBASTIãO BERNARDO SILVA</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Advance IOTA 2</td>
-            <td class="fs_res">FAMíLIA GEISSE / PRó ESPORTE RS</td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-          </tr>
-<tr class="fs_res_res_row" onmouseover="this.className = 'hover'" onmouseout="this.className='fs_res_res_row'" data-cats="open serial sport lite" data-rank-open="56" data-rank-serial="39" data-rank-sport="20" data-rank-lite="5">
-            <td class="fs_res rank-cell" align="right">56</td>
-            <td class="fs_res">88673</td>
-            <td class="fs_res">YURI ELIAS LAUX</td>
-            <td class="fs_res">M</td>
-            <td class="fs_res">BRA</td>
-            <td class="fs_res">Gin carrera </td>
-            <td class="fs_res">Mg 10 </td>
-            <td class="fs_res">13:45:00</td>
-            <td class="fs_res">
-              <del>
-              </del>
-            </td>
-            <td class="fs_res"></td>
-            <td class="fs_res" align="right"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">3.00</td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap"></td>
-            <td class="fs_res" align="right" style="white-space: nowrap">22.3</td>
+            <td class="fs_res" align="right">277.7</td>
           </tr>
       </tbody>
     </table>
     </div>
     <p id="footer-filter-text"></p>
+    <a class="voltar-btn" href="https://www.circuitoxcparapente.com.br/live" rel="noopener">Voltar para CXP</a>
 
     <div id="statsPanel" style="display:none;">
       <div class="fs_res">
@@ -1496,13 +232,8 @@
       </div>
     </div>
 
-    <div id="timesPanel" style="display:none;">
-      
-    </div>
-
     <div id="taskExtras">
-
-        <p></p><br><h3>Task definition</h3>
+<br><h3>Task definition</h3>
         <table class="fs_res">
           <thead>
             <tr>
@@ -1514,7 +245,6 @@
               <th class="fs_res">Close</th>
               <th class="fs_res">Coordinates</th>
               <th class="fs_res">Altitude</th>
-              <th class="fs_res">Alt. limits</th>
             </tr>
           </thead>
           <tbody>
@@ -1523,126 +253,387 @@
               <td class="fs_res" align="right">0.0 km
               </td>
               <td class="fs_res">A02051</td>
-              <td class="fs_res" align="right">200 m
+              <td class="fs_res" align="right">400 m
             </td>
-              <td class="fs_res">12:00</td>
-              <td class="fs_res">14:45</td>
+              <td class="fs_res">09:00</td>
+              <td class="fs_res">18:00</td>
               <td class="fs_res">
                   Lat: -29.69241 Lon: -53.21355</td>
               <td class="fs_res" align="right">509 m
             </td>
-              <td class="fs_res" align="right"></td>
             </tr>
             <tr>
               <td class="fs_res">2 SS</td>
-              <td class="fs_res" align="right">2.0 km
+              <td class="fs_res" align="right">1.7 km
               </td>
-              <td class="fs_res">A02051</td>
-              <td class="fs_res" align="right">2000 m
+              <td class="fs_res">A16004</td>
+              <td class="fs_res" align="right">4000 m
             </td>
-              <td class="fs_res">13:45</td>
+              <td class="fs_res">14:15</td>
               <td class="fs_res">18:00</td>
               <td class="fs_res">
-                  Lat: -29.69241 Lon: -53.21355</td>
-              <td class="fs_res" align="right">509 m
+                  Lat: -29.73319 Lon: -53.18044</td>
+              <td class="fs_res" align="right">43 m
             </td>
-              <td class="fs_res" align="right"></td>
             </tr>
             <tr>
               <td class="fs_res">3</td>
-              <td class="fs_res" align="right">13.8 km
+              <td class="fs_res" align="right">7.6 km
               </td>
-              <td class="fs_res">A30003</td>
-              <td class="fs_res" align="right">7500 m
+              <td class="fs_res">A35035</td>
+              <td class="fs_res" align="right">26000 m
             </td>
-              <td class="fs_res">13:45</td>
+              <td class="fs_res">14:15</td>
               <td class="fs_res">18:00</td>
               <td class="fs_res">
-                  Lat: -29.85182 Lon: -53.11007</td>
-              <td class="fs_res" align="right">29 m
+                  Lat: -29.42523 Lon: -53.11602</td>
+              <td class="fs_res" align="right">355 m
             </td>
-              <td class="fs_res" align="right"></td>
             </tr>
             <tr>
               <td class="fs_res">4</td>
-              <td class="fs_res" align="right">20.9 km
-              </td>
-              <td class="fs_res">A28011</td>
-              <td class="fs_res" align="right">3000 m
-            </td>
-              <td class="fs_res">13:45</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -29.72223 Lon: -53.05</td>
-              <td class="fs_res" align="right">109 m
-            </td>
-              <td class="fs_res" align="right"></td>
-            </tr>
-            <tr>
-              <td class="fs_res">5</td>
-              <td class="fs_res" align="right">37.1 km
-              </td>
-              <td class="fs_res">A13009</td>
-              <td class="fs_res" align="right">400 m
-            </td>
-              <td class="fs_res">13:45</td>
-              <td class="fs_res">18:00</td>
-              <td class="fs_res">
-                  Lat: -29.65262 Lon: -53.22573</td>
-              <td class="fs_res" align="right">90 m
-            </td>
-              <td class="fs_res" align="right"></td>
-            </tr>
-            <tr>
-              <td class="fs_res">6</td>
-              <td class="fs_res" align="right">43.1 km
+              <td class="fs_res" align="right">14.7 km
               </td>
               <td class="fs_res">A14004</td>
-              <td class="fs_res" align="right">1000 m
+              <td class="fs_res" align="right">2000 m
             </td>
-              <td class="fs_res">13:45</td>
+              <td class="fs_res">14:15</td>
               <td class="fs_res">18:00</td>
               <td class="fs_res">
                   Lat: -29.71469 Lon: -53.25193</td>
               <td class="fs_res" align="right">42 m
             </td>
-              <td class="fs_res" align="right"></td>
+            </tr>
+            <tr>
+              <td class="fs_res">5</td>
+              <td class="fs_res" align="right">23.1 km
+              </td>
+              <td class="fs_res">A46010</td>
+              <td class="fs_res" align="right">15000 m
+            </td>
+              <td class="fs_res">14:15</td>
+              <td class="fs_res">18:00</td>
+              <td class="fs_res">
+                  Lat: -29.4889 Lon: -53.28952</td>
+              <td class="fs_res" align="right">100 m
+            </td>
+            </tr>
+            <tr>
+              <td class="fs_res">6</td>
+              <td class="fs_res" align="right">28.9 km
+              </td>
+              <td class="fs_res">A14004</td>
+              <td class="fs_res" align="right">4500 m
+            </td>
+              <td class="fs_res">14:15</td>
+              <td class="fs_res">18:00</td>
+              <td class="fs_res">
+                  Lat: -29.71469 Lon: -53.25193</td>
+              <td class="fs_res" align="right">42 m
+            </td>
             </tr>
             <tr>
               <td class="fs_res">7 ES</td>
-              <td class="fs_res" align="right">52.3 km
+              <td class="fs_res" align="right">34.6 km
               </td>
               <td class="fs_res">A04047</td>
               <td class="fs_res" align="right">800 m
             </td>
-              <td class="fs_res">13:45</td>
+              <td class="fs_res">14:15</td>
               <td class="fs_res">18:00</td>
               <td class="fs_res">
                   Lat: -29.61628 Lon: -53.24917</td>
               <td class="fs_res" align="right">469 m
             </td>
-              <td class="fs_res" align="right"></td>
             </tr>
             <tr>
               <td class="fs_res">8</td>
-              <td class="fs_res" align="right">53.8 km
+              <td class="fs_res" align="right">35.9 km
               </td>
               <td class="fs_res">A07008</td>
-              <td class="fs_res" align="right">200 m
+              <td class="fs_res" align="right">400 m
             </td>
-              <td class="fs_res">13:45</td>
+              <td class="fs_res">14:15</td>
               <td class="fs_res">18:00</td>
               <td class="fs_res">
                   Lat: -29.63873 Lon: -53.24303</td>
               <td class="fs_res" align="right">77 m
             </td>
-              <td class="fs_res" align="right"></td>
             </tr>
           </tbody>
         </table>
         <p>
                 Leading-time ratio: 26%
               </p>
+        <div class="fs_res" style="page-break-before: always;">
+          <h3>Pilots not yet processed (NYP)</h3>
+          <table class="fs_res">
+            <thead>
+              <tr>
+                <th class="fs_res">Id</th>
+                <th class="fs_res">Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fs_res" align="right">2351</td>
+                <td class="fs_res">FABIO ROBERTO KUHN FARIAS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">2367</td>
+                <td class="fs_res">SERGIO ROBERTO FURTADO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">3013</td>
+                <td class="fs_res">RAFAEL ELEODORO DE GOES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">3045</td>
+                <td class="fs_res">GUSTAVO BRUGGEMANN</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">3047</td>
+                <td class="fs_res">JOSE LUIS SUDBRACK GUIMARAES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">3050</td>
+                <td class="fs_res">FLAVIO LYSZKOWSKI PINHEIRO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">5101</td>
+                <td class="fs_res">RONNIE KOERICH</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">5102</td>
+                <td class="fs_res">VALDIR OLI DIAS DA ROSA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">5103</td>
+                <td class="fs_res">SANDRO BICHIBICHI</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">5105</td>
+                <td class="fs_res">LUCIANO HORN</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">10136</td>
+                <td class="fs_res">RICHARD BRYAN PETHIGAL</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">12617</td>
+                <td class="fs_res">MARCELO WICKERT</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">13237</td>
+                <td class="fs_res">ALEX WAGNER BOLDT</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">14805</td>
+                <td class="fs_res">DANIEL LIMA DE OLIVEIRA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">15510</td>
+                <td class="fs_res">RODOLFO VARGAS DO NASCIMENTO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">17236</td>
+                <td class="fs_res">MIGUEL ANTONIO PELIZAN</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">18078</td>
+                <td class="fs_res">JOCELI SCHOPF</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">18150</td>
+                <td class="fs_res">JARBAS BATISTA DE MELLO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">18437</td>
+                <td class="fs_res">VALTER ROBERTO POSTALI</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">22523</td>
+                <td class="fs_res">HELTON MACHADO KRAUS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">23678</td>
+                <td class="fs_res">LUCILEI DAL POZZO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">24714</td>
+                <td class="fs_res">ANGELO SANTOS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">25503</td>
+                <td class="fs_res">MARCO ANDRE BRUXEL</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">25955</td>
+                <td class="fs_res">PAULO ROBERTO BAPTISTA DA SILVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">27072</td>
+                <td class="fs_res">ANDRE ISOTON</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">28826</td>
+                <td class="fs_res">LUIS CARLOS FAGUNDES FILHO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">29589</td>
+                <td class="fs_res">WIGBERT SCHWADE</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">31278</td>
+                <td class="fs_res">ALEXANDRE LUIZ GOMES PEREZ DE ROSARIO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">32405</td>
+                <td class="fs_res">JOSE FERNANDO DE QUINA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">32414</td>
+                <td class="fs_res">OSMAR FRANCISCO DOS SANTOS JUNIOR</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">32540</td>
+                <td class="fs_res">ROLF PACHALY</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">34846</td>
+                <td class="fs_res">ROBSON LEO PACHALY</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">36143</td>
+                <td class="fs_res">ROBSON LUIZ PERSKE DA SILVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">38482</td>
+                <td class="fs_res">MARCOS CEZAR MONTI RAUPP</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">42540</td>
+                <td class="fs_res">ROLF PACHALY FILHO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">44914</td>
+                <td class="fs_res">BRUNO WALDEMIR KUHN </td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">46030</td>
+                <td class="fs_res">MAICON DANIEL DE SOUZA CORREA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">51977</td>
+                <td class="fs_res">CRISTIANO ROSSA MODEL</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">52161</td>
+                <td class="fs_res">JHEANDRE CASSOL SCHOPF</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">52223</td>
+                <td class="fs_res">LUCAS BECKER AXELRUD</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">57415</td>
+                <td class="fs_res">ROMULO CARDOSO TEIXEIRA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">57852</td>
+                <td class="fs_res">ALEX SANDRO TROMBINI E SILVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">60916</td>
+                <td class="fs_res">RICHARD DA SILVA DOURADO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">61189</td>
+                <td class="fs_res">TATIANA CRISTINA VENTER ODY</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">64663</td>
+                <td class="fs_res">LUCAS PEDRO BONFADINI</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">66227</td>
+                <td class="fs_res">ALLAN GULARTE RODRIGUES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">70168</td>
+                <td class="fs_res">JOãO CARLOS SOARES PETRY</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">70468</td>
+                <td class="fs_res">TIAGO CASSIANO FORTUNA MENEZES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">71933</td>
+                <td class="fs_res">GUSTAVO HENRIQUE GUENO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">72056</td>
+                <td class="fs_res">EDUARDO RODRIGUES DA SILVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">72434</td>
+                <td class="fs_res">FABIO MATEUS GOMES</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">74602</td>
+                <td class="fs_res">BELMOR LUIZ BATISTA DA SILVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">74631</td>
+                <td class="fs_res">HENRIQUE SANTOS DA ROSA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">76890</td>
+                <td class="fs_res">FERNANDO SCHULTZ ALDADO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">77274</td>
+                <td class="fs_res">DIONISIO CORDEIRO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">81213</td>
+                <td class="fs_res">PAULO ROBERTO GAZANIGA MELO</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">83094</td>
+                <td class="fs_res">THÉO PIERO DE BARROS</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">87081</td>
+                <td class="fs_res">DIEGO DE SOUZA BERETTA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">87490</td>
+                <td class="fs_res">FELIPE NICHELE BUSCHLE</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">88671</td>
+                <td class="fs_res">JORGE SEBASTIãO BERNARDO SILVA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">88673</td>
+                <td class="fs_res">YURI ELIAS LAUX</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">88682</td>
+                <td class="fs_res">CRISTIANO DE ALMEIDA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">89396</td>
+                <td class="fs_res">GUSTAVO TEIXEIRA</td>
+              </tr>
+              <tr>
+                <td class="fs_res" align="right">89415</td>
+                <td class="fs_res">JONAS FERNANDO FRANCO STURZA</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <div class="fs_res" style="page-break-before: always;">
           <h3>Task statistics</h3>
           <table class="fs_res">
@@ -1655,15 +646,15 @@
             <tbody>
               <tr>
                 <td class="fs_res">task_distance</td>
-                <td class="fs_res" align="right">53.832</td>
+                <td class="fs_res" align="right">35.943</td>
               </tr>
               <tr>
                 <td class="fs_res">ss_distance</td>
-                <td class="fs_res" align="right">50.26</td>
+                <td class="fs_res" align="right">32.894</td>
               </tr>
               <tr>
                 <td class="fs_res">launch_to_ess_distance</td>
-                <td class="fs_res" align="right">52.26</td>
+                <td class="fs_res" align="right">34.561</td>
               </tr>
               <tr>
                 <td class="fs_res">qnh_setting</td>
@@ -1683,15 +674,15 @@
               </tr>
               <tr>
                 <td class="fs_res">no_of_pilots_present</td>
-                <td class="fs_res" align="right">65</td>
+                <td class="fs_res" align="right">1</td>
               </tr>
               <tr>
                 <td class="fs_res">no_of_pilots_flying</td>
-                <td class="fs_res" align="right">65</td>
+                <td class="fs_res" align="right">1</td>
               </tr>
               <tr>
                 <td class="fs_res">no_of_pilots_lo</td>
-                <td class="fs_res" align="right">65</td>
+                <td class="fs_res" align="right">1</td>
               </tr>
               <tr>
                 <td class="fs_res">no_of_pilots_landed_before_stop</td>
@@ -1699,23 +690,23 @@
               </tr>
               <tr>
                 <td class="fs_res">sum_dist_over_min</td>
-                <td class="fs_res" align="right">649.931</td>
+                <td class="fs_res" align="right">10.331</td>
               </tr>
               <tr>
                 <td class="fs_res">sum_real_dist_over_min</td>
-                <td class="fs_res" align="right">649.931</td>
+                <td class="fs_res" align="right">10.331</td>
               </tr>
               <tr>
                 <td class="fs_res">sum_flown_distances</td>
-                <td class="fs_res" align="right">839.027</td>
+                <td class="fs_res" align="right">13.331</td>
               </tr>
               <tr>
                 <td class="fs_res">best_dist</td>
-                <td class="fs_res" align="right">47.955</td>
+                <td class="fs_res" align="right">13.331</td>
               </tr>
               <tr>
                 <td class="fs_res">best_real_dist</td>
-                <td class="fs_res" align="right">47.955</td>
+                <td class="fs_res" align="right">13.331</td>
               </tr>
               <tr>
                 <td class="fs_res">best_time</td>
@@ -1723,15 +714,15 @@
               </tr>
               <tr>
                 <td class="fs_res">last_start_time</td>
-                <td class="fs_res" align="right">2026-10-31T13:45:00-03:00</td>
+                <td class="fs_res" align="right">2026-11-01T14:15:00-03:00</td>
               </tr>
               <tr>
                 <td class="fs_res">first_start_time</td>
-                <td class="fs_res" align="right">2026-10-31T13:45:01-03:00</td>
+                <td class="fs_res" align="right">2026-11-01T14:28:48-03:00</td>
               </tr>
               <tr>
                 <td class="fs_res">last_landed_before_ess_finish_time</td>
-                <td class="fs_res" align="right">2026-10-31T17:08:08-03:00</td>
+                <td class="fs_res" align="right">2026-11-01T15:20:03-03:00</td>
               </tr>
               <tr>
                 <td class="fs_res">no_of_pilots_reaching_es</td>
@@ -1771,11 +762,11 @@
               </tr>
               <tr>
                 <td class="fs_res">smallest_leading_coefficient</td>
-                <td class="fs_res" align="right">2.7923</td>
+                <td class="fs_res" align="right">1.2911</td>
               </tr>
               <tr>
                 <td class="fs_res">available_points_distance</td>
-                <td class="fs_res" align="right">356.5</td>
+                <td class="fs_res" align="right">249.9</td>
               </tr>
               <tr>
                 <td class="fs_res">available_points_time</td>
@@ -1787,7 +778,7 @@
               </tr>
               <tr>
                 <td class="fs_res">available_points_leading</td>
-                <td class="fs_res" align="right">39.6</td>
+                <td class="fs_res" align="right">27.8</td>
               </tr>
               <tr>
                 <td class="fs_res">available_points_arrival</td>
@@ -1795,7 +786,7 @@
               </tr>
               <tr>
                 <td class="fs_res">time_validity</td>
-                <td class="fs_res" align="right">1</td>
+                <td class="fs_res" align="right">0.559</td>
               </tr>
               <tr>
                 <td class="fs_res">launch_validity</td>
@@ -1803,7 +794,7 @@
               </tr>
               <tr>
                 <td class="fs_res">distance_validity</td>
-                <td class="fs_res" align="right">0.3961</td>
+                <td class="fs_res" align="right">0.4967</td>
               </tr>
               <tr>
                 <td class="fs_res">stop_validity</td>
@@ -1811,11 +802,11 @@
               </tr>
               <tr>
                 <td class="fs_res">day_quality</td>
-                <td class="fs_res" align="right">0.3961</td>
+                <td class="fs_res" align="right">0.2777</td>
               </tr>
               <tr>
                 <td class="fs_res">ftv_day_validity</td>
-                <td class="fs_res" align="right">0.3944</td>
+                <td class="fs_res" align="right">0.2777</td>
               </tr>
               <tr>
                 <td class="fs_res">time_points_stop_correction</td>
@@ -1835,76 +826,452 @@
           <table class="fs_res">
             <thead>
               <tr>
-                <th class="fs_res">Setting</th>
-                <th class="fs_res">Value</th>
+                <th class="fs_res">param</th>
+                <th class="fs_res">value</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="fs_res">Formula</td>
+                <td class="fs_res">id</td>
                 <td class="fs_res" align="right">GAP2025</td>
               </tr>
               <tr>
-                <td class="fs_res">Discipline</td>
-                <td class="fs_res" align="right">Paragliding</td>
+                <td class="fs_res">is_pg_comp</td>
+                <td class="fs_res" align="right">1</td>
               </tr>
               <tr>
-                <td class="fs_res">Minimum Distance</td>
-                <td class="fs_res" align="right">3.0 km</td>
+                <td class="fs_res">fai_sanctioning</td>
+                <td class="fs_res" align="right">2</td>
               </tr>
               <tr>
-                <td class="fs_res">Nominal Distance</td>
-                <td class="fs_res" align="right">40.0 km</td>
+                <td class="fs_res">ftv_factor</td>
+                <td class="fs_res" align="right">0</td>
               </tr>
               <tr>
-                <td class="fs_res">Nominal Time</td>
-                <td class="fs_res" align="right">1:30</td>
+                <td class="fs_res">day_quality_override</td>
+                <td class="fs_res" align="right">0</td>
               </tr>
               <tr>
-                <td class="fs_res">Scoring Altitude</td>
+                <td class="fs_res">bonus_gr</td>
+                <td class="fs_res" align="right">4</td>
+              </tr>
+              <tr>
+                <td class="fs_res">jump_the_gun_factor</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">jump_the_gun_max</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">min_dist</td>
+                <td class="fs_res" align="right">3</td>
+              </tr>
+              <tr>
+                <td class="fs_res">nom_dist</td>
+                <td class="fs_res" align="right">35</td>
+              </tr>
+              <tr>
+                <td class="fs_res">nom_goal</td>
+                <td class="fs_res" align="right">0.3</td>
+              </tr>
+              <tr>
+                <td class="fs_res">nom_launch</td>
+                <td class="fs_res" align="right">0.96</td>
+              </tr>
+              <tr>
+                <td class="fs_res">nom_time</td>
+                <td class="fs_res" align="right">1.25</td>
+              </tr>
+              <tr>
+                <td class="fs_res">normalize_1000_before_day_quality</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">time_points_if_not_in_goal</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_arrival_position_points</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_arrival_time_points</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_departure_points</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_difficulty_for_distance_points</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_distance_points</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_leading_points</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_semi_circle_control_zone_for_goal_line</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_time_points</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">scoring_altitude</td>
                 <td class="fs_res" align="right">GPS</td>
+              </tr>
+              <tr>
+                <td class="fs_res">final_glide_decelerator</td>
+                <td class="fs_res" align="right">none</td>
+              </tr>
+              <tr>
+                <td class="fs_res">no_final_glide_decelerator_reason</td>
+                <td class="fs_res" align="right">
+                </td>
+              </tr>
+              <tr>
+                <td class="fs_res">min_time_span_for_valid_task</td>
+                <td class="fs_res" align="right">38</td>
+              </tr>
+              <tr>
+                <td class="fs_res">score_back_time</td>
+                <td class="fs_res" align="right">5</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_proportional_leading_weight_if_nobody_in_goal</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">leading_weight_factor</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">turnpoint_radius_tolerance</td>
+                <td class="fs_res" align="right">0,002</td>
+              </tr>
+              <tr>
+                <td class="fs_res">turnpoint_radius_minimum_absolute_tolerance</td>
+                <td class="fs_res" align="right">5</td>
+              </tr>
+              <tr>
+                <td class="fs_res">number_of_decimals_task_results</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">number_of_decimals_competition_results</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">redistribute_removed_time_points_as_distance_points</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_best_score_for_ftv_validity</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_constant_leading_weight</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_flat_decline_of_timepoints</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">use_leading_time_ratio</td>
+                <td class="fs_res" align="right">1</td>
+              </tr>
+              <tr>
+                <td class="fs_res">optimize_ss_alone</td>
+                <td class="fs_res" align="right">0</td>
+              </tr>
+              <tr>
+                <td class="fs_res">minimum_validity_to_count_stopped_task</td>
+                <td class="fs_res" align="right">0.05</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
       <div class="fs_res" style="width:100%;font-size: xx-small;"><i>
-              Report created: 2026-11-01T08:08:42-03:00</i></div>
+              Report created: 2026-11-03T17:29:58-03:00</i></div>
       <div class="fs_res" style="width:100%;font-size: x-small;">
         <p>
-        FS development, maintenance and support by <a href="https://www.volirium.com" target="_new"><img src="data:image/png;base64,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"></a></p>
+              Apurador: Arthur Grandini Rodella (Tutu)
+            </p>
       </div>
     </div>
-  
+    <script>
+          (function() {
+            // Encontra a tabela de pilotos — a que contém "Lead." no cabecalho
+            var pilotTable = null;
+            var tables = document.querySelectorAll('table.fs_res');
+            for (var i = 0; i < tables.length; i++) {
+              if (tables[i].textContent.indexOf('Lead.') !== -1) { pilotTable = tables[i]; break; }
+            }
+            if (!pilotTable) return;
+
+            // Indice da coluna — procura th cujo texto contém o termo mas NÃO contém excludeText
+            function colIndex(text, excludeText) {
+              var ths = pilotTable.querySelectorAll('thead th');
+              for (var i = 0; i < ths.length; i++) {
+                var t = ths[i].textContent.replace(/\s+/g,' ').trim();
+                if (t.indexOf(text) !== -1 && (!excludeText || t.indexOf(excludeText) === -1)) return i;
+              }
+              return -1;
+            }
+
+            // Negrito e destaque na celula com valor maximo
+            function boldMax(colIdx) {
+              if (colIdx < 0) return;
+              var rows = pilotTable.querySelectorAll('tr');
+              var maxVal = -1, maxCells = [];
+              rows.forEach(function(row) {
+                var cell = row.querySelectorAll('td')[colIdx];
+                if (!cell) return;
+                var val = parseFloat(cell.textContent.replace(',','.').trim());
+                if (!isNaN(val) && val > 0) {
+                  if (val > maxVal) { maxVal = val; maxCells = [cell]; }
+                  else if (val === maxVal) { maxCells.push(cell); }
+                }
+              });
+              maxCells.forEach(function(c) {
+                c.style.fontWeight = 'bold';
+              });
+            }
+
+            // 'Lead.' unico, sem ambiguidade
+            boldMax(colIndex('Lead.', null));
+            // 'Time' excluindo '[' para evitar coluna 'Time [h:m:s]'
+            boldMax(colIndex('Time', '['));
+          })();
+        </script>
     </div>
 
-    
+    <div class="pc-overlay" id="pcOverlay"></div>
+    <div class="pilot-card" id="pilotCard">
+      <div id="pcPhotoWrap"></div>
+      <div class="pc-name" id="pcName"></div>
+      <div class="pc-lbl">Id</div>
+      <div class="pc-val" id="pcId"></div>
+      <div class="pc-lbl">Parapente</div>
+      <div class="pc-val" id="pcGlider"></div>
+      <div class="pc-lbl">Sponsor</div>
+      <div class="pc-val" id="pcSponsor"></div>
+      <div class="pc-lbl">Total</div>
+      <div class="pc-val" id="pcTotal"></div>
+      <div style="text-align:center"><span class="pc-status" id="pcStatus"></span></div><button class="pc-bio-btn" id="pcBioBtn" style="display:none" onclick="toggleBio()">📋 Biografia</button><div class="pc-bio-panel" id="pcBioPanel">
+        <div class="pc-bio-loading" id="pcBioLoading">Carregando...</div>
+        <div id="pcBioContent" style="display:none">
+          <div class="pc-bio-lbl">Cidade - UF</div>
+          <div class="pc-bio-val" id="bioCidade"></div>
+          <div class="pc-bio-lbl">Escola / Clube</div>
+          <div class="pc-bio-val" id="bioEscola"></div>
+          <div class="pc-bio-lbl">Início no voo livre</div>
+          <div class="pc-bio-val" id="bioInicio"></div>
+          <div class="pc-bio-lbl">Record XC linha reta</div>
+          <div class="pc-bio-val" id="bioReta"></div>
+          <div class="pc-bio-lbl">Record XC triângulo</div>
+          <div class="pc-bio-val" id="bioTri"></div>
+          <div class="pc-bio-lbl">Conquistas</div>
+          <div class="pc-bio-val pc-bio-val-sm" id="bioConquistas"></div>
+          <div class="pc-bio-lbl">Sobre mim</div>
+          <div class="pc-bio-val pc-bio-val-sm" id="bioSobre"></div><a id="bioIgLink" class="pc-bio-ig-link" href="#" target="_blank" style="display:none">📸 Instagram</a></div>
+      </div>
+    </div><script>
+          (function() {
+            var BASE    = 'https://arthurgr89.github.io/fotos-pilotos/';
+            var CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ210s9KVMrtsvBAfIo5NkzNcCQfZai4MjIegOSAqDTFU6YIAccIBaWrvRu6CgNopiDFRVQSnIrEU5x/pub?output=csv';
+            var GVIZ    = 'https://docs.google.com/spreadsheets/d/1Mmug8a15KUvxtB7RsU5wBvKBaBuakb9I70iyEsGtpwU/gviz/tq?tqx=out:json;responseHandler:bioDataCallback';
+            var card    = document.getElementById('pilotCard');
+            var overlay = document.getElementById('pcOverlay');
+            var currentId  = null;
+            var bioMap     = null;
+            var bioWaiters = [];
+
+            function parseCsv(line) {
+              var res = [], cur = '', inQ = false;
+              for (var i = 0; i < line.length; i++) {
+                var c = line[i];
+                if (c === '"') { inQ = !inQ; }
+                else if (c === ',' && !inQ) { res.push(cur); cur = ''; }
+                else { cur += c; }
+              }
+              res.push(cur); return res;
+            }
+
+            function setBioMap(map) {
+              if (bioMap !== null) return;
+              bioMap = map;
+              var cbs = bioWaiters.slice(); bioWaiters = [];
+              cbs.forEach(function(cb) { cb(); });
+            }
+
+            // Metodo 1: fetch() CSV (funciona em https e na maioria dos casos)
+            function tryFetchCsv() {
+              if (!window.fetch) return;
+              fetch(CSV_URL).then(function(r) { return r.text(); }).then(function(text) {
+                var map = {};
+                text.split(/\r?\n/).slice(1).forEach(function(line) {
+                  if (!line.trim()) return;
+                  var cols = parseCsv(line);
+                  var id = cols[2] ? cols[2].trim() : '';
+                  if (id && !map[id]) map[id] = { escola:cols[3]||'', inicio:cols[4]||'', reta:cols[5]||'', triangulo:cols[6]||'', conquistas:cols[7]||'', sobre:cols[8]||'', cidade:cols[10]||'', instagram:cols[12]||'' };
+                });
+                setBioMap(map);
+              }).catch(function(){});
+            }
+
+            // Metodo 2: JSONP gviz (funciona em file://)
+            window.bioDataCallback = function(data) {
+              var map = {};
+              try {
+                (data.table.rows || []).forEach(function(r) {
+                  var id = r.c[2] && r.c[2].v != null ? String(r.c[2].v).split('.')[0] : null;
+                  if (!id) return;
+                  if (!map[id]) map[id] = { escola:r.c[3]?(r.c[3].v||''):'', inicio:r.c[4]?(r.c[4].v||''):'', reta:r.c[5]?(r.c[5].v||''):'', triangulo:r.c[6]?(r.c[6].v||''):'', conquistas:r.c[7]?(r.c[7].v||''):'', sobre:r.c[8]?(r.c[8].v||''):'', cidade:r.c[10]?(r.c[10].v||''):'', instagram:r.c[12]?(r.c[12].v||''):'' };
+                });
+              } catch(e) {}
+              setBioMap(map);
+            };
+
+            function injectGviz() {
+              var s = document.createElement('script'); s.src = GVIZ;
+              s.onerror = function() { setTimeout(function() { if (bioMap === null) setBioMap({}); }, 100); };
+              document.head.appendChild(s);
+            }
+
+            function getBio(id, cb) {
+              if (bioMap !== null) { cb(bioMap[String(id)] || null); return; }
+              bioWaiters.push(function() { cb(bioMap[String(id)] || null); });
+            }
+
+            // Dispara ambos em paralelo - o primeiro que responder vence
+            tryFetchCsv();
+            injectGviz();
+
+            function populate(el) {
+              var d = el.dataset; currentId = d.id;
+              document.getElementById('pcBioPanel').classList.remove('visible');
+              document.getElementById('pcBioBtn').style.display = 'none';
+              document.getElementById('pcBioContent').style.display = 'none';
+              document.getElementById('pcBioLoading').style.display = 'block';
+              document.getElementById('pcBioLoading').textContent = 'Carregando...';
+              var initials = d.name.split(' ').slice(0,2).map(function(w){return w[0];}).join('');
+              var img = document.createElement('img');
+              img.className = 'pc-photo'; img.alt = d.name; img.src = BASE + d.id + '.jpg';
+              img.onerror = function() {
+                var div = document.createElement('div'); div.className = 'pc-initials'; div.textContent = initials;
+                this.parentNode.replaceChild(div, this);
+              };
+              var wrap = document.getElementById('pcPhotoWrap'); wrap.innerHTML = ''; wrap.appendChild(img);
+              document.getElementById('pcName').textContent    = d.name;
+              document.getElementById('pcId').textContent      = d.id;
+              document.getElementById('pcGlider').textContent  = d.glider;
+              document.getElementById('pcSponsor').textContent = d.sponsor;
+              document.getElementById('pcTotal').textContent   = d.total ? d.total + ' pts' : '—';
+              var st = document.getElementById('pcStatus');
+              st.textContent = d.status; st.className = 'pc-status pcs-' + d.status;
+              // Mostra o botao Biografia somente se o piloto tiver cadastro
+              getBio(d.id, function(bio) {
+                if (d.id !== currentId) return;
+                if (bio) document.getElementById('pcBioBtn').style.display = 'block';
+              });
+            }
+
+            window.toggleBio = function() {
+              var panel = document.getElementById('pcBioPanel');
+              var content = document.getElementById('pcBioContent');
+              var loading = document.getElementById('pcBioLoading');
+              if (panel.classList.contains('visible')) { panel.classList.remove('visible'); return; }
+              panel.classList.add('visible');
+              getBio(currentId, function(bio) {
+                if (!bio) { loading.textContent = 'Biografia não cadastrada.'; return; }
+                document.getElementById('bioEscola').textContent     = bio.escola      || '—';
+                document.getElementById('bioInicio').textContent     = bio.inicio      || '—';
+                document.getElementById('bioReta').textContent       = bio.reta        || '—';
+                document.getElementById('bioTri').textContent        = bio.triangulo   || '—';
+                document.getElementById('bioConquistas').textContent = bio.conquistas  || '—';
+                document.getElementById('bioCidade').textContent      = bio.cidade       || '—';
+                document.getElementById('bioSobre').textContent       = bio.sobre       || '—';
+                var igLink = document.getElementById('bioIgLink');
+                if (bio.instagram) {
+                  var ig = bio.instagram.replace(/^@/, '').trim();
+                  igLink.href = 'https://www.instagram.com/' + ig + '/';
+                  igLink.style.display = 'block';
+                } else {
+                  igLink.style.display = 'none';
+                }
+                loading.style.display = 'none'; content.style.display = 'block';
+                pos(lastX, lastY);
+              });
+            };
+
+            var lastX = 0, lastY = 0;
+            function pos(x, y) {
+              lastX = x; lastY = y;
+              var vw = window.innerWidth, vh = window.innerHeight;
+              var cw = card.offsetWidth || 260, ch = card.offsetHeight || 400;
+              var cx = x + 14, cy = y - 20;
+              if (cx + cw > vw) cx = Math.max(8, x - cw - 14);
+              if (cx + cw > vw) cx = Math.max(8, vw - cw - 8);
+              if (cy + ch > vh) cy = Math.max(8, vh - ch - 8);
+              if (cy < 8) cy = 8;
+              card.style.left = cx + 'px'; card.style.top = cy + 'px';
+            }
+
+            var hideTimer = null;
+            function scheduleHide() { hideTimer = setTimeout(function() { card.classList.remove('visible'); overlay.classList.remove('visible'); }, 200); }
+            function cancelHide()   { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } }
+            function hide()         { cancelHide(); card.classList.remove('visible'); overlay.classList.remove('visible'); }
+            function isMobile()     { return window.matchMedia('(hover: none)').matches; }
+
+            // O card permanece aberto quando o mouse esta sobre ele
+            card.addEventListener('mouseenter', cancelHide);
+            card.addEventListener('mouseleave', function() { if (!isMobile()) scheduleHide(); });
+
+            document.querySelectorAll('.pilot-name').forEach(function(el) {
+              el.addEventListener('mouseenter', function(e) {
+                if (isMobile()) return;
+                cancelHide(); populate(el); card.classList.add('visible'); pos(e.clientX, e.clientY);
+              });
+              el.addEventListener('mousemove', function(e) {
+                if (isMobile() || !card.classList.contains('visible')) return; pos(e.clientX, e.clientY);
+              });
+              el.addEventListener('mouseleave', function() { if (!isMobile()) scheduleHide(); });
+              el.addEventListener('click', function(e) {
+                if (!isMobile()) return; e.stopPropagation();
+                if (card.classList.contains('visible')) { hide(); return; }
+                populate(el); card.classList.add('visible'); overlay.classList.add('visible'); pos(e.clientX, e.clientY);
+              });
+            });
+            overlay.addEventListener('click', hide);
+          })();
+        </script>
 
     <script>
-      var FOOTER_TEXT = {"open":"","serial":"Results include only those pilots from the Overall ranking where ca:Categoria_Filtro contains *.","sport":"Results include only those pilots from the Overall ranking where ca:Categoria_Filtro contains **.","lite":"Results include only those pilots from the Overall ranking where ca:Categoria_Filtro contains ***.","fem":"Results include only those pilots from the Overall ranking where female equals 1."};
-      var CAT_H2 = {"open":"Task 1: Overall V4","serial":"Task 1: SERIAL V1","sport":"Task 1: SPORT V1","lite":"Task 1: SPORT LIGHT V1","fem":"Task 1: FEMININO V4"};
+      var FOOTER_TEXT = {"open": "", "serial": "Results include only those pilots where Overall ranking where ca:Categoria_Filtro contains *", "sport": "Results include only those pilots where Overall ranking where ca:Categoria_Filtro contains **", "fem": "Results include only those pilots where Overall ranking where female equals 1"};
+      var CAT_H2 = {"open": "Task 2: OPEN", "serial": "Task 2: SERIAL", "sport": "Task 2: SPORT", "fem": "Task 2: FEMININO"};
 
       function showTab(catId) {
         var pilotTableEl   = document.getElementById('pilotTable');
         var footerElToggle = document.getElementById('footer-filter-text');
         var statsPanelEl   = document.getElementById('statsPanel');
-        var timesPanelEl   = document.getElementById('timesPanel');
         var extrasEl       = document.getElementById('taskExtras');
 
         document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
 
-        // Oculta tudo primeiro
         pilotTableEl.style.display   = 'none';
         footerElToggle.style.display = 'none';
         statsPanelEl.style.display   = 'none';
-        if (timesPanelEl) timesPanelEl.style.display = 'none';
         if (extrasEl)     extrasEl.style.display     = 'none';
-
-        if (catId === 'times') {
-          document.getElementById('btn-times').classList.add('active');
-          if (timesPanelEl) timesPanelEl.style.display = 'block';
-          window.scrollTo(0, 0); return;
-        }
 
         if (catId === 'stats') {
           document.getElementById('btn-stats').classList.add('active');
@@ -1912,7 +1279,6 @@
           renderStats(); window.scrollTo(0, 0); return;
         }
 
-        // Aba de categoria (open, serial, sport, lite, fem...)
         document.getElementById('btn-' + catId).classList.add('active');
         pilotTableEl.style.display   = '';
         footerElToggle.style.display = '';
