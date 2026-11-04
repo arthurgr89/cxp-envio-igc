@@ -239,8 +239,8 @@
         <div class="pin-box" id="pinCreateForm">
           <label>Escolha um PIN de 4 números</label>
           <div class="pin-fields">
-            <input type="password" class="pin-input" id="newPin1" inputmode="numeric" maxlength="4" placeholder="••••">
-            <input type="password" class="pin-input" id="newPin2" inputmode="numeric" maxlength="4" placeholder="confirme">
+            <input type="password" class="pin-input" id="newPin1" inputmode="numeric" maxlength="4" placeholder="••••" enterkeyhint="next" autocomplete="off">
+            <input type="password" class="pin-input" id="newPin2" inputmode="numeric" maxlength="4" placeholder="confirme" enterkeyhint="done" autocomplete="off">
           </div>
           <button class="primary" id="createPinBtn">Cadastrar PIN</button>
         </div>
@@ -528,6 +528,22 @@
     el.addEventListener('input', ()=>{
       el.style.color = el.value.length === 4 ? '#2ECC71' : '';
     });
+  });
+
+  // Cadastro de PIN: controla pra onde o foco vai com Enter / "Próximo" / "OK" do teclado,
+  // senão o navegador pula pro seletor "Dia da prova" (logo abaixo) e abre a lista de datas.
+  document.getElementById('newPin1').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      document.getElementById('newPin2').focus();
+    }
+  });
+  document.getElementById('newPin2').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      e.target.blur();
+      document.getElementById('createPinBtn').focus({ preventScroll:true });
+    }
   });
 
   document.getElementById('togglePinCardBtn').addEventListener('click', ()=>{
@@ -1039,7 +1055,6 @@
   function drawTaskOnMap(turnpoints, optimizedRoute){
     pilotMapLayers.task.clearLayers();
     if(!turnpoints || !turnpoints.length) return null;
-    const TOLERANCIA_PILAO = 0.02; // mesma tolerância de 2% que o FSCOMP usa no raio
     let bounds = L.latLngBounds();
     turnpoints.forEach(p=>{
       let color = '#176f15';
@@ -1048,11 +1063,7 @@
       else if(p.type === 'GOAL') color = 'var(--lift)';
       const circle = L.circle([p.lat, p.lon], { radius:p.radius, color, weight:3, fillOpacity:0.15 })
         .addTo(pilotMapLayers.task)
-        .bindPopup(`<b>${escapeHtml(p.name)}</b><br>Raio: ${p.radius}m (tolerância ±2%)`);
-      L.circle([p.lat, p.lon], { radius:p.radius * (1 + TOLERANCIA_PILAO), color, weight:1.5, fill:false, opacity:0.7, dashArray:'6,6' })
-        .addTo(pilotMapLayers.task);
-      L.circle([p.lat, p.lon], { radius:p.radius * (1 - TOLERANCIA_PILAO), color, weight:1.5, fill:false, opacity:0.7, dashArray:'6,6' })
-        .addTo(pilotMapLayers.task);
+        .bindPopup(`<b>${escapeHtml(p.name)}</b><br>Raio: ${p.radius}m`);
       bounds.extend(circle.getBounds());
     });
     if(optimizedRoute && optimizedRoute.length > 1){
