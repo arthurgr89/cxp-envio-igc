@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CXP Live</title>
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
-<link rel="icon" href="favicon-192.png" type="image/png" sizes="192x192">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -140,6 +136,17 @@
   }
   button.primary:hover, a.primary:hover{ background:#ff8c57; }
   button.primary:disabled{ background:var(--line); color:var(--text-muted); cursor:not-allowed; }
+  .result-grid{ display:none; grid-template-columns:repeat(3,1fr); gap:10px; max-width:560px; margin:14px auto 0; }
+  .result-grid.show{ display:grid; }
+  .result-grid a{
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    min-height:64px; padding:10px 6px; box-sizing:border-box; border-radius:8px;
+    background:var(--thermal); color:#111; text-decoration:none;
+    font-family:var(--font-display); font-weight:700; font-size:15px; line-height:1.2;
+    transition:background .15s ease;
+  }
+  .result-grid a:hover{ background:#ff8c57; }
+
   button.secondary{
     margin-top:10px; width:100%; background:none; color:var(--text-muted); border:1px solid var(--line);
     font-family:var(--font-mono); font-size:12.5px; padding:9px; border-radius:7px; cursor:pointer;
@@ -213,6 +220,7 @@
     <img id="eventLogo" style="display:none; max-height:248px; max-width:95%; object-fit:contain; margin:20px auto 0; border-radius:6px;" alt="Logo do evento">
     <p class="sub" id="championshipNameLine" style="display:none; text-align:center; font-weight:600; color:var(--text); margin:10px auto 0; max-width:80ch;"></p>
     <a class="primary" href="https://live.circuitoxcparapente.com.br/resultados/preview.html" style="max-width:360px; margin-left:auto; margin-right:auto;">Ver resultado da prévia</a>
+    <div class="result-grid" id="resultGrid"></div>
   </header>
 
   <div class="tabs">
@@ -380,6 +388,19 @@
       <button class="primary" id="addDayBtn">Adicionar dia</button>
       <div class="toast" id="dayToast"></div>
       <div id="dayListWrap" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Resultado oficial da prova (HTML)</h2>
+      <p class="hint">Anexe o HTML de resultado de cada dia. Depois de enviar, o botão aparece na página principal, abaixo da prévia. Enquanto não houver HTML anexado, nada aparece. Enviar de novo no mesmo dia substitui o anterior.</p>
+      <label>Dia</label>
+      <select id="resultDaySelect" style="margin-bottom:10px;"></select>
+      <label>Texto do botão</label>
+      <input type="text" id="resultLabelInput" maxlength="20" placeholder="Prova 01" style="margin-bottom:10px;">
+      <input type="file" id="resultInput" accept=".html,.htm" style="margin-bottom:10px;">
+      <button class="primary" id="saveResultBtn" disabled>Salvar resultado desse dia</button>
+      <div class="toast" id="resultToast"></div>
+      <div id="resultListWrap" style="margin-top:14px;"></div>
     </div>
 
     <div class="card">
@@ -849,6 +870,149 @@
     btn.textContent = 'Salvar prova desse dia';
   });
 
+  // ===== Resultados oficiais por prova =====
+  let dayResults = [];  // [{event_date, button_label}]  (sem o HTML, que e' pesado)
+
+  async function loadDayResults(){
+    try{
+      const { data, error } = await sb.from('day_results').select('event_date,button_label').order('event_date');
+      if(error) throw error;
+      dayResults = data || [];
+    }catch(e){
+      dayResults = [];
+    }
+    renderResultGrid();
+    renderResultList();
+  }
+
+  function renderResultGrid(){
+    const grid = document.getElementById('resultGrid');
+    if(!dayResults.length){
+      grid.classList.remove('show');
+      grid.innerHTML = '';
+      return;
+    }
+    grid.innerHTML = dayResults.map(r =>
+      `<a href="resultado.html?dia=${encodeURIComponent(r.event_date)}">${escapeHtml(r.button_label)}</a>`
+    ).join('');
+    grid.classList.add('show');
+  }
+
+  function defaultResultLabel(date){
+    const idx = eventDays.findIndex(d => d.event_date === date);
+    return 'Prova ' + String((idx >= 0 ? idx : dayResults.length) + 1).padStart(2, '0');
+  }
+
+  function populateResultDaySelect(){
+    const sel = document.getElementById('resultDaySelect');
+    if(!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = eventDays.map(d => {
+      const has = dayResults.some(r => r.event_date === d.event_date);
+      return `<option value="${d.event_date}">${escapeHtml(d.label)} — ${formatDateBR(d.event_date)}${has ? ' ✓' : ''}</option>`;
+    }).join('');
+    if([...sel.options].some(o => o.value === prev)) sel.value = prev;
+    fillResultLabel();
+  }
+
+  function fillResultLabel(){
+    const sel = document.getElementById('resultDaySelect');
+    const input = document.getElementById('resultLabelInput');
+    if(!sel || !sel.value){ input.value = ''; return; }
+    const existing = dayResults.find(r => r.event_date === sel.value);
+    input.value = existing ? existing.button_label : defaultResultLabel(sel.value);
+  }
+
+  function renderResultList(){
+    populateResultDaySelect();
+    const wrap = document.getElementById('resultListWrap');
+    if(!dayResults.length){
+      wrap.innerHTML = '<div class="empty" style="padding:10px 0;">Nenhum resultado anexado ainda.</div>';
+      return;
+    }
+    wrap.innerHTML = dayResults.map(r => `
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--line); font-size:13.5px;">
+        <span>${escapeHtml(r.button_label)} <span style="color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">— ${formatDateBR(r.event_date)}</span></span>
+        <button class="dl-btn" data-result-date="${r.event_date}">Remover</button>
+      </div>
+    `).join('');
+    wrap.querySelectorAll('[data-result-date]').forEach(btn=>{
+      btn.addEventListener('click', ()=> deleteDayResult(btn.dataset.resultDate));
+    });
+  }
+
+  async function deleteDayResult(date){
+    const toast = document.getElementById('resultToast');
+    if(!(await appConfirm('Remover o resultado desse dia? O botão some da página principal.'))) return;
+    try{
+      const { error } = await sb.from('day_results').delete().eq('event_date', date);
+      if(error) throw error;
+      await loadDayResults();
+      toast.textContent = 'Resultado removido.';
+      toast.className = 'toast ok show';
+    }catch(e){
+      toast.textContent = 'Erro ao remover: ' + (e.message || 'erro desconhecido');
+      toast.className = 'toast err show';
+    }
+  }
+
+  let selectedResultHtml = null;
+  document.getElementById('resultDaySelect').addEventListener('change', fillResultLabel);
+  document.getElementById('resultInput').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    const toast = document.getElementById('resultToast');
+    const btn = document.getElementById('saveResultBtn');
+    selectedResultHtml = null;
+    btn.disabled = true;
+    if(!file) return;
+    if(file.size > 8 * 1024 * 1024){
+      toast.textContent = 'Arquivo grande demais (máximo 8 MB).';
+      toast.className = 'toast err show';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const txt = String(reader.result || '');
+      if(!/<html|<body|<table|<div/i.test(txt)){
+        toast.textContent = 'Esse arquivo não parece um HTML de resultado.';
+        toast.className = 'toast err show';
+        return;
+      }
+      selectedResultHtml = txt;
+      toast.textContent = `Pronto pra salvar: ${file.name} (${Math.round(file.size/1024)} KB).`;
+      toast.className = 'toast info show';
+      btn.disabled = false;
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('saveResultBtn').addEventListener('click', async ()=>{
+    const date = document.getElementById('resultDaySelect').value;
+    const label = document.getElementById('resultLabelInput').value.trim() || defaultResultLabel(date);
+    const toast = document.getElementById('resultToast');
+    if(!selectedResultHtml || !date) return;
+    const btn = document.getElementById('saveResultBtn');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+    try{
+      const { error } = await sb.from('day_results').upsert(
+        { event_date: date, button_label: label, html: selectedResultHtml, updated_at: new Date().toISOString() },
+        { onConflict: 'event_date' }
+      );
+      if(error) throw error;
+      selectedResultHtml = null;
+      document.getElementById('resultInput').value = '';
+      await loadDayResults();
+      toast.textContent = 'Resultado salvo. O botão já aparece na página principal.';
+      toast.className = 'toast ok show';
+    }catch(e){
+      toast.textContent = 'Erro ao salvar: ' + (e.message || 'erro desconhecido');
+      toast.className = 'toast err show';
+      btn.disabled = false;
+    }
+    btn.textContent = 'Salvar resultado desse dia';
+  });
+
   async function loadSubmissionStatus(){
     const wrap = document.getElementById('submissionStatusList');
     const select = document.getElementById('dayContextSelect');
@@ -919,6 +1083,7 @@
       populateFlightsDayFilter();
       populateDnfDaySelect();
       populateTaskDaySelect();
+      populateResultDaySelect();
     }catch(e){
       eventDays = [];
     }
@@ -2006,6 +2171,7 @@
 
   loadPilots();
   loadEventDays();
+  loadDayResults();
   loadEventSettings();
 </script>
 </body>
