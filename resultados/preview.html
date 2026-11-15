@@ -140,11 +140,14 @@
               Race to Goal 22.8 km</h3>
         <p>Provisional</p>
         
-    <h2 style="color:red;">Última atualização: 15/11/2026 - 13:25 h</h2>
+    <h2 style="color:red;">Última atualização: 15/11/2026 - 13:31 h</h2>
 
     <div class="pilot-wrap">
     <div class="tabs-bar">
           <button class="tab-btn active" onclick="showTab('open')" id="btn-open">OPEN</button>
+          <button class="tab-btn" onclick="showTab('serial')" id="btn-serial">SERIAL</button>
+          <button class="tab-btn" onclick="showTab('sport')" id="btn-sport">SPORT</button>
+          <button class="tab-btn" onclick="showTab('lite')" id="btn-lite">SPORT LITE</button>
           <button class="tab-btn" onclick="showTab('stats')" id="btn-stats">ESTATÍSTICAS</button>
     </div>
     <table class="fs_res" id="pilotTable">
@@ -182,7 +185,7 @@
             </tr>
           </thead>
       <tbody id="pilotTbody">
-<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open" data-rank-open="1">
+<tr onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')" class="female" data-cats="open serial sport lite" data-rank-open="1" data-rank-serial="1" data-rank-sport="1" data-rank-lite="1">
             <td class="fs_res rank-cell" align="right">1</td>
             <td class="fs_res">42081</td>
             <td class="fs_res"><span class="pilot-name" data-id="42081" data-name="GABRIELA RIBEIRO ÁSSIMOS" data-glider="[B] MACPARA - EDEN 8" data-sponsor="BASE DA NUVEM E VETS" data-ss="11:45:00" data-total="1000" data-status="DF">GABRIELA RIBEIRO ÁSSIMOS</span></td>
@@ -660,7 +663,7 @@
               </tr>
               <tr>
                 <td class="fs_res">ftv_factor</td>
-                <td class="fs_res" align="right">0.33</td>
+                <td class="fs_res" align="right">0</td>
               </tr>
               <tr>
                 <td class="fs_res">day_quality_override</td>
@@ -1071,8 +1074,8 @@
         </script>
 
     <script>
-      var FOOTER_TEXT = {"open": ""};
-      var CAT_H2 = {"open": "Task 1: OPEN"};
+      var FOOTER_TEXT = {"open": "", "serial": "", "sport": "", "lite": ""};
+      var CAT_H2 = {"open": "Task 1: OPEN", "serial": "Task 1: SERIAL", "sport": "Task 1: SPORT", "lite": "Task 1: SPORT LITE"};
 
       function showTab(catId) {
         var pilotTableEl   = document.getElementById('pilotTable');
