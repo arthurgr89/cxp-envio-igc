@@ -1754,15 +1754,27 @@
     if(!date) return;
     hint.style.display = 'block'; hint.textContent = 'Calculando a classificação geral…';
     try{
-      for(let guard = 0; guard < 80; guard++){
-        const res = await fetch(CHECK_FLIGHT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'apikey': SUPABASE_ANON_KEY },
-          body: JSON.stringify({ date, ranking: true, skip: Object.keys(cmpAll.pilots) })
-        });
-        const data = await res.json().catch(() => ({}));
+      let fails = 0;
+      for(let guard = 0; guard < 120; guard++){
+        let data;
+        try{
+          const res = await fetch(CHECK_FLIGHT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'apikey': SUPABASE_ANON_KEY },
+            body: JSON.stringify({ date, ranking: true, skip: Object.keys(cmpAll.pilots) })
+          });
+          data = await res.json().catch(() => ({}));
+          if(!res.ok || data.error) throw new Error(data.error || data.message || ('HTTP ' + res.status));
+        }catch(err){
+          if(req !== cmpAllReq) return;
+          // falha momentânea do servidor (ex.: falta de recursos): tenta de novo até 4 vezes
+          if(++fails > 4) throw err;
+          await new Promise(r => setTimeout(r, 1500 * fails));
+          if(req !== cmpAllReq) return;
+          continue;
+        }
+        fails = 0;
         if(req !== cmpAllReq) return;
-        if(!res.ok || data.error) throw new Error(data.error || data.message || ('HTTP ' + res.status));
         Object.assign(cmpAll.pilots, data.pilots || {});
         cmpUpdateOthers();
         if(typeof data.startGate === 'number'){ cmpAll.gate = data.startGate; cmpPlaceStartMark(); }
