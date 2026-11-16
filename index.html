@@ -1732,7 +1732,7 @@
       if(!o){
         const pl = pilots.find(p => String(p.id) === id);
         const name = pl ? pl.name : 'Piloto';
-        const marker = L.circleMarker(ll, { radius:5, color:'#fff', weight:1, opacity:0.45, fillColor:'#9ca3af', fillOpacity:0.5 });
+        const marker = L.circleMarker(ll, { radius:5, color:'#fff', weight:1, opacity:0.9, fillColor:'#000', fillOpacity:0.85 });
         marker.bindTooltip(() => {
           const r = cmpAll.ready ? cmpRankOf(id, cmpT) : null;
           return (r ? `<b>${r}º</b> ` : '') + escapeHtml(cmpShortName(name));
