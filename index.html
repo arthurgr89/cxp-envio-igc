@@ -1715,9 +1715,9 @@
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'apikey': SUPABASE_ANON_KEY },
           body: JSON.stringify({ date, ranking: true, skip: Object.keys(cmpAll.pilots) })
         });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if(req !== cmpAllReq) return;
-        if(!res.ok || data.error) throw new Error(data.error || 'falha');
+        if(!res.ok || data.error) throw new Error(data.error || data.message || ('HTTP ' + res.status));
         Object.assign(cmpAll.pilots, data.pilots || {});
         if(typeof data.startGate === 'number'){ cmpAll.gate = data.startGate; cmpPlaceStartMark(); }
         cmpAll.total = data.total || Object.keys(cmpAll.pilots).length;
