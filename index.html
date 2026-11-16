@@ -1285,6 +1285,13 @@
       let html = '';
       if(result.status){
         html += badge(result.status.df,'DF') + badge(result.status.ess,'ESS') + badge(result.status.goal,'GOAL');
+        if(typeof result.distanceKm === 'number'){
+          const km = (Math.round(result.distanceKm * 100) / 100).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+          html += `<span style="display:inline-block; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; margin-right:6px; margin-bottom:6px; background:rgba(0,102,255,0.15); color:var(--text); border:1px solid var(--thermal);">Distância: <span style="color:var(--lift);">${km} km</span></span>`;
+          if(result.startDetected === false){
+            html += `<div class="hint" style="margin-top:2px;">Largada válida não detectada: a distância mostrada vai só até a saída do cilindro de largada.</div>`;
+          }
+        }
       } else {
         html += '<div class="hint">A prova desse dia ainda não foi cadastrada pelo organizador — mostrando só o traçado.</div>';
       }
