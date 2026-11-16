@@ -153,6 +153,17 @@
   }
   button.secondary:hover{ border-color:var(--thermal); color:var(--thermal); }
 
+  #pilotMap.cmp-mode path.lead-seg{ stroke-opacity:0.28; }
+  .cmp-tip{ background:rgba(11,18,32,0.88); color:#fff; border:none; box-shadow:none; font-size:11.5px; font-weight:600; padding:2px 7px; }
+  .cmp-tip::before{ display:none; }
+  .cmp-chip{ display:inline-flex; align-items:center; gap:6px; padding:4px 6px 4px 10px; border-radius:20px; font-size:12.5px; font-weight:600; border:1px solid var(--line); background:rgba(255,255,255,0.04); }
+  .cmp-chip .dot, .cmp-row .dot{ width:10px; height:10px; border-radius:50%; flex:none; border:1px solid rgba(255,255,255,0.7); }
+  .cmp-chip button{ background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; padding:0 4px; line-height:1; }
+  .cmp-row{ display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid var(--line); font-size:13.5px; cursor:pointer; }
+  .cmp-row.off{ opacity:0.4; cursor:not-allowed; }
+  .cmp-row input{ width:18px; height:18px; flex:none; accent-color:var(--thermal); }
+  .cmp-row .dot{ background:transparent; border-color:var(--line); }
+  #cmpSlider{ flex:1; min-width:0; height:28px; padding:0; border:none; background:transparent; accent-color:var(--thermal); }
   .toast{ margin-top:12px; padding:10px 12px; border-radius:7px; font-size:13.5px; display:none; }
   .toast.show{ display:block; }
   .toast.ok{ background:rgba(63,201,138,0.12); border:1px solid var(--lift); color:var(--lift); }
@@ -324,14 +335,32 @@
 
     <div class="card" id="mapView" style="display:none;">
       <h2 id="mapViewTitle">Sua prova no mapa</h2>
-      <p class="hint">Tracklog, pilões da prova e espaço aéreo do dia selecionado.</p>
       <div id="flightStatusBox" style="margin-bottom:12px;"></div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
+        <button class="secondary" id="cmpToggleBtn" style="width:auto; margin-top:0; padding:8px 14px;">Comparar</button>
+        <button class="secondary" id="cmpListBtn" style="display:none; width:auto; margin-top:0; padding:8px 14px;">Escolher pilotos ▾</button>
+        <div id="cmpChips" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+      </div>
+      <div id="cmpPanel" style="display:none; margin-bottom:12px; padding:12px; background:var(--bg-deep); border:1px solid var(--line); border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:12.5px; color:var(--text-muted);">
+          <span id="cmpCount"></span>
+          <span class="refresh-link" id="cmpRefresh">Atualizar lista</span>
+        </div>
+        <input type="text" id="cmpSearch" placeholder="Buscar piloto..." style="margin-bottom:6px;">
+        <div id="cmpList" style="max-height:210px; overflow:auto;"></div>
+      </div>
       <div id="pilotMap" style="height:420px; border-radius:8px; background:var(--bg-deep);"></div>
-      <div id="leadLegend" style="display:none; margin-top:12px;">
-        <div style="font-size:12.5px; font-weight:600; margin-bottom:6px;">Peso da liderança ao longo da prova</div>
-        <div style="height:10px; border-radius:6px; background:linear-gradient(90deg,hsl(120,85%,45%),hsl(60,85%,45%),hsl(0,85%,45%));"></div>
-        <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted); margin-top:4px;"><span>conta pouco</span><span>conta muito</span></div>
-        <div class="hint" id="leadLegendText" style="margin-top:8px;"></div>
+      <div id="cmpTimeline" style="display:none; margin-top:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="secondary" id="cmpPlayBtn" style="width:46px; margin-top:0; padding:8px 0; font-size:15px;" aria-label="Tocar">▶</button>
+          <input type="range" id="cmpSlider" min="0" max="0" step="1" value="0">
+          <select id="cmpSpeed" style="width:auto; padding:8px 10px; font-size:13px;">
+            <option value="1">1×</option><option value="5">5×</option><option value="20" selected>20×</option><option value="60">60×</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:12.5px; color:var(--text-muted); margin-top:4px;">
+          <span id="cmpClockMin"></span><span id="cmpClock" style="color:var(--text); font-weight:600; font-size:14px;"></span><span id="cmpClockMax"></span>
+        </div>
       </div>
     </div>
   </div>
@@ -1065,6 +1094,7 @@
   document.getElementById('refreshSubmissionBtn').addEventListener('click', loadSubmissionStatus);
   document.getElementById('dayContextSelect').addEventListener('change', loadSubmissionStatus);
   document.getElementById('dayContextSelect').addEventListener('change', ()=>{
+    if(cmpActive){ cmpOnDayChange(); return; }
     if(!mapFlightShown && document.getElementById('mapView').style.display === 'block') showDayTaskOnMap();
   });
 
@@ -1208,7 +1238,8 @@
     pilotMapLayers = {
       task: L.layerGroup().addTo(pilotLeafletMap),
       airspace: L.layerGroup().addTo(pilotLeafletMap),
-      igc: L.layerGroup().addTo(pilotLeafletMap)
+      igc: L.layerGroup().addTo(pilotLeafletMap),
+      cmp: L.layerGroup().addTo(pilotLeafletMap)
     };
   }
 
@@ -1239,28 +1270,19 @@
   function drawLeadRoute(leadRoute){
     const pts = leadRoute.points;
     // contorno escuro por baixo pra cor aparecer bem sobre qualquer mapa
-    L.polyline(pts.map(p => [p[0], p[1]]), { color:'#0b1220', weight:9, opacity:0.45 }).addTo(pilotMapLayers.task);
+    L.polyline(pts.map(p => [p[0], p[1]]), { color:'#0b1220', weight:9, opacity:0.45, className:'lead-seg' }).addTo(pilotMapLayers.task);
     for(let i = 1; i < pts.length; i++){
       const a = pts[i-1], b = pts[i];
       const inside = a[2] >= 0 && b[2] >= 0;
       if(!inside){
-        L.polyline([[a[0],a[1]],[b[0],b[1]]], { color:'#9fb3c8', weight:4, opacity:0.9, dashArray:'6,6' }).addTo(pilotMapLayers.task);
+        L.polyline([[a[0],a[1]],[b[0],b[1]]], { color:'#9fb3c8', weight:4, opacity:0.9, dashArray:'6,6', className:'lead-seg' }).addTo(pilotMapLayers.task);
         continue;
       }
       const w = (a[2] + b[2]) / 2;
-      L.polyline([[a[0],a[1]],[b[0],b[1]]], { color:leadColor(w), weight:6, opacity:1, lineCap:'butt' })
+      L.polyline([[a[0],a[1]],[b[0],b[1]]], { color:leadColor(w), weight:6, opacity:1, lineCap:'butt', className:'lead-seg' })
         .addTo(pilotMapLayers.task)
         .bindTooltip(`Peso na liderança: ${Math.round(w * 100)}% do máximo`, { sticky:true });
     }
-  }
-
-  function updateLeadLegend(leadRoute){
-    const box = document.getElementById('leadLegend');
-    if(!leadRoute){ box.style.display = 'none'; return; }
-    const fmt = n => n.toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:1 });
-    document.getElementById('leadLegendText').innerHTML =
-      `O trecho de velocidade (do SSS ao ESS) tem ${fmt(leadRoute.ssKm)} km. O peso é máximo entre o <strong>km ${fmt(leadRoute.redFromKm)}</strong> e o <strong>km ${fmt(leadRoute.redToKm)}</strong> depois da largada: é aí que estar na frente do grupo rende mais pontos de liderança. Perto da largada e perto do ESS conta pouco. O tracejado cinza (decolagem até o SSS e ESS até o goal) não conta.`;
-    box.style.display = 'block';
   }
 
   function drawTaskOnMap(turnpoints, optimizedRoute, goalLine, leadRoute){
@@ -1310,6 +1332,7 @@
 
   async function renderFlightOnMap(igcContent, dayDate, pilotNameForTitle){
     ensurePilotMap();
+    if(cmpActive) cmpResetUI();
     const reqId = ++mapReqId;
     const statusBox = document.getElementById('flightStatusBox');
     document.getElementById('mapViewTitle').textContent = pilotNameForTitle ? `Carregando prova de ${pilotNameForTitle}...` : 'Verificando seu voo...';
@@ -1322,7 +1345,6 @@
 
       const airBounds = drawAirspacesOnMap(result.airspaces);
       const taskBounds = drawTaskOnMap(result.turnpoints, result.optimizedRoute, result.goalLine, result.leadRoute);
-      updateLeadLegend(result.leadRoute);
       const trackBounds = drawTrackOnMap(result.track);
 
       setTimeout(()=>{
@@ -1382,7 +1404,6 @@
     const date = sel && sel.value ? sel.value : null;
     const clearAll = ()=>{
       pilotMapLayers.task.clearLayers(); pilotMapLayers.airspace.clearLayers(); pilotMapLayers.igc.clearLayers();
-      updateLeadLegend(null);
     };
     if(!eventDays.length || !date){
       mapFlightShown = false;
@@ -1401,7 +1422,6 @@
       pilotMapLayers.igc.clearLayers();
       const airBounds = drawAirspacesOnMap(result.airspaces);
       const taskBounds = drawTaskOnMap(result.turnpoints, result.optimizedRoute, result.goalLine, result.leadRoute);
-      updateLeadLegend(result.leadRoute);
       const fb = L.latLngBounds();
       let any = false;
       [airBounds, taskBounds].forEach(b=>{ if(b){ fb.extend(b); any = true; } });
@@ -1411,7 +1431,7 @@
         if(any) pilotLeafletMap.fitBounds(fb, { padding:[20,20] });
       }, 150);
       statusBox.innerHTML = (result.turnpoints && result.turnpoints.length)
-        ? '<div class="hint">Mostrando a prova do dia. Escolha um piloto na lista de envio pra ver o voo dele aqui.</div>'
+        ? ''
         : '<div class="hint">A prova desse dia ainda não foi cadastrada pelo organizador.</div>';
     }catch(e){
       if(reqId !== mapReqId) return;
@@ -1441,11 +1461,328 @@
     }
   }
 
+  // ---------- Comparar pilotos ----------
+  const CMP_COLORS = ['#1d4ed8', '#d6249f', '#f97316', '#7c3aed', '#0891b2'];
+  const CMP_MAX = 5;
+  let cmpActive = false, cmpDate = null;
+  let cmpAvailable = [];        // [{id, name, glider}] pilotos com IGC enviado no dia
+  let cmpSelected = [];         // [{id, name, color, track, loading, distanceKm, line, trail, marker, markerOn}]
+  const cmpCache = {};          // `${id}|${data}` -> { track, distanceKm }
+  let cmpT = 0, cmpMin = 0, cmpMax = 0, cmpPlaying = false, cmpRaf = null, cmpLastTs = 0, cmpLastDraw = 0;
+  const CMP_TRAIL_SEC = 600;    // rastro de 10 minutos atrás de cada piloto
+
+  function cmpShowPanel(on){
+    document.getElementById('cmpPanel').style.display = on ? 'block' : 'none';
+    document.getElementById('cmpListBtn').textContent = on ? 'Ocultar lista ▴' : 'Escolher pilotos ▾';
+    setTimeout(()=>{ if(pilotLeafletMap) pilotLeafletMap.invalidateSize(); }, 50);
+  }
+  document.getElementById('cmpListBtn').addEventListener('click', ()=>{
+    cmpShowPanel(document.getElementById('cmpPanel').style.display === 'none');
+  });
+
+  function cmpNorm(s){ return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function cmpShortName(name){
+    const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    if(!w.length) return '?';
+    return w.length > 1 ? `${cap(w[0])} ${w[1].charAt(0).toUpperCase()}.` : cap(w[0]);
+  }
+  function cmpClock(sec){   // segundos UTC -> HH:MM:SS (UTC-3)
+    let s = Math.round(sec) - 3 * 3600;
+    s = ((s % 86400) + 86400) % 86400;
+    const p = n => String(n).padStart(2, '0');
+    return `${p(Math.floor(s / 3600))}:${p(Math.floor((s % 3600) / 60))}:${p(s % 60)}`;
+  }
+
+  async function cmpLoadAvailable(){
+    const list = document.getElementById('cmpList');
+    const sel = document.getElementById('dayContextSelect');
+    cmpDate = sel && sel.value ? sel.value : null;
+    if(!cmpDate){ cmpAvailable = []; cmpRenderList(); return; }
+    list.innerHTML = '<div class="hint" style="padding:8px 0;">Carregando pilotos...</div>';
+    const date = cmpDate;
+    try{
+      const { data, error } = await sb.rpc('pilots_submitted_for_date', { p_date: date });
+      if(error) throw error;
+      if(date !== cmpDate) return;
+      const ids = new Set((data || []).map(v => String(v)));
+      cmpAvailable = pilots.filter(p => ids.has(String(p.id))).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    }catch(e){
+      cmpAvailable = [];
+      list.innerHTML = '<div class="hint" style="padding:8px 0;">Não consegui carregar a lista agora.</div>';
+      return;
+    }
+    cmpRenderList();
+  }
+
+  function cmpRenderList(){
+    const list = document.getElementById('cmpList');
+    const q = cmpNorm(document.getElementById('cmpSearch').value);
+    const full = cmpSelected.length >= CMP_MAX;
+    document.getElementById('cmpCount').textContent = `Escolha até ${CMP_MAX} pilotos (${cmpSelected.length}/${CMP_MAX})`;
+    if(!cmpAvailable.length){
+      list.innerHTML = '<div class="hint" style="padding:8px 0;">Nenhum piloto enviou IGC nesse dia ainda.</div>';
+      return;
+    }
+    const rows = cmpAvailable.filter(p => !q || cmpNorm(p.name).includes(q));
+    if(!rows.length){ list.innerHTML = '<div class="hint" style="padding:8px 0;">Nenhum piloto encontrado.</div>'; return; }
+    list.innerHTML = rows.map(p => {
+      const s = cmpSelected.find(x => String(x.id) === String(p.id));
+      const off = !s && full;
+      return `<label class="cmp-row${off ? ' off' : ''}">
+        <input type="checkbox" data-pid="${escapeHtml(String(p.id))}" ${s ? 'checked' : ''} ${off ? 'disabled' : ''}>
+        <span class="dot" style="${s ? `background:${s.color}; border-color:#fff;` : ''}"></span>
+        <span>${escapeHtml(p.name)}</span>
+      </label>`;
+    }).join('');
+    list.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.addEventListener('change', ()=> cmpToggleSelect(cb.dataset.pid));
+    });
+  }
+
+  function cmpRenderChips(){
+    const box = document.getElementById('cmpChips');
+    box.innerHTML = cmpSelected.map(s => {
+      const km = typeof s.distanceKm === 'number'
+        ? ' · ' + (Math.round(s.distanceKm * 100) / 100).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' km' : '';
+      return `<span class="cmp-chip" style="border-color:${s.color};">
+        <span class="dot" style="background:${s.color};"></span>
+        <span>${escapeHtml(cmpShortName(s.name))}${s.loading ? ' · carregando...' : escapeHtml(km)}</span>
+        <button data-rm="${escapeHtml(String(s.id))}" aria-label="Remover">✕</button>
+      </span>`;
+    }).join('');
+    box.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', ()=> cmpToggleSelect(b.dataset.rm)));
+  }
+
+  function cmpRemoveLayers(s){
+    if(s.line) pilotMapLayers.cmp.removeLayer(s.line);
+    if(s.trail) pilotMapLayers.cmp.removeLayer(s.trail);
+    if(s.marker) pilotMapLayers.cmp.removeLayer(s.marker);
+    s.line = s.trail = s.marker = null; s.markerOn = false;
+  }
+
+  function cmpToggleSelect(pid){
+    const idx = cmpSelected.findIndex(x => String(x.id) === String(pid));
+    if(idx >= 0){
+      cmpRemoveLayers(cmpSelected[idx]);
+      cmpSelected.splice(idx, 1);
+      cmpAfterChange();
+      return;
+    }
+    if(cmpSelected.length >= CMP_MAX) return;
+    const p = cmpAvailable.find(x => String(x.id) === String(pid));
+    if(!p) return;
+    const used = new Set(cmpSelected.map(x => x.color));
+    const color = CMP_COLORS.find(c => !used.has(c)) || CMP_COLORS[0];
+    const s = { id: p.id, name: p.name, color, track: null, loading: true, distanceKm: null, line: null, trail: null, marker: null, markerOn: false };
+    cmpSelected.push(s);
+    cmpAfterChange();
+    cmpLoadTrack(s);
+    if(cmpSelected.length >= CMP_MAX) cmpShowPanel(false);
+  }
+
+  async function cmpLoadTrack(s){
+    const date = cmpDate, key = `${s.id}|${date}`;
+    const stillValid = ()=> date === cmpDate && cmpSelected.includes(s);
+    try{
+      let entry = cmpCache[key];
+      if(!entry){
+        const { data, error } = await sb.rpc('get_flight_content', { p_pilot_id: s.id, p_date: date });
+        if(error) throw error;
+        const row = Array.isArray(data) ? data[0] : data;
+        if(!row || !row.content) throw new Error('voo não encontrado');
+        const result = await checkFlight(row.content, date);
+        const track = (result.track || []).map(q => ({ lat:q.lat, lon:q.lon, alt:q.alt, time:q.time }));
+        entry = cmpCache[key] = { track, distanceKm: typeof result.distanceKm === 'number' ? result.distanceKm : null };
+      }
+      if(!stillValid()) return;
+      if(!entry.track.length) throw new Error('tracklog vazio');
+      s.track = entry.track; s.distanceKm = entry.distanceKm; s.loading = false;
+      s.line = L.polyline(s.track.map(q => [q.lat, q.lon]), { color:s.color, weight:2, opacity:0.3 }).addTo(pilotMapLayers.cmp);
+      s.trail = L.polyline([], { color:s.color, weight:4, opacity:0.95 }).addTo(pilotMapLayers.cmp);
+      s.marker = L.circleMarker([s.track[0].lat, s.track[0].lon], { radius:7, color:'#fff', weight:2, fillColor:s.color, fillOpacity:1 });
+      const side = [['right', [9, 0]], ['left', [-9, 0]], ['top', [0, -9]], ['bottom', [0, 9]], ['right', [9, 14]]][Math.max(0, CMP_COLORS.indexOf(s.color))];
+      s.marker.bindTooltip(cmpShortName(s.name), { permanent:true, direction:side[0], offset:side[1], className:'cmp-tip' });
+      const wasEmpty = cmpSelected.filter(x => x !== s && x.track).length === 0;
+      cmpRecalcRange(wasEmpty);
+      cmpFit(s, wasEmpty);
+      cmpRenderChips();
+      cmpUpdate();
+    }catch(e){
+      if(!stillValid()) return;
+      const i = cmpSelected.indexOf(s);
+      if(i >= 0) cmpSelected.splice(i, 1);
+      cmpAfterChange();
+      document.getElementById('flightStatusBox').innerHTML =
+        `<div class="empty" style="padding:6px 0;">Não consegui carregar o voo de ${escapeHtml(cmpShortName(s.name))}: ${escapeHtml(e.message || 'erro')}</div>`;
+    }
+  }
+
+  function cmpFit(s, force){
+    if(!pilotLeafletMap || !s.line) return;
+    const b = s.line.getBounds();
+    if(force || !pilotLeafletMap.getBounds().contains(b)){
+      const all = L.latLngBounds();
+      cmpSelected.forEach(x => { if(x.line) all.extend(x.line.getBounds()); });
+      pilotLeafletMap.fitBounds(all, { padding:[30, 30] });
+    }
+  }
+
+  function cmpAfterChange(){
+    cmpRenderChips();
+    cmpRenderList();
+    cmpRecalcRange(false);
+    cmpUpdate();
+  }
+
+  // Linha do tempo: da decolagem do primeiro piloto ao pouso do último
+  function cmpRecalcRange(reset){
+    const loaded = cmpSelected.filter(s => s.track && s.track.length);
+    const box = document.getElementById('cmpTimeline');
+    if(!loaded.length){
+      cmpStop();
+      box.style.display = 'none';
+      return;
+    }
+    const wasAtStart = !box.style.display || box.style.display === 'none' || cmpT <= cmpMin;
+    cmpMin = Math.min(...loaded.map(s => s.track[0].time));
+    cmpMax = Math.max(...loaded.map(s => s.track[s.track.length - 1].time));
+    // a barra começa na decolagem do primeiro piloto: se ainda estava no início, acompanha o novo início
+    if(reset || wasAtStart || cmpT < cmpMin || cmpT > cmpMax) cmpT = cmpMin;
+    const sl = document.getElementById('cmpSlider');
+    sl.min = cmpMin; sl.max = cmpMax; sl.value = cmpT;
+    document.getElementById('cmpClockMin').textContent = cmpClock(cmpMin);
+    document.getElementById('cmpClockMax').textContent = cmpClock(cmpMax);
+    box.style.display = 'block';
+  }
+
+  function cmpIndexAtOrBefore(track, t){   // último índice com time <= t (ou -1)
+    let lo = 0, hi = track.length - 1, ans = -1;
+    while(lo <= hi){
+      const mid = (lo + hi) >> 1;
+      if(track[mid].time <= t){ ans = mid; lo = mid + 1; } else hi = mid - 1;
+    }
+    return ans;
+  }
+
+  function cmpUpdate(){
+    document.getElementById('cmpClock').textContent = cmpClock(cmpT);
+    cmpSelected.forEach(s => {
+      if(!s.track || !s.marker) return;
+      const tr = s.track, i = cmpIndexAtOrBefore(tr, cmpT);
+      if(i < 0){                                   // ainda não decolou
+        if(s.markerOn){ pilotMapLayers.cmp.removeLayer(s.marker); s.markerOn = false; }
+        s.trail.setLatLngs([]);
+        return;
+      }
+      let lat = tr[i].lat, lon = tr[i].lon, alt = tr[i].alt;
+      if(i < tr.length - 1){
+        const a = tr[i], b = tr[i + 1], f = b.time > a.time ? (cmpT - a.time) / (b.time - a.time) : 0;
+        lat = a.lat + (b.lat - a.lat) * f; lon = a.lon + (b.lon - a.lon) * f; alt = Math.round(a.alt + (b.alt - a.alt) * f);
+      }
+      if(!s.markerOn){ s.marker.addTo(pilotMapLayers.cmp); s.markerOn = true; }
+      s.marker.setLatLng([lat, lon]);
+      s.marker.setTooltipContent(`${cmpShortName(s.name)} · ${alt} m`);
+      const j = Math.max(0, cmpIndexAtOrBefore(tr, cmpT - CMP_TRAIL_SEC));
+      const stride = Math.max(1, Math.floor((i - j) / 300));
+      const pts = [];
+      for(let k = j; k <= i; k += stride) pts.push([tr[k].lat, tr[k].lon]);
+      pts.push([lat, lon]);
+      s.trail.setLatLngs(pts);
+    });
+  }
+
+  function cmpSetPlaying(on){
+    cmpPlaying = on;
+    document.getElementById('cmpPlayBtn').textContent = on ? '❚❚' : '▶';
+    document.getElementById('cmpPlayBtn').setAttribute('aria-label', on ? 'Pausar' : 'Tocar');
+    if(cmpRaf){ cancelAnimationFrame(cmpRaf); cmpRaf = null; }
+    if(on){
+      if(cmpT >= cmpMax) cmpT = cmpMin;
+      cmpLastTs = performance.now();
+      cmpRaf = requestAnimationFrame(cmpTick);
+    }
+  }
+  function cmpStop(){ if(cmpPlaying) cmpSetPlaying(false); }
+
+  function cmpTick(ts){
+    if(!cmpPlaying) return;
+    const speed = Number(document.getElementById('cmpSpeed').value) || 20;
+    cmpT += (ts - cmpLastTs) / 1000 * speed;
+    cmpLastTs = ts;
+    let ended = false;
+    if(cmpT >= cmpMax){ cmpT = cmpMax; ended = true; }
+    if(ts - cmpLastDraw > 40 || ended){
+      cmpLastDraw = ts;
+      document.getElementById('cmpSlider').value = cmpT;
+      cmpUpdate();
+    }
+    if(ended){ cmpSetPlaying(false); return; }
+    cmpRaf = requestAnimationFrame(cmpTick);
+  }
+
+  document.getElementById('cmpPlayBtn').addEventListener('click', ()=> cmpSetPlaying(!cmpPlaying));
+  document.getElementById('cmpSlider').addEventListener('input', (e)=>{
+    cmpT = Number(e.target.value);
+    cmpUpdate();
+  });
+  document.getElementById('cmpSearch').addEventListener('input', cmpRenderList);
+  document.getElementById('cmpRefresh').addEventListener('click', cmpLoadAvailable);
+
+  // Limpa tudo do modo comparar (sem recarregar a prova)
+  function cmpResetUI(){
+    cmpStop();
+    cmpSelected.forEach(cmpRemoveLayers);
+    cmpSelected = [];
+    if(pilotMapLayers) pilotMapLayers.cmp.clearLayers();
+    cmpActive = false;
+    document.getElementById('cmpPanel').style.display = 'none';
+    document.getElementById('cmpListBtn').style.display = 'none';
+    document.getElementById('cmpTimeline').style.display = 'none';
+    document.getElementById('cmpChips').innerHTML = '';
+    document.getElementById('cmpSearch').value = '';
+    document.getElementById('cmpToggleBtn').textContent = 'Comparar';
+    const m = document.getElementById('pilotMap'); if(m) m.classList.remove('cmp-mode');
+  }
+
+  function cmpEnter(){
+    cmpActive = true;
+    document.getElementById('cmpToggleBtn').textContent = 'Sair da comparação';
+    document.getElementById('cmpListBtn').style.display = '';
+    cmpShowPanel(true);
+    document.getElementById('pilotMap').classList.add('cmp-mode');
+    mapFlightShown = false;
+    showDayTaskOnMap();          // garante prova do dia no mapa e tira o voo avulso
+    cmpLoadAvailable();
+  }
+
+  function cmpExit(){
+    cmpResetUI();
+    showDayTaskOnMap();
+  }
+
+  function cmpOnDayChange(){
+    cmpStop();
+    cmpSelected.forEach(cmpRemoveLayers);
+    cmpSelected = [];
+    pilotMapLayers.cmp.clearLayers();
+    document.getElementById('cmpTimeline').style.display = 'none';
+    document.getElementById('cmpChips').innerHTML = '';
+    showDayTaskOnMap();
+    cmpLoadAvailable();
+  }
+
+  document.getElementById('cmpToggleBtn').addEventListener('click', ()=>{
+    ensurePilotMap();
+    if(cmpActive) cmpExit(); else cmpEnter();
+  });
+
   function switchPilotoView(view, opts){
     document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
     document.getElementById('mapView').style.display = view === 'map' ? 'block' : 'none';
     document.getElementById('toggleListBtn').classList.toggle('active', view === 'list');
     document.getElementById('toggleMapBtn').classList.toggle('active', view === 'map');
+    if(view === 'list') cmpStop();
     if(view === 'map'){
       ensurePilotMap();
       setTimeout(()=>{ if(pilotLeafletMap) pilotLeafletMap.invalidateSize(); }, 50);
