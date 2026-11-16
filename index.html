@@ -1216,7 +1216,7 @@
   // ================= Verificação de voo (agora roda na Edge Function, não aqui) =================
   const CHECK_FLIGHT_URL = 'https://rqzsqlanwbdovtbxoprq.supabase.co/functions/v1/check-flight';
 
-  async function checkFlight(igcContent, date){
+  async function checkFlight(igcContent, date, opts){
     const res = await fetch(CHECK_FLIGHT_URL, {
       method: 'POST',
       headers: {
@@ -1224,7 +1224,7 @@
         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
         'apikey': SUPABASE_ANON_KEY
       },
-      body: JSON.stringify({ date, igcContent })
+      body: JSON.stringify({ date, igcContent, withProgress: !!(opts && opts.withProgress) })
     });
     const data = await res.json();
     if(!res.ok || data.error) throw new Error(data.error || 'Falha ao verificar o voo no servidor');
@@ -1234,6 +1234,7 @@
   // ---------- Mapa da aba Piloto ----------
   let pilotLeafletMap = null, pilotMapLayers = null;
   let mapReqId = 0;            // descarta respostas antigas quando o usuário muda de piloto/dia rápido
+  let mapViewedPilot = null;   // {id, date} do piloto cujo voo está no mapa (para pré-selecionar no Comparar)
   let mapFlightShown = false;  // true = o mapa está mostrando o voo de um piloto (e não só a prova)
 
   function ensurePilotMap(){
@@ -1335,7 +1336,7 @@
     return line.getBounds();
   }
 
-  async function renderFlightOnMap(igcContent, dayDate, pilotNameForTitle){
+  async function renderFlightOnMap(igcContent, dayDate, pilotNameForTitle, pilotId){
     ensurePilotMap();
     if(cmpActive) cmpResetUI();
     const reqId = ++mapReqId;
@@ -1346,6 +1347,7 @@
       const result = await checkFlight(igcContent, dayDate);
       if(reqId !== mapReqId) return;
       mapFlightShown = true;
+      mapViewedPilot = (pilotId !== undefined && pilotId !== null) ? { id: String(pilotId), date: dayDate } : null;
       document.getElementById('mapViewTitle').textContent = pilotNameForTitle ? `Prova de ${pilotNameForTitle}` : 'Sua prova no mapa';
 
       const airBounds = drawAirspacesOnMap(result.airspaces);
@@ -1459,7 +1461,7 @@
         statusBox.innerHTML = '<div class="empty" style="padding:10px 0;">Não encontrei o voo desse piloto.</div>';
         return;
       }
-      await renderFlightOnMap(row.content, date, row.pilot_name || pilotName);
+      await renderFlightOnMap(row.content, date, row.pilot_name || pilotName, pilotId);
     }catch(e){
       document.getElementById('mapViewTitle').textContent = 'Sua prova no mapa';
       statusBox.innerHTML = '<div class="empty" style="padding:10px 0;">Não consegui carregar esse voo.</div>';
@@ -1596,13 +1598,14 @@
         if(error) throw error;
         const row = Array.isArray(data) ? data[0] : data;
         if(!row || !row.content) throw new Error('voo não encontrado');
-        const result = await checkFlight(row.content, date);
+        const result = await checkFlight(row.content, date, { withProgress:true });
         const track = (result.track || []).map(q => ({ lat:q.lat, lon:q.lon, alt:q.alt, time:q.time }));
-        entry = cmpCache[key] = { track, distanceKm: typeof result.distanceKm === 'number' ? result.distanceKm : null };
+        const pg = result.progress && Array.isArray(result.progress.samples) && result.progress.samples.length ? result.progress : null;
+        entry = cmpCache[key] = { track, distanceKm: typeof result.distanceKm === 'number' ? result.distanceKm : null, progress: pg };
       }
       if(!stillValid()) return;
       if(!entry.track.length) throw new Error('tracklog vazio');
-      s.track = entry.track; s.distanceKm = entry.distanceKm; s.loading = false;
+      s.track = entry.track; s.distanceKm = entry.distanceKm; s.progress = entry.progress; s.loading = false;
       s.line = L.polyline(s.track.map(q => [q.lat, q.lon]), { color:s.color, weight:2, opacity:0.3 }).addTo(pilotMapLayers.cmp);
       s.trail = L.polyline([], { color:s.color, weight:4, opacity:0.95 }).addTo(pilotMapLayers.cmp);
       s.marker = L.circleMarker([s.track[0].lat, s.track[0].lon], { radius:7, color:'#fff', weight:2, fillColor:s.color, fillOpacity:1 });
@@ -1670,8 +1673,23 @@
     return ans;
   }
 
+  const CMP_ORD = ['1st', '2nd', '3rd', '4th', '5th'];
+
+  // Progresso (km voados "na prova") do piloto no instante t; null se ainda não largou ou sem dados
+  function cmpProgressAt(s, t){
+    const pg = s.progress;
+    if(!pg || t < pg.startTime) return null;
+    const a = pg.samples;
+    if(t >= a[a.length - 1][0]) return a[a.length - 1][1];
+    let lo = 0, hi = a.length - 1;
+    while(hi - lo > 1){ const m = (lo + hi) >> 1; if(a[m][0] <= t) lo = m; else hi = m; }
+    const f = a[hi][0] > a[lo][0] ? (t - a[lo][0]) / (a[hi][0] - a[lo][0]) : 0;
+    return a[lo][1] + (a[hi][1] - a[lo][1]) * f;
+  }
+
   function cmpUpdate(){
     document.getElementById('cmpClock').textContent = cmpClock(cmpT);
+    const shown = [];
     cmpSelected.forEach(s => {
       if(!s.track || !s.marker) return;
       const tr = s.track, i = cmpIndexAtOrBefore(tr, cmpT);
@@ -1687,13 +1705,21 @@
       }
       if(!s.markerOn){ s.marker.addTo(pilotMapLayers.cmp); s.markerOn = true; }
       s.marker.setLatLng([lat, lon]);
-      s.marker.setTooltipContent(`${cmpShortName(s.name)} · ${alt} m`);
+      shown.push(s);
       const j = Math.max(0, cmpIndexAtOrBefore(tr, cmpT - CMP_TRAIL_SEC));
       const stride = Math.max(1, Math.floor((i - j) / 300));
       const pts = [];
       for(let k = j; k <= i; k += stride) pts.push([tr[k].lat, tr[k].lon]);
       pts.push([lat, lon]);
       s.trail.setLatLngs(pts);
+    });
+    // posição na prova neste instante: 1st, 2nd... (quem ainda não largou fica só com o nome)
+    const ranked = shown.map(s => ({ s, p: cmpProgressAt(s, cmpT) })).filter(x => x.p !== null)
+      .sort((x, y) => (y.p - x.p) || x.s.name.localeCompare(y.s.name, 'pt-BR'));
+    const pos = new Map(ranked.map((x, n) => [x.s, n]));
+    shown.forEach(s => {
+      const n = pos.get(s), nm = escapeHtml(cmpShortName(s.name));
+      s.marker.setTooltipContent(n === undefined ? nm : `<b>${CMP_ORD[n] || (n + 1) + 'th'}</b> ${nm}`);
     });
   }
 
@@ -1750,15 +1776,21 @@
     const m = document.getElementById('pilotMap'); if(m) m.classList.remove('cmp-mode');
   }
 
-  function cmpEnter(){
+  async function cmpEnter(){
+    // piloto que estava no mapa (lido antes de a prova do dia ser redesenhada)
+    const pre = (mapFlightShown && mapViewedPilot) ? mapViewedPilot : null;
     cmpActive = true;
     document.getElementById('cmpToggleBtn').textContent = 'Sair da comparação';
     document.getElementById('cmpListBtn').style.display = '';
     cmpShowPanel(true);
     document.getElementById('pilotMap').classList.add('cmp-mode');
     mapFlightShown = false;
+    mapViewedPilot = null;
     showDayTaskOnMap();          // garante prova do dia no mapa e tira o voo avulso
-    cmpLoadAvailable();
+    await cmpLoadAvailable();
+    if(cmpActive && pre && pre.date === cmpDate && cmpAvailable.some(p => String(p.id) === pre.id) && !cmpSelected.some(x => String(x.id) === pre.id)){
+      cmpToggleSelect(pre.id);
+    }
   }
 
   function cmpExit(){
@@ -2133,13 +2165,14 @@
       toast.className = 'toast ok show';
       const submittedContent = parsedFlight.content;
       const submittedDate = parsedFlight.date;
+      const submittedPilotId = selectedPilot ? selectedPilot.id : null;
       parsedFlight = null;
       fileInput.value = '';
       document.getElementById('pilotPinInput').value = '';
       document.getElementById('preview').classList.remove('show');
       loadSubmissionStatus();
       switchPilotoView('map', { skipTask:true });
-      renderFlightOnMap(submittedContent, submittedDate);
+      renderFlightOnMap(submittedContent, submittedDate, undefined, submittedPilotId);
     }catch(e){
       toast.textContent = 'Não consegui enviar o voo: ' + (e.message || 'erro desconhecido');
       toast.className = 'toast err show';
