@@ -1729,7 +1729,7 @@
       cmpUpdate();
     }catch(e){
       if(req !== cmpAllReq) return;
-      hint.textContent = 'Não consegui calcular a classificação geral agora.';
+      hint.textContent = 'Não consegui calcular a classificação geral agora' + (e && e.message ? ' (' + String(e.message).slice(0, 120) + ')' : '.');
     }
   }
 
