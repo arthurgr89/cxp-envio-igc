@@ -1221,11 +1221,19 @@
     return any ? bounds : null;
   }
 
-  function drawTaskOnMap(turnpoints, optimizedRoute){
+  function drawTaskOnMap(turnpoints, optimizedRoute, goalLine){
     pilotMapLayers.task.clearLayers();
     if(!turnpoints || !turnpoints.length) return null;
     let bounds = L.latLngBounds();
-    turnpoints.forEach(p=>{
+    turnpoints.forEach((p, idx)=>{
+      // Goal em linha (XCTSK "goal":{"type":"LINE"}): desenha a linha em vez do cilindro
+      if(goalLine && idx === turnpoints.length - 1){
+        const line = L.polyline(goalLine, { color:'#00B2FF', weight:6 })
+          .addTo(pilotMapLayers.task)
+          .bindPopup(`<b>${escapeHtml(p.name)}</b><br>Goal (linha de ${p.radius * 2}m)`);
+        bounds.extend(line.getBounds());
+        return;
+      }
       let color = '#176f15';
       if(p.type === 'SSS') color = '#e8c400';
       else if(p.type === 'ESS') color = 'red';
@@ -1265,7 +1273,7 @@
       document.getElementById('mapViewTitle').textContent = pilotNameForTitle ? `Prova de ${pilotNameForTitle}` : 'Sua prova no mapa';
 
       const airBounds = drawAirspacesOnMap(result.airspaces);
-      const taskBounds = drawTaskOnMap(result.turnpoints, result.optimizedRoute);
+      const taskBounds = drawTaskOnMap(result.turnpoints, result.optimizedRoute, result.goalLine);
       const trackBounds = drawTrackOnMap(result.track);
 
       setTimeout(()=>{
