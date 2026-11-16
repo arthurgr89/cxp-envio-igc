@@ -344,6 +344,7 @@
         <button class="secondary" id="cmpToggleBtn" style="width:auto; margin-top:0; padding:8px 14px;">Comparar</button>
         <button class="secondary" id="cmpListBtn" style="display:none; width:auto; margin-top:0; padding:8px 14px;">Escolher pilotos ▾</button>
         <div id="cmpChips" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+        <div id="cmpRankHint" style="display:none; font-size:12px; color:var(--text-muted); margin-top:4px;"></div>
       </div>
       <div id="cmpPanel" style="display:none; margin-bottom:12px; padding:12px; background:var(--bg-deep); border:1px solid var(--line); border-radius:8px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:12.5px; color:var(--text-muted);">
@@ -355,7 +356,13 @@
       </div>
       <div id="pilotMap" style="height:420px; border-radius:8px; background:var(--bg-deep);"></div>
       <div id="cmpTimeline" style="display:none; margin-top:10px;">
-        <input type="range" id="cmpSlider" min="0" max="0" step="1" value="0" aria-label="Linha do tempo">
+        <div style="position:relative; padding-top:16px;">
+          <div id="cmpStartMark" style="display:none; position:absolute; left:0; top:0; width:0; pointer-events:none;">
+            <span id="cmpStartLbl" style="position:absolute; top:0; transform:translateX(-50%); white-space:nowrap; font-family:var(--font-mono); font-size:11px; line-height:14px; color:var(--text-muted);"></span>
+            <span style="position:absolute; top:28px; left:-1.5px; width:3px; height:16px; border-radius:2px; background:var(--text); opacity:0.85;"></span>
+          </div>
+          <input type="range" id="cmpSlider" min="0" max="0" step="1" value="0" aria-label="Linha do tempo">
+        </div>
         <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:12px; color:var(--text-muted); margin-top:2px;">
           <span id="cmpClockMin"></span><span id="cmpClockMax"></span>
         </div>
@@ -1598,14 +1605,14 @@
         if(error) throw error;
         const row = Array.isArray(data) ? data[0] : data;
         if(!row || !row.content) throw new Error('voo não encontrado');
-        const result = await checkFlight(row.content, date, { withProgress:true });
+        const result = await checkFlight(row.content, date);
+        if(typeof result.startGate === 'number') cmpAll.gate = result.startGate;
         const track = (result.track || []).map(q => ({ lat:q.lat, lon:q.lon, alt:q.alt, time:q.time }));
-        const pg = result.progress && Array.isArray(result.progress.samples) && result.progress.samples.length ? result.progress : null;
-        entry = cmpCache[key] = { track, distanceKm: typeof result.distanceKm === 'number' ? result.distanceKm : null, progress: pg };
+        entry = cmpCache[key] = { track, distanceKm: typeof result.distanceKm === 'number' ? result.distanceKm : null };
       }
       if(!stillValid()) return;
       if(!entry.track.length) throw new Error('tracklog vazio');
-      s.track = entry.track; s.distanceKm = entry.distanceKm; s.progress = entry.progress; s.loading = false;
+      s.track = entry.track; s.distanceKm = entry.distanceKm; s.loading = false;
       s.line = L.polyline(s.track.map(q => [q.lat, q.lon]), { color:s.color, weight:2, opacity:0.3 }).addTo(pilotMapLayers.cmp);
       s.trail = L.polyline([], { color:s.color, weight:4, opacity:0.95 }).addTo(pilotMapLayers.cmp);
       s.marker = L.circleMarker([s.track[0].lat, s.track[0].lon], { radius:7, color:'#fff', weight:2, fillColor:s.color, fillOpacity:1 });
@@ -1662,6 +1669,23 @@
     document.getElementById('cmpClockMin').textContent = cmpClock(cmpMin);
     document.getElementById('cmpClockMax').textContent = cmpClock(cmpMax);
     box.style.display = 'block';
+    cmpPlaceStartMark();
+  }
+
+  // marca na barra o horário do start (vem do XCTSK); some se estiver fora da faixa
+  function cmpPlaceStartMark(){
+    const mark = document.getElementById('cmpStartMark');
+    const g = cmpAll.gate;
+    if(typeof g !== 'number' || !(cmpMax > cmpMin) || g < cmpMin || g > cmpMax){ mark.style.display = 'none'; return; }
+    const pct = (g - cmpMin) / (cmpMax - cmpMin);
+    mark.style.left = `calc(15px + ${pct} * (100% - 30px))`;
+    const lbl = document.getElementById('cmpStartLbl');
+    lbl.textContent = 'Start ' + cmpClock(g).replace(/:00$/, '');
+    lbl.style.left = '0';
+    mark.style.display = 'block';
+    const box = document.getElementById('cmpTimeline').getBoundingClientRect(), r = lbl.getBoundingClientRect();
+    if(r.left < box.left) lbl.style.left = (box.left - r.left) + 'px';
+    else if(r.right > box.right) lbl.style.left = (box.right - r.right) + 'px';
   }
 
   function cmpIndexAtOrBefore(track, t){   // último índice com time <= t (ou -1)
@@ -1673,12 +1697,46 @@
     return ans;
   }
 
-  const CMP_ORD = ['1st', '2nd', '3rd', '4th', '5th'];
+  // Classificação geral do dia (todos os pilotos), vinda do servidor em blocos
+  let cmpAll = { date: null, pilots: {}, ready: false, total: 0, gate: null };
+  let cmpAllReq = 0;
+  async function cmpLoadRanking(){
+    const sel = document.getElementById('dayContextSelect');
+    const date = sel && sel.value ? sel.value : null, req = ++cmpAllReq;
+    if(cmpAll.ready && cmpAll.date === date){ document.getElementById('cmpRankHint').style.display = 'none'; return; }
+    cmpAll = { date, pilots: {}, ready: false, total: 0, gate: cmpAll.gate };
+    const hint = document.getElementById('cmpRankHint');
+    if(!date) return;
+    hint.style.display = 'block'; hint.textContent = 'Calculando a classificação geral…';
+    try{
+      for(let guard = 0; guard < 80; guard++){
+        const res = await fetch(CHECK_FLIGHT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'apikey': SUPABASE_ANON_KEY },
+          body: JSON.stringify({ date, ranking: true, skip: Object.keys(cmpAll.pilots) })
+        });
+        const data = await res.json();
+        if(req !== cmpAllReq) return;
+        if(!res.ok || data.error) throw new Error(data.error || 'falha');
+        Object.assign(cmpAll.pilots, data.pilots || {});
+        if(typeof data.startGate === 'number'){ cmpAll.gate = data.startGate; cmpPlaceStartMark(); }
+        cmpAll.total = data.total || Object.keys(cmpAll.pilots).length;
+        if(!data.pending){ cmpAll.ready = true; break; }
+        hint.textContent = `Calculando a classificação geral… ${Object.keys(cmpAll.pilots).length}/${cmpAll.total}`;
+      }
+      if(!cmpAll.ready) throw new Error('incompleto');
+      hint.style.display = 'none';
+      cmpUpdate();
+    }catch(e){
+      if(req !== cmpAllReq) return;
+      hint.textContent = 'Não consegui calcular a classificação geral agora.';
+    }
+  }
+
 
   // Progresso (km voados "na prova") do piloto no instante t; null se ainda não largou ou sem dados
-  function cmpProgressAt(s, t){
-    const pg = s.progress;
-    if(!pg || t < pg.startTime) return null;
+  function cmpProgressAt(pg, t){
+    if(!pg || pg.startTime === null || pg.startTime === undefined || !pg.samples || !pg.samples.length || t < pg.startTime) return null;
     const a = pg.samples;
     if(t >= a[a.length - 1][0]) return a[a.length - 1][1];
     let lo = 0, hi = a.length - 1;
@@ -1714,12 +1772,15 @@
       s.trail.setLatLngs(pts);
     });
     // posição na prova neste instante: 1st, 2nd... (quem ainda não largou fica só com o nome)
-    const ranked = shown.map(s => ({ s, p: cmpProgressAt(s, cmpT) })).filter(x => x.p !== null)
-      .sort((x, y) => (y.p - x.p) || x.s.name.localeCompare(y.s.name, 'pt-BR'));
-    const pos = new Map(ranked.map((x, n) => [x.s, n]));
+    const ready = cmpAll.ready && cmpAll.date === cmpDate;
+    const everyone = ready ? Object.values(cmpAll.pilots).map(pg => cmpProgressAt(pg, cmpT)).filter(v => v !== null) : [];
     shown.forEach(s => {
-      const n = pos.get(s), nm = escapeHtml(cmpShortName(s.name));
-      s.marker.setTooltipContent(n === undefined ? nm : `<b>${CMP_ORD[n] || (n + 1) + 'th'}</b> ${nm}`);
+      const nm = escapeHtml(cmpShortName(s.name));
+      const mine = ready ? cmpProgressAt(cmpAll.pilots[String(s.id)], cmpT) : null;
+      if(mine === null){ s.marker.setTooltipContent(nm); return; }
+      let pos = 1;
+      for(const v of everyone) if(v > mine + 1e-6) pos++;
+      s.marker.setTooltipContent(`<b>${pos}º</b> ${nm}`);
     });
   }
 
@@ -1763,6 +1824,7 @@
   // Limpa tudo do modo comparar (sem recarregar a prova)
   function cmpResetUI(){
     cmpStop();
+    cmpAllReq++;
     cmpSelected.forEach(cmpRemoveLayers);
     cmpSelected = [];
     if(pilotMapLayers) pilotMapLayers.cmp.clearLayers();
@@ -1771,6 +1833,7 @@
     document.getElementById('cmpListBtn').style.display = 'none';
     document.getElementById('cmpTimeline').style.display = 'none';
     document.getElementById('cmpChips').innerHTML = '';
+    document.getElementById('cmpRankHint').style.display = 'none';
     document.getElementById('cmpSearch').value = '';
     document.getElementById('cmpToggleBtn').textContent = 'Comparar';
     const m = document.getElementById('pilotMap'); if(m) m.classList.remove('cmp-mode');
@@ -1787,6 +1850,7 @@
     mapFlightShown = false;
     mapViewedPilot = null;
     showDayTaskOnMap();          // garante prova do dia no mapa e tira o voo avulso
+    cmpLoadRanking();
     await cmpLoadAvailable();
     if(cmpActive && pre && pre.date === cmpDate && cmpAvailable.some(p => String(p.id) === pre.id) && !cmpSelected.some(x => String(x.id) === pre.id)){
       cmpToggleSelect(pre.id);
@@ -1805,8 +1869,9 @@
     pilotMapLayers.cmp.clearLayers();
     document.getElementById('cmpTimeline').style.display = 'none';
     document.getElementById('cmpChips').innerHTML = '';
+    cmpAll = { date: null, pilots: {}, ready: false, total: 0, gate: null };
     showDayTaskOnMap();
-    cmpLoadAvailable();
+    cmpLoadAvailable().then(cmpLoadRanking);
   }
 
   document.getElementById('cmpToggleBtn').addEventListener('click', ()=>{
