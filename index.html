@@ -1226,12 +1226,13 @@
     if(!turnpoints || !turnpoints.length) return null;
     let bounds = L.latLngBounds();
     turnpoints.forEach((p, idx)=>{
-      // Goal em linha (XCTSK "goal":{"type":"LINE"}): desenha a linha em vez do cilindro
+      // Goal em linha (XCTSK "goal":{"type":"LINE"}): linha + semicírculo atrás, como no FSCOMP
       if(goalLine && idx === turnpoints.length - 1){
-        const line = L.polyline(goalLine, { color:'#00B2FF', weight:6 })
+        L.polygon(goalLine.semicircle, { color:'#00B2FF', weight:2, fillOpacity:0.15 }).addTo(pilotMapLayers.task);
+        const line = L.polyline(goalLine.line, { color:'#00B2FF', weight:6 })
           .addTo(pilotMapLayers.task)
           .bindPopup(`<b>${escapeHtml(p.name)}</b><br>Goal (linha de ${p.radius * 2}m)`);
-        bounds.extend(line.getBounds());
+        bounds.extend(L.polygon(goalLine.semicircle).getBounds());
         return;
       }
       let color = '#176f15';
