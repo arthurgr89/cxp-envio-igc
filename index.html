@@ -327,6 +327,12 @@
       <p class="hint">Tracklog, pilões da prova e espaço aéreo do dia selecionado.</p>
       <div id="flightStatusBox" style="margin-bottom:12px;"></div>
       <div id="pilotMap" style="height:420px; border-radius:8px; background:var(--bg-deep);"></div>
+      <div id="leadLegend" style="display:none; margin-top:12px;">
+        <div style="font-size:12.5px; font-weight:600; margin-bottom:6px;">Peso da liderança ao longo da prova</div>
+        <div style="height:10px; border-radius:6px; background:linear-gradient(90deg,hsl(120,85%,45%),hsl(60,85%,45%),hsl(0,85%,45%));"></div>
+        <div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text-muted); margin-top:4px;"><span>conta pouco</span><span>conta muito</span></div>
+        <div class="hint" id="leadLegendText" style="margin-top:8px;"></div>
+      </div>
     </div>
   </div>
 
@@ -1058,6 +1064,9 @@
 
   document.getElementById('refreshSubmissionBtn').addEventListener('click', loadSubmissionStatus);
   document.getElementById('dayContextSelect').addEventListener('change', loadSubmissionStatus);
+  document.getElementById('dayContextSelect').addEventListener('change', ()=>{
+    if(!mapFlightShown && document.getElementById('mapView').style.display === 'block') showDayTaskOnMap();
+  });
 
   function formatDateBR(iso){
     if(!iso) return '';
@@ -1084,6 +1093,7 @@
       populateDnfDaySelect();
       populateTaskDaySelect();
       populateResultDaySelect();
+      if(!mapFlightShown && document.getElementById('mapView').style.display === 'block') showDayTaskOnMap();
     }catch(e){
       eventDays = [];
     }
@@ -1188,6 +1198,8 @@
 
   // ---------- Mapa da aba Piloto ----------
   let pilotLeafletMap = null, pilotMapLayers = null;
+  let mapReqId = 0;            // descarta respostas antigas quando o usuário muda de piloto/dia rápido
+  let mapFlightShown = false;  // true = o mapa está mostrando o voo de um piloto (e não só a prova)
 
   function ensurePilotMap(){
     if(pilotLeafletMap) return;
@@ -1221,7 +1233,37 @@
     return any ? bounds : null;
   }
 
-  function drawTaskOnMap(turnpoints, optimizedRoute, goalLine){
+  // Cor do peso da liderança: 0 = verde (conta pouco) → amarelo → 1 = vermelho (conta muito)
+  function leadColor(w){ return `hsl(${Math.round(120 * (1 - Math.max(0, Math.min(1, w))))},85%,45%)`; }
+
+  function drawLeadRoute(leadRoute){
+    const pts = leadRoute.points;
+    // contorno escuro por baixo pra cor aparecer bem sobre qualquer mapa
+    L.polyline(pts.map(p => [p[0], p[1]]), { color:'#0b1220', weight:9, opacity:0.45 }).addTo(pilotMapLayers.task);
+    for(let i = 1; i < pts.length; i++){
+      const a = pts[i-1], b = pts[i];
+      const inside = a[2] >= 0 && b[2] >= 0;
+      if(!inside){
+        L.polyline([[a[0],a[1]],[b[0],b[1]]], { color:'#9fb3c8', weight:4, opacity:0.9, dashArray:'6,6' }).addTo(pilotMapLayers.task);
+        continue;
+      }
+      const w = (a[2] + b[2]) / 2;
+      L.polyline([[a[0],a[1]],[b[0],b[1]]], { color:leadColor(w), weight:6, opacity:1, lineCap:'butt' })
+        .addTo(pilotMapLayers.task)
+        .bindTooltip(`Peso na liderança: ${Math.round(w * 100)}% do máximo`, { sticky:true });
+    }
+  }
+
+  function updateLeadLegend(leadRoute){
+    const box = document.getElementById('leadLegend');
+    if(!leadRoute){ box.style.display = 'none'; return; }
+    const fmt = n => n.toLocaleString('pt-BR', { minimumFractionDigits:1, maximumFractionDigits:1 });
+    document.getElementById('leadLegendText').innerHTML =
+      `O trecho de velocidade (do SSS ao ESS) tem ${fmt(leadRoute.ssKm)} km. O peso é máximo entre o <strong>km ${fmt(leadRoute.redFromKm)}</strong> e o <strong>km ${fmt(leadRoute.redToKm)}</strong> depois da largada: é aí que estar na frente do grupo rende mais pontos de liderança. Perto da largada e perto do ESS conta pouco. O tracejado cinza (decolagem até o SSS e ESS até o goal) não conta.`;
+    box.style.display = 'block';
+  }
+
+  function drawTaskOnMap(turnpoints, optimizedRoute, goalLine, leadRoute){
     pilotMapLayers.task.clearLayers();
     if(!turnpoints || !turnpoints.length) return null;
     let bounds = L.latLngBounds();
@@ -1244,7 +1286,9 @@
         .bindPopup(`<b>${escapeHtml(p.name)}</b><br>Raio: ${p.radius}m`);
       bounds.extend(circle.getBounds());
     });
-    if(optimizedRoute && optimizedRoute.length > 1){
+    if(leadRoute && leadRoute.points && leadRoute.points.length > 1){
+      drawLeadRoute(leadRoute);
+    } else if(optimizedRoute && optimizedRoute.length > 1){
       L.polyline(optimizedRoute, { color:'#00bcd4', weight:3 }).addTo(pilotMapLayers.task);
     }
     return bounds;
@@ -1266,15 +1310,19 @@
 
   async function renderFlightOnMap(igcContent, dayDate, pilotNameForTitle){
     ensurePilotMap();
+    const reqId = ++mapReqId;
     const statusBox = document.getElementById('flightStatusBox');
     document.getElementById('mapViewTitle').textContent = pilotNameForTitle ? `Carregando prova de ${pilotNameForTitle}...` : 'Verificando seu voo...';
     statusBox.innerHTML = '<div class="hint">Verificando voo no servidor...</div>';
     try{
       const result = await checkFlight(igcContent, dayDate);
+      if(reqId !== mapReqId) return;
+      mapFlightShown = true;
       document.getElementById('mapViewTitle').textContent = pilotNameForTitle ? `Prova de ${pilotNameForTitle}` : 'Sua prova no mapa';
 
       const airBounds = drawAirspacesOnMap(result.airspaces);
-      const taskBounds = drawTaskOnMap(result.turnpoints, result.optimizedRoute, result.goalLine);
+      const taskBounds = drawTaskOnMap(result.turnpoints, result.optimizedRoute, result.goalLine, result.leadRoute);
+      updateLeadLegend(result.leadRoute);
       const trackBounds = drawTrackOnMap(result.track);
 
       setTimeout(()=>{
@@ -1318,14 +1366,63 @@
       }
       statusBox.innerHTML = html;
     }catch(e){
+      if(reqId !== mapReqId) return;
       document.getElementById('mapViewTitle').textContent = pilotNameForTitle ? `Prova de ${pilotNameForTitle}` : 'Sua prova no mapa';
       statusBox.innerHTML = '<div class="empty" style="padding:10px 0;">Não consegui verificar esse voo agora: ' + escapeHtml(e.message) + '</div>';
     }
   }
 
+  // Mostra só a prova do dia selecionado (pilões, espaço aéreo, rota colorida), sem voo de piloto
+  async function showDayTaskOnMap(){
+    ensurePilotMap();
+    const reqId = ++mapReqId;
+    const statusBox = document.getElementById('flightStatusBox');
+    const title = document.getElementById('mapViewTitle');
+    const sel = document.getElementById('dayContextSelect');
+    const date = sel && sel.value ? sel.value : null;
+    const clearAll = ()=>{
+      pilotMapLayers.task.clearLayers(); pilotMapLayers.airspace.clearLayers(); pilotMapLayers.igc.clearLayers();
+      updateLeadLegend(null);
+    };
+    if(!eventDays.length || !date){
+      mapFlightShown = false;
+      clearAll();
+      title.textContent = 'Prova do dia';
+      statusBox.innerHTML = '<div class="hint">Nenhum dia de prova cadastrado ainda.</div>';
+      return;
+    }
+    const day = eventDays.find(d => d.event_date === date);
+    title.textContent = `Prova do dia — ${day ? day.label : 'Prova'} (${formatDateBR(date)})`;
+    statusBox.innerHTML = '<div class="hint">Carregando a prova...</div>';
+    try{
+      const result = await checkFlight(null, date);
+      if(reqId !== mapReqId) return;
+      mapFlightShown = false;
+      pilotMapLayers.igc.clearLayers();
+      const airBounds = drawAirspacesOnMap(result.airspaces);
+      const taskBounds = drawTaskOnMap(result.turnpoints, result.optimizedRoute, result.goalLine, result.leadRoute);
+      updateLeadLegend(result.leadRoute);
+      const fb = L.latLngBounds();
+      let any = false;
+      [airBounds, taskBounds].forEach(b=>{ if(b){ fb.extend(b); any = true; } });
+      setTimeout(()=>{
+        if(!pilotLeafletMap || reqId !== mapReqId) return;
+        pilotLeafletMap.invalidateSize();
+        if(any) pilotLeafletMap.fitBounds(fb, { padding:[20,20] });
+      }, 150);
+      statusBox.innerHTML = (result.turnpoints && result.turnpoints.length)
+        ? '<div class="hint">Mostrando a prova do dia. Escolha um piloto na lista de envio pra ver o voo dele aqui.</div>'
+        : '<div class="hint">A prova desse dia ainda não foi cadastrada pelo organizador.</div>';
+    }catch(e){
+      if(reqId !== mapReqId) return;
+      statusBox.innerHTML = '<div class="empty" style="padding:10px 0;">Não consegui carregar a prova agora: ' + escapeHtml(e.message) + '</div>';
+    }
+  }
+
   async function viewPilotFlight(pilotId, pilotName, date){
     const statusBox = document.getElementById('flightStatusBox');
-    switchPilotoView('map');
+    mapReqId++;
+    switchPilotoView('map', { skipTask:true });
     document.getElementById('mapViewTitle').textContent = `Carregando prova de ${pilotName}...`;
     statusBox.innerHTML = '';
     try{
@@ -1344,7 +1441,7 @@
     }
   }
 
-  function switchPilotoView(view){
+  function switchPilotoView(view, opts){
     document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
     document.getElementById('mapView').style.display = view === 'map' ? 'block' : 'none';
     document.getElementById('toggleListBtn').classList.toggle('active', view === 'list');
@@ -1352,6 +1449,7 @@
     if(view === 'map'){
       ensurePilotMap();
       setTimeout(()=>{ if(pilotLeafletMap) pilotLeafletMap.invalidateSize(); }, 50);
+      if(!mapFlightShown && !(opts && opts.skipTask)) showDayTaskOnMap();
     }
   }
   document.getElementById('toggleListBtn').addEventListener('click', ()=> switchPilotoView('list'));
@@ -1698,7 +1796,7 @@
       document.getElementById('pilotPinInput').value = '';
       document.getElementById('preview').classList.remove('show');
       loadSubmissionStatus();
-      switchPilotoView('map');
+      switchPilotoView('map', { skipTask:true });
       renderFlightOnMap(submittedContent, submittedDate);
     }catch(e){
       toast.textContent = 'Não consegui enviar o voo: ' + (e.message || 'erro desconhecido');
