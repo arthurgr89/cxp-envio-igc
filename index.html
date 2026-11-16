@@ -1252,6 +1252,7 @@
       task: L.layerGroup().addTo(pilotLeafletMap),
       airspace: L.layerGroup().addTo(pilotLeafletMap),
       igc: L.layerGroup().addTo(pilotLeafletMap),
+      cmpOthers: L.layerGroup().addTo(pilotLeafletMap),
       cmp: L.layerGroup().addTo(pilotLeafletMap)
     };
   }
@@ -1700,11 +1701,55 @@
   // Classificação geral do dia (todos os pilotos), vinda do servidor em blocos
   let cmpAll = { date: null, pilots: {}, ready: false, total: 0, gate: null };
   let cmpAllReq = 0;
+  let cmpOthers = {};   // id -> {marker, on}  (demais pilotos: bolinhas cinza apagadas)
+
+  function cmpClearOthers(){
+    if(pilotMapLayers) pilotMapLayers.cmpOthers.clearLayers();
+    cmpOthers = {};
+  }
+  function cmpPosAt(pos, t){   // [[t,lat,lon]...] -> [lat,lon] interpolado, ou null fora do voo
+    if(!pos || !pos.length || t < pos[0][0] || t > pos[pos.length - 1][0]) return null;
+    let lo = 0, hi = pos.length - 1;
+    while(hi - lo > 1){ const m = (lo + hi) >> 1; if(pos[m][0] <= t) lo = m; else hi = m; }
+    const a = pos[lo], b = pos[hi], f = b[0] > a[0] ? (t - a[0]) / (b[0] - a[0]) : 0;
+    return [a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
+  function cmpRankOf(id, t){
+    const mine = cmpProgressAt(cmpAll.pilots[id], t);
+    if(mine === null) return null;
+    let pos = 1;
+    for(const k in cmpAll.pilots){ const v = cmpProgressAt(cmpAll.pilots[k], t); if(v !== null && v > mine + 1e-6) pos++; }
+    return pos;
+  }
+  function cmpUpdateOthers(){
+    if(!cmpActive || !pilotMapLayers) return;
+    const ready = cmpAll.date === cmpDate;
+    const selIds = new Set(cmpSelected.map(s => String(s.id)));
+    for(const id in cmpAll.pilots){
+      let o = cmpOthers[id];
+      const ll = (ready && !selIds.has(id)) ? cmpPosAt(cmpAll.pilots[id].pos, cmpT) : null;
+      if(!ll){ if(o && o.on){ pilotMapLayers.cmpOthers.removeLayer(o.marker); o.on = false; } continue; }
+      if(!o){
+        const pl = pilots.find(p => String(p.id) === id);
+        const name = pl ? pl.name : 'Piloto';
+        const marker = L.circleMarker(ll, { radius:5, color:'#fff', weight:1, opacity:0.45, fillColor:'#9ca3af', fillOpacity:0.5 });
+        marker.bindTooltip(() => {
+          const r = cmpAll.ready ? cmpRankOf(id, cmpT) : null;
+          return (r ? `<b>${r}º</b> ` : '') + escapeHtml(cmpShortName(name));
+        }, { direction:'top', offset:[0, -6], className:'cmp-tip' });
+        marker.on('click', () => marker.openTooltip());
+        o = cmpOthers[id] = { marker, on:false };
+      }
+      o.marker.setLatLng(ll);
+      if(!o.on){ o.marker.addTo(pilotMapLayers.cmpOthers); o.on = true; }
+    }
+  }
   async function cmpLoadRanking(){
     const sel = document.getElementById('dayContextSelect');
     const date = sel && sel.value ? sel.value : null, req = ++cmpAllReq;
     if(cmpAll.ready && cmpAll.date === date){ document.getElementById('cmpRankHint').style.display = 'none'; return; }
     cmpAll = { date, pilots: {}, ready: false, total: 0, gate: cmpAll.gate };
+    cmpClearOthers();
     const hint = document.getElementById('cmpRankHint');
     if(!date) return;
     hint.style.display = 'block'; hint.textContent = 'Calculando a classificação geral…';
@@ -1719,6 +1764,7 @@
         if(req !== cmpAllReq) return;
         if(!res.ok || data.error) throw new Error(data.error || data.message || ('HTTP ' + res.status));
         Object.assign(cmpAll.pilots, data.pilots || {});
+        cmpUpdateOthers();
         if(typeof data.startGate === 'number'){ cmpAll.gate = data.startGate; cmpPlaceStartMark(); }
         cmpAll.total = data.total || Object.keys(cmpAll.pilots).length;
         if(!data.pending){ cmpAll.ready = true; break; }
@@ -1772,6 +1818,7 @@
       s.trail.setLatLngs(pts);
     });
     // posição na prova neste instante: 1st, 2nd... (quem ainda não largou fica só com o nome)
+    cmpUpdateOthers();
     const ready = cmpAll.ready && cmpAll.date === cmpDate;
     const everyone = ready ? Object.values(cmpAll.pilots).map(pg => cmpProgressAt(pg, cmpT)).filter(v => v !== null) : [];
     shown.forEach(s => {
@@ -1825,6 +1872,7 @@
   function cmpResetUI(){
     cmpStop();
     cmpAllReq++;
+    cmpClearOthers();
     cmpSelected.forEach(cmpRemoveLayers);
     cmpSelected = [];
     if(pilotMapLayers) pilotMapLayers.cmp.clearLayers();
@@ -1870,6 +1918,7 @@
     document.getElementById('cmpTimeline').style.display = 'none';
     document.getElementById('cmpChips').innerHTML = '';
     cmpAll = { date: null, pilots: {}, ready: false, total: 0, gate: null };
+    cmpClearOthers();
     showDayTaskOnMap();
     cmpLoadAvailable().then(cmpLoadRanking);
   }
