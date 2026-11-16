@@ -2187,6 +2187,13 @@
   fileInput.addEventListener('change', e=>{ if(e.target.files.length) handleFile(e.target.files[0]); });
 
   function handleFile(file){
+    if(file.size > 5 * 1024 * 1024){
+      parsedFlight = null; fileInput.value = '';
+      document.getElementById('preview').classList.remove('show');
+      const t = document.getElementById('pilotToast');
+      if(t){ t.textContent = 'Arquivo grande demais (máximo 5 MB). Um IGC normal tem bem menos que isso — confira se é o arquivo certo.'; t.className = 'toast err show'; }
+      return;
+    }
     const reader = new FileReader();
     reader.onload = ()=>{
       const content = reader.result;
@@ -2280,8 +2287,22 @@
         btn.textContent = 'Enviar voo';
         return;
       }
+      if(result === 'too_large'){
+        toast.textContent = 'Arquivo grande demais (máximo 5 MB).';
+        toast.className = 'toast err show';
+        btn.disabled = false;
+        btn.textContent = 'Enviar voo';
+        return;
+      }
       if(result === 'already_submitted'){
         toast.textContent = 'Você já enviou o voo desse dia. Se precisar corrigir, fale com o organizador — ele consegue apagar o envio anterior pra você reenviar.';
+        toast.className = 'toast err show';
+        btn.disabled = false;
+        btn.textContent = 'Enviar voo';
+        return;
+      }
+      if(result !== 'ok'){
+        toast.textContent = 'Não consegui enviar o voo (resposta inesperada do servidor). Tente de novo ou fale com o organizador.';
         toast.className = 'toast err show';
         btn.disabled = false;
         btn.textContent = 'Enviar voo';
