@@ -515,24 +515,26 @@
 
     <div class="card">
       <h2>Marcar DNF / ABS / Enviado</h2>
-      <p class="hint">DNF (não decolou) e ABS (não foi à etapa) evitam que o piloto fique "Pendente". "Enviado" é pra quando você recebe o IGC direto por cabo (sem internet) e joga na pasta do FSCOMP na mão — assim a lista mostra certo mesmo sem passar pelo app.</p>
-      <div class="combo">
-        <input type="text" id="dnfPilotSearch" placeholder="Digite o nome do piloto...">
-        <div class="combo-list" id="dnfPilotList"></div>
-      </div>
-      <div class="selected-pilot" id="dnfSelectedBox">
-        <div class="top"><span id="dnfSelName"></span><span class="pid" id="dnfSelId"></span></div>
-      </div>
-      <label style="margin-top:10px;">Dia</label>
+      <p class="hint">DNF (não decolou) e ABS (não foi à etapa) evitam que o piloto fique "Pendente". "Enviado" é pra quando você recebe o IGC direto por cabo (sem internet) e joga na pasta do FSCOMP na mão — assim a lista mostra certo mesmo sem passar pelo app. A lista abaixo mostra só quem ainda está pendente no dia escolhido.</p>
+      <label>Dia</label>
       <select id="dnfDaySelect" style="margin-bottom:10px;"></select>
-      <div style="display:flex; gap:8px;">
+      <input type="text" id="dnfFilter" placeholder="Filtrar pendentes por nome..." style="margin-bottom:8px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; font-size:12.5px; color:var(--text-muted);">
+        <span id="dnfCount">0 selecionados</span>
+        <span>
+          <a href="#" id="dnfSelAll" style="color:var(--thermal);">Selecionar todos</a> ·
+          <a href="#" id="dnfSelNone" style="color:var(--thermal);">Limpar</a>
+        </span>
+      </div>
+      <div id="dnfPendingList" style="max-height:320px; overflow-y:auto; border:1px solid var(--line); border-radius:7px; background:var(--bg-deep);"></div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
         <button class="secondary" id="markDnfBtn" style="flex:1;" disabled>Marcar DNF</button>
         <button class="secondary" id="markAbsBtn" style="flex:1;" disabled>Marcar ABS</button>
       </div>
       <button class="secondary" id="markEnviadoBtn" style="margin-top:8px;" disabled>Marcar Enviado (recebido por cabo)</button>
-      <button class="secondary" id="clearDnfBtn" style="margin-top:8px;" disabled>Remover marcação</button>
       <div class="toast" id="dnfToast"></div>
-      <div id="dnfListWrap" style="margin-top:14px;"></div>
+      <h3 style="font-size:14px; margin:16px 0 6px;">Já marcados neste dia</h3>
+      <div id="dnfListWrap"></div>
     </div>
 
     <div class="card">
@@ -2005,7 +2007,7 @@
       const matches = pilots.filter(p => p.name.toLowerCase().includes(f));
       listEl.innerHTML = '';
       if(!matches.length){ listEl.classList.remove('show'); return; }
-      matches.slice(0,30).forEach(p=>{
+      matches.forEach(p=>{
         const div = document.createElement('div');
         div.className = 'combo-item';
         div.innerHTML = `<div class="top"><span>${escapeHtml(p.name)}</span><span class="pid">${escapeHtml(p.id)}</span></div>${p.glider ? `<div class="glider">${escapeHtml(p.glider)}</div>` : ''}`;
@@ -2485,7 +2487,8 @@
   }
 
   // ---------- Organizer: DNF / ABS marking ----------
-  let selectedDnfPilot = null;
+  let dnfPending = [];          // pilotos pendentes do dia escolhido
+  const dnfChecked = new Set(); // ids marcados na lista
 
   function populateDnfDaySelect(){
     const sel = document.getElementById('dnfDaySelect');
@@ -2493,30 +2496,73 @@
     const prev = sel.value;
     sel.innerHTML = eventDays.map(d => `<option value="${d.event_date}">${escapeHtml(d.label)} — ${formatDateBR(d.event_date)}</option>`).join('');
     if([...sel.options].some(o => o.value === prev)) sel.value = prev;
+    if(document.getElementById('orgContent').style.display === 'block') loadDnfList();
   }
 
-  makePilotCombo(document.getElementById('dnfPilotSearch'), document.getElementById('dnfPilotList'), (p)=>{
-    selectedDnfPilot = p;
-    const box = document.getElementById('dnfSelectedBox');
-    const markDnf = document.getElementById('markDnfBtn');
-    const markAbs = document.getElementById('markAbsBtn');
-    const markEnviado = document.getElementById('markEnviadoBtn');
-    const clearBtn = document.getElementById('clearDnfBtn');
-    if(!p){
-      box.classList.remove('show');
-      markDnf.disabled = true; markAbs.disabled = true; markEnviado.disabled = true; clearBtn.disabled = true;
+  function updateDnfButtons(){
+    const n = dnfChecked.size;
+    document.getElementById('dnfCount').textContent = n === 1 ? '1 selecionado' : `${n} selecionados`;
+    ['markDnfBtn','markAbsBtn','markEnviadoBtn'].forEach(id => { document.getElementById(id).disabled = n === 0; });
+  }
+
+  function dnfVisiblePilots(){
+    const f = document.getElementById('dnfFilter').value.trim().toLowerCase();
+    return dnfPending.filter(p => !f || p.name.toLowerCase().includes(f));
+  }
+
+  function renderDnfPending(){
+    const box = document.getElementById('dnfPendingList');
+    const list = dnfVisiblePilots();
+    if(!list.length){
+      box.innerHTML = `<div class="empty" style="padding:12px;">${dnfPending.length ? 'Nenhum piloto com esse nome entre os pendentes.' : 'Nenhum piloto pendente neste dia.'}</div>`;
+      updateDnfButtons();
       return;
     }
-    box.classList.add('show');
-    document.getElementById('dnfSelName').textContent = p.name;
-    document.getElementById('dnfSelId').textContent = 'ID '+p.id;
-    markDnf.disabled = false; markAbs.disabled = false; markEnviado.disabled = false; clearBtn.disabled = false;
+    box.innerHTML = '';
+    list.forEach(p=>{
+      const row = document.createElement('label');
+      row.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line); cursor:pointer; font-size:13.5px;';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.style.cssText = 'width:auto; margin:0;';
+      cb.checked = dnfChecked.has(p.id);
+      cb.addEventListener('change', ()=>{
+        if(cb.checked) dnfChecked.add(p.id); else dnfChecked.delete(p.id);
+        updateDnfButtons();
+      });
+      const name = document.createElement('span');
+      name.style.flex = '1';
+      name.textContent = p.name;
+      const pid = document.createElement('span');
+      pid.className = 'pid';
+      pid.style.cssText = 'font-family:var(--font-mono); color:var(--text-muted); font-size:12px;';
+      pid.textContent = p.id;
+      row.append(cb, name, pid);
+      box.appendChild(row);
+    });
+    updateDnfButtons();
+  }
+
+  document.getElementById('dnfFilter').addEventListener('input', renderDnfPending);
+  document.getElementById('dnfSelAll').addEventListener('click', (e)=>{
+    e.preventDefault();
+    dnfVisiblePilots().forEach(p => dnfChecked.add(p.id));
+    renderDnfPending();
+  });
+  document.getElementById('dnfSelNone').addEventListener('click', (e)=>{
+    e.preventDefault();
+    dnfChecked.clear();
+    renderDnfPending();
   });
 
-  document.getElementById('dnfDaySelect').addEventListener('change', loadDnfList);
+  document.getElementById('dnfDaySelect').addEventListener('change', ()=>{
+    dnfChecked.clear();
+    loadDnfList();
+  });
 
   async function setDnfStatus(status){
-    if(!selectedDnfPilot) return;
+    const ids = [...dnfChecked];
+    if(!ids.length) return;
     const date = document.getElementById('dnfDaySelect').value;
     const toast = document.getElementById('dnfToast');
     if(!date){
@@ -2525,10 +2571,14 @@
       return;
     }
     try{
-      const { error } = await sb.from('pilot_day_status').upsert({ pilot_id: selectedDnfPilot.id, event_date: date, status });
+      const rows = ids.map(id => ({ pilot_id: id, event_date: date, status }));
+      const { error } = await sb.from('pilot_day_status').upsert(rows);
       if(error) throw error;
-      toast.textContent = `${selectedDnfPilot.name} marcado como ${status} nesse dia.`;
+      toast.textContent = ids.length === 1
+        ? `1 piloto marcado como ${status} nesse dia.`
+        : `${ids.length} pilotos marcados como ${status} nesse dia.`;
       toast.className = 'toast ok show';
+      dnfChecked.clear();
       await loadDnfList();
     }catch(e){
       toast.textContent = 'Erro ao marcar: ' + (e.message || 'erro desconhecido');
@@ -2540,13 +2590,12 @@
   document.getElementById('markAbsBtn').addEventListener('click', ()=> setDnfStatus('ABS'));
   document.getElementById('markEnviadoBtn').addEventListener('click', ()=> setDnfStatus('ENVIADO'));
 
-  document.getElementById('clearDnfBtn').addEventListener('click', async ()=>{
-    if(!selectedDnfPilot) return;
+  async function removeDnfMark(pilotId){
     const date = document.getElementById('dnfDaySelect').value;
     const toast = document.getElementById('dnfToast');
     if(!date) return;
     try{
-      const { error } = await sb.from('pilot_day_status').delete().eq('pilot_id', selectedDnfPilot.id).eq('event_date', date);
+      const { error } = await sb.from('pilot_day_status').delete().eq('pilot_id', pilotId).eq('event_date', date);
       if(error) throw error;
       toast.textContent = 'Marcação removida.';
       toast.className = 'toast ok show';
@@ -2555,26 +2604,54 @@
       toast.textContent = 'Erro ao remover: ' + (e.message || 'erro desconhecido');
       toast.className = 'toast err show';
     }
-  });
+  }
 
+  // Carrega: quem já tem marcação + quem já enviou voo → o resto é "pendente"
   async function loadDnfList(){
     const wrap = document.getElementById('dnfListWrap');
     const date = document.getElementById('dnfDaySelect').value;
-    if(!date){ wrap.innerHTML = ''; return; }
+    if(!date){
+      wrap.innerHTML = '';
+      dnfPending = [];
+      renderDnfPending();
+      return;
+    }
     try{
-      const { data, error } = await sb.from('pilot_day_status').select('*').eq('event_date', date);
-      if(error) throw error;
-      if(!data.length){
+      const [st, fl] = await Promise.all([
+        sb.from('pilot_day_status').select('*').eq('event_date', date),
+        sb.from('flights').select('pilot_id').eq('flight_date', date)
+      ]);
+      if(st.error) throw st.error;
+      if(fl.error) throw fl.error;
+      const marked = st.data || [];
+      const done = new Set([...marked.map(r => r.pilot_id), ...(fl.data || []).map(r => r.pilot_id)]);
+      dnfPending = pilots.filter(p => !done.has(p.id));
+      [...dnfChecked].forEach(id => { if(!dnfPending.some(p => p.id === id)) dnfChecked.delete(id); });
+      renderDnfPending();
+
+      if(!marked.length){
         wrap.innerHTML = '<div class="empty" style="padding:8px 0;">Ninguém marcado nesse dia.</div>';
         return;
       }
-      wrap.innerHTML = data.map(r=>{
+      wrap.innerHTML = '';
+      marked.forEach(r=>{
         const p = pilots.find(pp => pp.id === r.pilot_id);
-        return `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line); font-size:13px;">
-          <span>${escapeHtml(p ? p.name : r.pilot_id)}</span>
-          <span class="mono" style="color:var(--sink); font-weight:600;">${escapeHtml(r.status)}</span>
-        </div>`;
-      }).join('');
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--line); font-size:13px;';
+        const nm = document.createElement('span');
+        nm.style.flex = '1';
+        nm.textContent = p ? p.name : r.pilot_id;
+        const stt = document.createElement('span');
+        stt.className = 'mono';
+        stt.style.cssText = 'color:var(--sink); font-weight:600;';
+        stt.textContent = r.status;
+        const rm = document.createElement('button');
+        rm.className = 'dl-btn';
+        rm.textContent = 'Remover';
+        rm.addEventListener('click', ()=> removeDnfMark(r.pilot_id));
+        row.append(nm, stt, rm);
+        wrap.appendChild(row);
+      });
     }catch(e){
       wrap.innerHTML = '<div class="empty" style="padding:8px 0;">Erro ao carregar marcações.</div>';
     }
@@ -2658,6 +2735,7 @@
       Object.keys(airspaceStatusCache).forEach(k => delete airspaceStatusCache[k]);
       renderFlightsList();
       updateFlightActionLabels();
+      loadDnfList();
     }catch(e){
       document.getElementById('flightsTable').style.display = 'none';
       const empty = document.getElementById('flightsEmpty');
